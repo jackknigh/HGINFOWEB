@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dao.db1.decisionForm.OutCarMapper" >
+  <resultMap id="BaseResultMap" type="com.dao.entity.decisionForm.OutCar" >
+    <id column="AccountID" property="accountid" jdbcType="VARCHAR" />
+    <id column="BillID" property="billid" jdbcType="INTEGER" />
+    <result column="OutCarID" property="outcarid" jdbcType="VARCHAR" />
+    <result column="WeighDate" property="weighdate" jdbcType="TIMESTAMP" />
+    <result column="LoadometerID" property="loadometerid" jdbcType="VARCHAR" />
+    <result column="MainOrderID" property="mainorderid" jdbcType="VARCHAR" />
+    <result column="OpenNoteID" property="opennoteid" jdbcType="VARCHAR" />
+    <result column="GuardID" property="guardid" jdbcType="VARCHAR" />
+    <result column="CarNo" property="carno" jdbcType="VARCHAR" />
+    <result column="DriverName" property="drivername" jdbcType="VARCHAR" />
+    <result column="DriveCardNo" property="drivecardno" jdbcType="VARCHAR" />
+    <result column="UnitName" property="unitname" jdbcType="VARCHAR" />
+    <result column="LoadWeight" property="loadweight" jdbcType="NUMERIC" />
+    <result column="TankID" property="tankid" jdbcType="VARCHAR" />
+    <result column="EspecialRequest" property="especialrequest" jdbcType="VARCHAR" />
+    <result column="Weight1" property="weight1" jdbcType="NUMERIC" />
+    <result column="Weighman1" property="weighman1" jdbcType="VARCHAR" />
+    <result column="WeightTime1" property="weighttime1" jdbcType="TIMESTAMP" />
+    <result column="Weight2" property="weight2" jdbcType="NUMERIC" />
+    <result column="Weighman2" property="weighman2" jdbcType="VARCHAR" />
+    <result column="WeightTime2" property="weighttime2" jdbcType="TIMESTAMP" />
+    <result column="NetWeight" property="netweight" jdbcType="NUMERIC" />
+    <result column="OutAdjust" property="outadjust" jdbcType="NUMERIC" />
+    <result column="SendAdjust" property="sendadjust" jdbcType="NUMERIC" />
+    <result column="BLNO" property="blno" jdbcType="VARCHAR" />
+    <result column="SendNumber" property="sendnumber" jdbcType="NUMERIC" />
+    <result column="Number" property="number" jdbcType="NUMERIC" />
+    <result column="LeadSealNo" property="leadsealno" jdbcType="VARCHAR" />
+    <result column="LeadSealNumber" property="leadsealnumber" jdbcType="NUMERIC" />
+    <result column="OnNumber" property="onnumber" jdbcType="NUMERIC" />
+    <result column="UnderNumber" property="undernumber" jdbcType="NUMERIC" />
+    <result column="Loader" property="loader" jdbcType="VARCHAR" />
+    <result column="OpenPumpTime" property="openpumptime" jdbcType="TIMESTAMP" />
+    <result column="ClosePumpTime" property="closepumptime" jdbcType="TIMESTAMP" />
+    <result column="BeginTime" property="begintime" jdbcType="TIMESTAMP" />
+    <result column="EndTime" property="endtime" jdbcType="TIMESTAMP" />
+    <result column="NoteWay" property="noteway" jdbcType="INTEGER" />
+    <result column="CreateDate" property="createdate" jdbcType="TIMESTAMP" />
+    <result column="OperatorID" property="operatorid" jdbcType="VARCHAR" />
+    <result column="State" property="state" jdbcType="INTEGER" />
+    <result column="Remark1" property="remark1" jdbcType="VARCHAR" />
+    <result column="Remark2" property="remark2" jdbcType="VARCHAR" />
+    <result column="RadarNumber1" property="radarnumber1" jdbcType="NUMERIC" />
+    <result column="RadarNumber2" property="radarnumber2" jdbcType="NUMERIC" />
+    <result column="ReceiptID" property="receiptid" jdbcType="VARCHAR" />
+    <result column="CheckID" property="checkid" jdbcType="VARCHAR" />
+    <result column="Remark3" property="remark3" jdbcType="VARCHAR" />
+    <result column="FlowmeterNum" property="flowmeternum" jdbcType="NUMERIC" />
+    <result column="CranePlace" property="craneplace" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    AccountID, BillID, OutCarID, WeighDate, LoadometerID, MainOrderID, OpenNoteID, GuardID, 
+    CarNo, DriverName, DriveCardNo, UnitName, LoadWeight, TankID, EspecialRequest, Weight1, 
+    Weighman1, WeightTime1, Weight2, Weighman2, WeightTime2, NetWeight, OutAdjust, SendAdjust, 
+    BLNO, SendNumber, Number, LeadSealNo, LeadSealNumber, OnNumber, UnderNumber, Loader, 
+    OpenPumpTime, ClosePumpTime, BeginTime, EndTime, NoteWay, CreateDate, OperatorID, 
+    State, Remark1, Remark2, RadarNumber1, RadarNumber2, ReceiptID, CheckID, Remark3, 
+    FlowmeterNum, CranePlace
+  </sql>
+
+  <!-- LoadingBay,VGuestName,GoodsID, GoodsName, LoadType, Number, OPBeginDate, OPEndDate,
+  BeginTime, EndTime, GuardInDate,GuardOutDate -->
+  <select id="carKPI" resultMap="BaseResultMap">
+
+
+  </select>
+  
+</mapper>

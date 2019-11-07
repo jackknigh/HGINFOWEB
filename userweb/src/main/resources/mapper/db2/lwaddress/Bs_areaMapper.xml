@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dao.db2.lwaddress.Bs_areaMapper" >
+  <resultMap id="BaseResultMap" type="com.dao.entity.lwaddress.Bs_area" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="AREA_CODE" property="areaCode" jdbcType="VARCHAR" />
+    <result column="CITY_CODE" property="cityCode" jdbcType="VARCHAR" />
+    <result column="AREA_NAME" property="areaName" jdbcType="VARCHAR" />
+    <result column="SHORT_NAME" property="shortName" jdbcType="VARCHAR" />
+    <result column="LNG" property="lng" jdbcType="VARCHAR" />
+    <result column="LAT" property="lat" jdbcType="VARCHAR" />
+    <result column="SORT" property="sort" jdbcType="INTEGER" />
+    <result column="GMT_CREATE" property="gmtCreate" jdbcType="TIMESTAMP" />
+    <result column="GMT_MODIFIED" property="gmtModified" jdbcType="TIMESTAMP" />
+    <result column="MEMO" property="memo" jdbcType="VARCHAR" />
+    <result column="DATA_STATE" property="dataState" jdbcType="INTEGER" />
+    <result column="TENANT_CODE" property="tenantCode" jdbcType="VARCHAR" />
+    <result column="PROVINCE_CODE" property="provinceCode" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, AREA_CODE, CITY_CODE, AREA_NAME, SHORT_NAME, LNG, LAT, SORT, GMT_CREATE, GMT_MODIFIED, 
+    MEMO, DATA_STATE, TENANT_CODE
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from bs_area
+    where id = #{id,jdbcType=VARCHAR}
+  </select>
+  <select id="selectAreaAllName" resultMap="BaseResultMap">
+    SELECT AREA_CODE,CITY_CODE,AREA_NAME,SHORT_NAME FROM bs_area
+  </select>
+
+  <select id="selectByCityCode" resultMap="BaseResultMap">
+     SELECT AREA_CODE,CITY_CODE,AREA_NAME,SHORT_NAME FROM bs_area WHERE CITY_CODE = #{cityCode}
+  </select>
+
+  <select id="selectByProvince" resultMap="BaseResultMap">
+    SELECT AREA_CODE,CITY_CODE,AREA_NAME,SHORT_NAME FROM bs_area WHERE CITY_CODE IN
+    <foreach collection="list" item="cityCode" index="index"
+             open="(" close=")" separator=",">
+      #{cityCode}
+    </foreach>
+  </select>
+  <select id="selectByAreaCode" resultMap="BaseResultMap">
+    SELECT AREA_CODE,AREA_NAME,CITY_CODE,SHORT_NAME FROM bs_area WHERE AREA_CODE = #{areaCode}
+  </select>
+
+
+  <select id="selectAreaMessage" resultMap="BaseResultMap">
+    SELECT PROVINCE_CODE,b1.CITY_CODE,AREA_CODE,AREA_NAME,b1.SHORT_NAME from bs_area b1
+    INNER JOIN bs_city b2 on b1.CITY_CODE = b2.CITY_CODE
+  </select>
+</mapper>

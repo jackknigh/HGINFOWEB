@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spinfosec.dao.common.ValidationDao">
+
+    <select id="duplicate" parameterType="com.dto.pojo.spsys.common.ValidationBean" resultType="java.lang.String">
+        SELECT ${checkName} FROM ${entityName} WHERE 1 = 1
+        <if test="checkValue != null and checkValue != ''">
+            AND ${checkName} = #{checkValue}
+        </if>
+        <if test="pkName != null and pkName !=''">
+            AND ${pkName}
+            <![CDATA[!= ]]>
+            #{pkValue};
+        </if>
+    </select>
+</mapper>

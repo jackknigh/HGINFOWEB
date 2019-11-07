@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.db1.wzzf.ZfEventMapper">
+
+  <select id="quXianStat"   resultType="java.util.HashMap">
+    SELECT event_county,COUNT(ID) FROM `zf_event`
+    WHERE  1=1
+    <if test="beginDate != null">
+      and occur_date <![CDATA[ >= ]]> #{beginDate}
+    </if>
+    <if test="endDate != null">
+      and occur_date <![CDATA[ <= ]]> #{endDate}
+    </if>
+    <if test="eventCounty != null">
+      and event_county = #{eventCounty}
+    </if>
+    AND FIND_IN_SET('B13-2紧急事件',event_class) GROUP BY event_county
+  </select>
+
+  <select id="jieDaoStat"   resultType="java.util.HashMap">
+    SELECT
+    `event_town`,
+    COUNT(ID)
+    FROM
+    `zf_event`
+    WHERE  1=1
+    <if test="beginDate != null">
+      and occur_date <![CDATA[ >= ]]> #{beginDate}
+    </if>
+    <if test="endDate != null">
+      and occur_date <![CDATA[ <= ]]> #{endDate}
+    </if>
+    <if test="eventCounty != null">
+      and event_county = #{eventCounty}
+    </if>
+    AND FIND_IN_SET(
+    'B13-2紧急事件',
+    event_class
+    )
+    GROUP BY event_town
+  </select>
+
+  <select id="jinJiEventList"   resultType="java.util.HashMap">
+    SELECT
+    *
+    FROM
+    `zf_event`
+    WHERE  1=1
+    <if test="beginDate != null">
+      and occur_date <![CDATA[ >= ]]> #{beginDate}
+    </if>
+    <if test="endDate != null">
+      and occur_date <![CDATA[ <= ]]> #{endDate}
+    </if>
+    <if test="eventCounty != null">
+      and event_county = #{eventCounty}
+    </if>
+    <if test="eventTown != null">
+      and event_town = #{eventTown}
+    </if>
+    AND FIND_IN_SET(
+    'B13-2紧急事件',
+    event_class
+    )
+  </select>
+
+
+  <select id="classEventList"   resultType="java.util.HashMap">
+    SELECT * FROM `zf_event`
+    WHERE  1=1
+    <if test="beginDate != null">
+      and occur_date <![CDATA[ >= ]]> #{beginDate}
+    </if>
+    <if test="endDate != null">
+      and occur_date <![CDATA[ <= ]]> #{endDate}
+    </if>
+    <if test="className != null">
+      AND FIND_IN_SET(#{className},event_class)
+    </if>
+  </select>
+
+
+
+</mapper>

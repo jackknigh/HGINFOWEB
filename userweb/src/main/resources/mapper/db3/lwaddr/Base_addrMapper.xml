@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dao.db3.lwaddr.Base_addrMapper1">
+    <resultMap id="BaseResultMap" type="com.dao.entity.lwaddress.Base_addr">
+        <id column="id" property="id" jdbcType="VARCHAR"/>
+        <result column="addr_jj" property="addrJj" jdbcType="VARCHAR"/>
+        <result column="addr_sj" property="addrSj" jdbcType="VARCHAR"/>
+        <result column="short_addr" property="shortAddr" jdbcType="VARCHAR"/>
+        <result column="name1" property="name1" jdbcType="VARCHAR"/>
+        <result column="name2" property="name2" jdbcType="VARCHAR"/>
+        <result column="name3" property="name3" jdbcType="VARCHAR"/>
+        <result column="phone" property="phone" jdbcType="VARCHAR"/>
+        <result column="province" property="province" jdbcType="VARCHAR"/>
+        <result column="pro_weight" property="proWeight" jdbcType="VARCHAR"/>
+        <result column="city" property="city" jdbcType="VARCHAR"/>
+        <result column="city_weight" property="cityWeight" jdbcType="VARCHAR"/>
+        <result column="area" property="area" jdbcType="VARCHAR"/>
+        <result column="area_weight" property="areaWeight" jdbcType="VARCHAR"/>
+        <result column="street" property="street" jdbcType="VARCHAR"/>
+        <result column="stre_weight" property="streWeight" jdbcType="VARCHAR"/>
+        <result column="pc_weight" property="pcWeight" jdbcType="VARCHAR"/>
+        <result column="mul_weight" property="mulWeight" jdbcType="VARCHAR"/>
+        <result column="str_score" property="strScore" jdbcType="VARCHAR"/>
+        <result column="number_score" property="numberScore" jdbcType="VARCHAR"/>
+        <result column="name_score" property="nameScore" jdbcType="VARCHAR"/>
+        <result column="phone_score" property="phoneScore" jdbcType="VARCHAR"/>
+        <result column="longitude" property="longitude" jdbcType="VARCHAR"/>
+        <result column="latitude" property="latitude" jdbcType="VARCHAR"/>
+        <result column="addr_sign1" property="addrSign1" jdbcType="VARCHAR"/>
+        <result column="addr_sign2" property="addrSign2" jdbcType="VARCHAR"/>
+        <result column="contrast_score" property="contrastScore" jdbcType="VARCHAR"/>
+        <result column="contrast_id" property="contrastId" jdbcType="VARCHAR"/>
+        <result column="p1type" property="p1type" jdbcType="INTEGER"/>
+        <result column="p2type" property="p2type" jdbcType="INTEGER"/>
+        <result column="p3type" property="p3type" jdbcType="INTEGER"/>
+        <result column="p4type" property="p4type" jdbcType="INTEGER"/>
+        <result column="p5type" property="p5type" jdbcType="INTEGER"/>
+        <result column="total1" property="total1" jdbcType="VARCHAR"/>
+        <result column="total2" property="total2" jdbcType="VARCHAR"/>
+        <result column="total3" property="total3" jdbcType="VARCHAR"/>
+        <result column="total4" property="total4" jdbcType="VARCHAR"/>
+        <result column="total5" property="total5" jdbcType="VARCHAR"/>
+        <result column="short_phone" property="shortPhone" jdbcType="VARCHAR"/>
+        <result column="old_name1" property="oldName1" jdbcType="VARCHAR"/>
+        <result column="old_phone" property="oldPhone" jdbcType="VARCHAR"/>
+        <result column="row_id" property="rowId" jdbcType="INTEGER"/>
+        <result column="table_name" property="tableName" jdbcType="VARCHAR"/>
+        <result column="count_id" property="countId" jdbcType="INTEGER"/>
+
+    </resultMap>
+    <sql id="Base_Column_List">
+    id, addr_jj, addr_sj, short_addr, name1, name2, name3, phone, province, pro_weight, 
+    city, city_weight, area, area_weight, street, stre_weight, pc_weight, mul_weight, 
+    str_score, number_score, name_score, phone_score, longitude, latitude, addr_sign1, 
+    addr_sign2, contrast_score, contrast_id, p1type, p2type, p3type, p4type, p5type, 
+    total1, total2, total3, total4, total5, short_phone,old_name1,old_phone,row_id,table_name,count_id
+  </sql>
+    <select id="selectByShortPhone" resultMap="BaseResultMap">
+    SELECT  id,addr_sj,short_addr, name1, phone,province,pro_weight,
+    city,city_weight,area,area_weight,street,stre_weight,mul_weight,
+   p3type,concat(substring(phone,2,2),right(phone,4)) as short_phone,old_name1,old_phone,row_id,table_name,count_id
+     FROM sec_addr where short_phone = #{shortPhone}  order by mul_weight desc
+
+  </select>
+
+
+    <select id="selectAddr_sj" resultMap="BaseResultMap">
+    SELECT p1type,id,addr_sj,name1,phone,short_phone,row_id,table_name  FROM base_addr
+    where count_id > #{number1} limit #{number2}
+  </select>
+
+    <insert id="insert1" parameterType="com.dao.entity.lwaddress.Base_addr" flushCache="true">
+
+        insert  into sec_addr
+        (id,addr_sj,short_addr,name1,phone,short_phone,addr_sign1,addr_sign2,province,pro_weight,
+        city,city_weight,area,area_weight,street,stre_weight,mul_weight,p1type,old_name1,old_phone,row_id,table_name,count_id)
+        values
+        <foreach collection="list" item="item" index="index" separator="," >
+            (#{item.id,jdbcType=VARCHAR},
+            #{item.addrSj,jdbcType=VARCHAR},
+            #{item.shortAddr,jdbcType=VARCHAR},
+            #{item.name1,jdbcType=VARCHAR},
+            #{item.phone,jdbcType=VARCHAR},
+            #{item.shortPhone,jdbcType=VARCHAR},
+            #{item.addrSign1,jdbcType=VARCHAR},
+            #{item.addrSign2,jdbcType=VARCHAR},
+            #{item.province,jdbcType=VARCHAR},
+            '${item.proWeight}',
+            #{item.city,jdbcType=VARCHAR},
+            '${item.cityWeight}',
+            #{item.area,jdbcType=VARCHAR},
+            '${item.areaWeight}',
+            #{item.street,jdbcType=VARCHAR},
+            '${item.streWeight}',
+            '${item.mulWeight}',
+            #{item.p1type,jdbcType=INTEGER},
+            #{item.oldName1,jdbcType=VARCHAR},
+            #{item.oldPhone,jdbcType=VARCHAR},
+            #{item.rowId,jdbcType=INTEGER},
+            #{item.tableName,jdbcType=VARCHAR},
+            #{item.countId,jdbcType=INTEGER}
+            )
+        </foreach>
+
+    </insert>
+
+    <insert id="insert3" parameterType="com.dao.entity.lwaddress.Base_addr">
+
+        <!--<foreach collection="list" item="item" index="index" separator=";">-->
+        insert   into merge_addr
+        (id,short_addr, name1, phone,short_phone,province,pro_weight,
+        city,city_weight,area,area_weight,street,stre_weight,mul_weight,addr_sign1,addr_sign2,
+        contrast_score,contrast_id,p2type,str_score,number_score,old_name1,old_phone,row_id,table_name,count_id)
+        values
+        (#{id,jdbcType=VARCHAR},
+        #{shortAddr,jdbcType=VARCHAR},
+        #{name1,jdbcType=VARCHAR},
+        #{phone,jdbcType=VARCHAR},
+        #{shortPhone,jdbcType=VARCHAR},
+        #{province,jdbcType=VARCHAR},
+        '${proWeight}',
+        #{city,jdbcType=VARCHAR},
+        '${cityWeight}',
+        #{area,jdbcType=VARCHAR},
+        '${areaWeight}',
+        #{street,jdbcType=VARCHAR},
+        '${streWeight}',
+        '${mulWeight}',
+        #{addrSign1,jdbcType=VARCHAR},
+        #{addrSign2,jdbcType=VARCHAR},
+        '${contrastScore}',
+        #{contrastId,jdbcType=VARCHAR},
+        '${p2type}',
+        #{strScore,jdbcType=VARCHAR},
+        #{numberScore,jdbcType=VARCHAR},
+        #{oldName1,jdbcType=VARCHAR},
+        #{oldPhone,jdbcType=VARCHAR},
+       #{rowId,jdbcType=INTEGER},
+        #{tableName,jdbcType=VARCHAR},
+        #{countId,jdbcType=INTEGER}
+        )
+        <!--</foreach>-->
+
+    </insert>
+
+    <insert id="insert3_2" parameterType="com.dao.entity.lwaddress.Base_addr">
+        insert   into merge_addr
+        (id,addr_sj,short_addr, name1, phone,short_phone,province,pro_weight,
+        city,city_weight,area,area_weight,street,stre_weight,mul_weight,addr_sign1,addr_sign2,
+        contrast_score,contrast_id,p2type,str_score,number_score,old_name1,old_phone,row_id,table_name,count_id)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.id,jdbcType=VARCHAR},
+            #{item.addrSj,jdbcType=VARCHAR},
+            #{item.shortAddr,jdbcType=VARCHAR},
+            #{item.name1,jdbcType=VARCHAR},
+            #{item.phone,jdbcType=VARCHAR},
+            #{item.shortPhone,jdbcType=VARCHAR},
+            #{item.province,jdbcType=VARCHAR},
+            '${item.proWeight}',
+            #{item.city,jdbcType=VARCHAR},
+            '${item.cityWeight}',
+            #{item.area,jdbcType=VARCHAR},
+            '${item.areaWeight}',
+            #{item.street,jdbcType=VARCHAR},
+            '${item.streWeight}',
+            '${item.mulWeight}',
+            #{item.addrSign1,jdbcType=VARCHAR},
+            #{item.addrSign2,jdbcType=VARCHAR},
+            '${item.contrastScore}',
+            #{item.contrastId,jdbcType=VARCHAR},
+            #{item.p2type,jdbcType=INTEGER},
+            #{item.strScore,jdbcType=VARCHAR},
+            #{item.numberScore,jdbcType=VARCHAR},
+            #{item.oldName1,jdbcType=VARCHAR},
+            #{item.oldPhone,jdbcType=VARCHAR},
+            #{item.rowId,jdbcType=INTEGER},
+            #{item.tableName,jdbcType=VARCHAR},
+            #{item.countId,jdbcType=INTEGER}
+            )
+        </foreach>
+
+    </insert>
+
+    <insert id="insert5" parameterType="com.dao.entity.lwaddress.Base_addr">
+
+        <!--<foreach collection="list" item="item" index="index" separator=";">-->
+        insert   into basics_addr
+        (id,short_addr, name1, phone,short_phone,province,pro_weight,
+        city,city_weight,area,area_weight,street,stre_weight,mul_weight,
+        p2type,addr_sign1,addr_sign2,number_score,old_name1,old_phone,row_id,table_name,count_id)
+        values
+        (#{id,jdbcType=VARCHAR},
+        #{shortAddr,jdbcType=VARCHAR},
+        #{name1,jdbcType=VARCHAR},
+        #{phone,jdbcType=VARCHAR},
+        #{shortPhone,jdbcType=VARCHAR},
+        #{province,jdbcType=VARCHAR},
+        '${proWeight}',
+        #{city,jdbcType=VARCHAR},
+        '${cityWeight}',
+        #{area,jdbcType=VARCHAR},
+        '${areaWeight}',
+        #{street,jdbcType=VARCHAR},
+        '${streWeight}',
+        '${mulWeight}',
+        #{p2type,jdbcType=INTEGER},
+        #{addrSign1,jdbcType=VARCHAR},
+        #{addrSign2,jdbcType=VARCHAR},
+        #{numberScore,jdbcType=VARCHAR},
+        #{oldName1,jdbcType=VARCHAR},
+        #{oldPhone,jdbcType=VARCHAR},
+       #{rowId,jdbcType=INTEGER},
+        #{tableName,jdbcType=VARCHAR},
+        #{countId,jdbcType=INTEGER}
+
+        )
+        <!--</foreach>-->
+
+    </insert>
+
+    <insert id="insert5_2" parameterType="com.dao.entity.lwaddress.Base_addr">
+        insert   into basics_addr
+        (id,addr_sj,short_addr, name1, phone,short_phone,province,pro_weight,
+        city,city_weight,area,area_weight,street,stre_weight,mul_weight,
+        p2type,addr_sign1,addr_sign2,number_score,old_name1,old_phone,row_id,table_name,count_id)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.id,jdbcType=VARCHAR},
+            #{item.addrSj,jdbcType=VARCHAR},
+            #{item.shortAddr,jdbcType=VARCHAR},
+            #{item.name1,jdbcType=VARCHAR},
+            #{item.phone,jdbcType=VARCHAR},
+            #{item.shortPhone,jdbcType=VARCHAR},
+            #{item.province,jdbcType=VARCHAR},
+            '${item.proWeight}',
+            #{item.city,jdbcType=VARCHAR},
+            '${item.cityWeight}',
+            #{item.area,jdbcType=VARCHAR},
+            '${item.areaWeight}',
+            #{item.street,jdbcType=VARCHAR},
+            '${item.streWeight}',
+            '${item.mulWeight}',
+            #{item.p2type,jdbcType=INTEGER},
+            #{item.addrSign1,jdbcType=VARCHAR},
+            #{item.addrSign2,jdbcType=VARCHAR},
+            #{item.numberScore,jdbcType=VARCHAR},
+            #{item.oldName1,jdbcType=VARCHAR},
+            #{item.oldPhone,jdbcType=VARCHAR},
+           #{item.rowId,jdbcType=INTEGER},
+            #{item.tableName,jdbcType=VARCHAR},
+            #{item.countId,jdbcType=INTEGER}
+            )
+        </foreach>
+
+    </insert>
+
+    <insert id="insert6" parameterType="com.dao.entity.lwaddress.Base_addr">
+        insert   into basics_addr_1
+        (id,addr_sj,short_addr, name1, phone,short_phone,province,pro_weight,
+        city,city_weight,area,area_weight,street,stre_weight,mul_weight,
+        p2type,addr_sign1,addr_sign2,number_score,old_name1,old_phone,row_id,table_name,count_id)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.id,jdbcType=VARCHAR},
+            #{item.addrSj,jdbcType=VARCHAR},
+            #{item.shortAddr,jdbcType=VARCHAR},
+            #{item.name1,jdbcType=VARCHAR},
+            #{item.phone,jdbcType=VARCHAR},
+            #{item.shortPhone,jdbcType=VARCHAR},
+            #{item.province,jdbcType=VARCHAR},
+            '${item.proWeight}',
+            #{item.city,jdbcType=VARCHAR},
+            '${item.cityWeight}',
+            #{item.area,jdbcType=VARCHAR},
+            '${item.areaWeight}',
+            #{item.street,jdbcType=VARCHAR},
+            '${item.streWeight}',
+            '${item.mulWeight}',
+            #{item.p2type,jdbcType=INTEGER},
+            #{item.addrSign1,jdbcType=VARCHAR},
+            #{item.addrSign2,jdbcType=VARCHAR},
+            #{item.numberScore,jdbcType=VARCHAR},
+            #{item.oldName1,jdbcType=VARCHAR},
+            #{item.oldPhone,jdbcType=VARCHAR},
+           #{item.rowId,jdbcType=INTEGER},
+            #{item.tableName,jdbcType=VARCHAR},
+            #{item.countId,jdbcType=INTEGER}
+            )
+        </foreach>
+
+    </insert>
+
+    <select id="selectMsg" parameterType="java.lang.String" resultType="com.dao.entity.lwaddress.Base_addr">
+        SELECT
+            id,
+            name1,
+            addr_sj,
+            phone
+        FROM
+            bascis_addr
+        <where>
+            <if test="phone != '' and phone != null" >
+                and phone like #{phone}
+            </if>
+            <if test="name != '' and name != null" >
+                and name like #{name}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectMsg1" parameterType="java.lang.String" resultType="com.dao.entity.lwaddress.Base_addr">
+        SELECT
+        id,
+        name1,
+        addr_sj,
+        phone
+        FROM
+        bascis_addr
+        <where>
+            <if test="phone != '' and phone != null" >
+                and phone = #{phone}
+            </if>
+            <if test="name != '' and name != null" >
+                and name = #{name}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insert4" parameterType="com.dao.entity.lwaddress.Base_addr">
+    insert into index_addr
+    (id,contrast_id)
+    values
+    <foreach collection="list" item="item" index="index" separator=",">
+        (#{item.id,jdbcType=VARCHAR},
+        #{item.contrastId,jdbcType=VARCHAR}
+        )
+    </foreach>
+    </insert>
+
+<!--
+    and ifnull(phone,0)!=0 and ifnull(short_addr,"")!=""
+-->
+
+
+
+</mapper>

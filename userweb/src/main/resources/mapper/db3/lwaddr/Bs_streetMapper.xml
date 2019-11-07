@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dao.db3.lwaddr.Bs_streetMapper1" >
+  <resultMap id="BaseResultMap" type="com.dao.entity.lwaddress.Bs_street" >
+    <id column="STREET_ID" property="streetId" jdbcType="INTEGER" />
+    <result column="STREET_CODE" property="streetCode" jdbcType="VARCHAR" />
+    <result column="AREA_CODE" property="areaCode" jdbcType="VARCHAR" />
+    <result column="STREET_NAME" property="streetName" jdbcType="VARCHAR" />
+    <result column="SHORT_NAME" property="shortName" jdbcType="VARCHAR" />
+    <result column="LNG" property="lng" jdbcType="VARCHAR" />
+    <result column="LAT" property="lat" jdbcType="VARCHAR" />
+    <result column="SORT" property="sort" jdbcType="INTEGER" />
+    <result column="GMT_CREATE" property="gmtCreate" jdbcType="TIMESTAMP" />
+    <result column="GMT_MODIFIED" property="gmtModified" jdbcType="TIMESTAMP" />
+    <result column="MEMO" property="memo" jdbcType="VARCHAR" />
+    <result column="DATA_STATE" property="dataState" jdbcType="INTEGER" />
+    <result column="TENANT_CODE" property="tenantCode" jdbcType="VARCHAR" />
+    <result column="PROVINCE_CODE" property="provinceCode" jdbcType="VARCHAR" />
+    <result column="CITY_CODE" property="cityCode" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    STREET_ID, STREET_CODE, AREA_CODE, STREET_NAME, SHORT_NAME, LNG, LAT, SORT, GMT_CREATE, 
+    GMT_MODIFIED, MEMO, DATA_STATE, TENANT_CODE
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from bs_street
+    where STREET_ID = #{streetId,jdbcType=INTEGER}
+  </select>
+
+
+  <select id="selectByAreaCode" resultMap="BaseResultMap">
+     SELECT AREA_CODE,STREET_CODE,STREET_NAME,SHORT_NAME FROM bs_street WHERE AREA_CODE = #{areaCode}
+  </select>
+
+  <select id="selectByCityCode" resultMap="BaseResultMap">
+    SELECT AREA_CODE,STREET_CODE,STREET_NAME,SHORT_NAME FROM bs_street WHERE AREA_CODE IN
+    <foreach collection="list" item="areaCode" index="index"
+             open="(" close=")" separator=",">
+      #{areaCode}
+    </foreach>
+  </select>
+
+  <select id="selectAreaCodeByStreetCode" resultType="java.lang.String">
+    SELECT AREA_CODE FROM bs_street WHERE STREET_CODE = #{streetCode}
+  </select>
+
+
+  <select id="selectAllStreet" resultMap="BaseResultMap">
+    SELECT AREA_CODE,STREET_CODE,STREET_NAME,SHORT_NAME FROM bs_street
+  </select>
+
+  <select id="selectStreetMessage" resultMap="BaseResultMap">
+    SELECT PROVINCE_CODE,b2.CITY_CODE,bs_street.AREA_CODE,STREET_CODE,STREET_NAME,SHORT_NAME FROM bs_street
+INNER JOIN (
+SELECT PROVINCE_CODE,bs_area.CITY_CODE,AREA_CODE from bs_area inner join bs_city ON bs_area.CITY_CODE = bs_city.CITY_CODE
+) b2 on bs_street.AREA_CODE= b2.AREA_CODE
+  </select>
+
+</mapper>

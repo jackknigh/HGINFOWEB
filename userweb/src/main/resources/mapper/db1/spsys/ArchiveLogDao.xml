@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spinfosec.dao.ArchiveLogDao">
+    <resultMap id="BaseResultMap" type="com.dao.entity.spsys.SpEventArchiveLog">
+        <id column="ID" jdbcType="VARCHAR" property="id"/>
+        <result column="STATUS" jdbcType="VARCHAR" property="status"/>
+        <result column="START_DATE" jdbcType="TIMESTAMP" property="startDate"/>
+        <result column="END_DATE" jdbcType="TIMESTAMP" property="endDate"/>
+        <result column="INCIDENT_NUM" jdbcType="VARCHAR" property="incidentNum"/>
+        <result column="PATH" jdbcType="VARCHAR" property="path"/>
+        <result column="DESCRIPTION" jdbcType="VARCHAR" property="description"/>
+        <result column="CREATE_DATE" jdbcType="TIMESTAMP" property="createDate"/>
+        <result column="ISDEL" jdbcType="VARCHAR" property="isdel"/>
+        <result column="CREATED_BY" jdbcType="VARCHAR" property="createdBy"/>
+        <result column="downOptLock" jdbcType="INTEGER" property="downOptLock"/>
+        <result column="recoverOptLock" jdbcType="INTEGER" property="recoverOptLock"/>
+    </resultMap>
+
+    <select id="queryEventByPage" parameterType="java.util.HashMap"
+            resultType="com.dto.pojo.spsys.system.EventArchiveLogRsp">
+        SELECT e.ID AS id,e.STATUS AS status, e.ISDEL AS isDel,e.CREATED_BY AS createdBy,e.INCIDENT_NUM AS incidentNum,
+        e.downOptLock AS downOptLock,e.recoverOptLock AS recoverOptLock,e.PATH AS path,
+        DATE_FORMAT(e.START_DATE, '%Y-%m-%d %H:%i:%s') AS startDate,
+        DATE_FORMAT(e.END_DATE, '%Y-%m-%d %H:%i:%s') AS endDate,
+        DATE_FORMAT(e.CREATE_DATE, '%Y-%m-%d %H:%i:%s') AS createDate,
+        a.NAME AS createdUserName
+        FROM sp_event_archive_log e LEFT JOIN sp_Admins a ON e.CREATED_BY = a.ID WHERE 1 = 1
+        <if test="status != null">
+            e.STATUS = #{status}
+        </if>
+        <if test="sort != null">
+            ORDER BY ${sort}
+        </if>
+        <if test="sort == null">
+            ORDER BY e.CREATE_DATE
+        </if>
+        <if test="order != null">
+            ${order}
+        </if>
+        <if test="order == null">
+            DESC
+        </if>
+    </select>
+
+    <select id="getEventAcrhiveLogById" parameterType="java.lang.String"
+            resultType="com.dao.entity.spsys.SpEventArchiveLog">
+        SELECT ID AS id,STATUS AS status, ISDEL AS isdel,CREATED_BY AS createdBy,INCIDENT_NUM AS incidentNum,
+        downOptLock AS downOptLock,recoverOptLock AS recoverOptLock,PATH AS path,DESCRIPTION AS description,
+        DATE_FORMAT(START_DATE, '%Y-%m-%d %H:%i:%s') AS startDate,
+        DATE_FORMAT(END_DATE, '%Y-%m-%d %H:%i:%s') AS endDate,
+        DATE_FORMAT(CREATE_DATE, '%Y-%m-%d %H:%i:%s') AS createDate
+        FROM sp_event_archive_log WHERE ID = #{id}
+    </select>
+
+    <select id="getOperateArchiveLogById" parameterType="java.lang.String"
+            resultType="com.dao.entity.spsys.SpSystemOperateArchiveLog">
+         SELECT ID AS id,STATUS AS status, ISDEL AS isdel,CREATED_BY AS createdBy,INCIDENT_NUM AS incidentNum,
+        downOptLock AS downOptLock,recoverOptLock AS recoverOptLock,PATH AS path,DESCRIPTION AS description,
+        DATE_FORMAT(START_DATE, '%Y-%m-%d %H:%i:%s') AS startDate,
+        DATE_FORMAT(END_DATE, '%Y-%m-%d %H:%i:%s') AS endDate,
+        DATE_FORMAT(CREATE_DATE, '%Y-%m-%d %H:%i:%s') AS createDate
+        FROM sp_system_operate_archive_log WHERE ID = #{id}
+    </select>
+
+    <insert id="saveEventArchiveLog" parameterType="com.dao.entity.spsys.SpEventArchiveLog">
+        INSERT INTO sp_event_archive_log (id, status, start_date,
+        end_date, incident_num, path,
+        description, create_date, ISDEL,
+        CREATED_BY, downOptLock, recoverOptLock)
+        VALUES (#{id,jdbcType=VARCHAR}, #{status,jdbcType=VARCHAR}, #{startDate,jdbcType=TIMESTAMP},
+        #{endDate,jdbcType=TIMESTAMP}, #{incidentNum,jdbcType=VARCHAR}, #{path,jdbcType=VARCHAR},
+        #{description,jdbcType=VARCHAR}, #{createDate,jdbcType=TIMESTAMP}, #{isdel,jdbcType=VARCHAR},
+        #{createdBy,jdbcType=VARCHAR}, #{downOptLock,jdbcType=INTEGER}, #{recoverOptLock,jdbcType=INTEGER})
+    </insert>
+
+    <update id="updateEventArchiveLog" parameterType="com.dao.entity.spsys.SpEventArchiveLog">
+    UPDATE sp_event_archive_log
+    SET STATUS = #{status,jdbcType=VARCHAR},
+      START_DATE = #{startDate,jdbcType=TIMESTAMP},
+      END_DATE = #{endDate,jdbcType=TIMESTAMP},
+      INCIDENT_NUM = #{incidentNum,jdbcType=VARCHAR},
+      PATH = #{path,jdbcType=VARCHAR},
+      DESCRIPTION = #{description,jdbcType=VARCHAR},
+      CREATE_DATE = #{createDate,jdbcType=TIMESTAMP},
+      ISDEL = #{isdel,jdbcType=VARCHAR},
+      CREATED_BY = #{createdBy,jdbcType=VARCHAR},
+      downOptLock = #{downOptLock,jdbcType=INTEGER},
+      recoverOptLock = #{recoverOptLock,jdbcType=INTEGER}
+    WHERE ID = #{id,jdbcType=VARCHAR}
+  </update>
+
+    <update id="updateOperateArchiveLog" parameterType="com.dao.entity.spsys.SpSystemOperateArchiveLog">
+        UPDATE sp_system_operate_archive_log
+       SET status = #{status,jdbcType=VARCHAR},
+      start_date = #{startDate,jdbcType=TIMESTAMP},
+      end_date = #{endDate,jdbcType=TIMESTAMP},
+      incident_num = #{incidentNum,jdbcType=VARCHAR},
+      path = #{path,jdbcType=VARCHAR},
+      description = #{description,jdbcType=VARCHAR},
+      create_date = #{createDate,jdbcType=TIMESTAMP},
+      ISDEL = #{isdel,jdbcType=VARCHAR},
+      CREATED_BY = #{createdBy,jdbcType=VARCHAR},
+      downOptLock = #{downOptLock,jdbcType=INTEGER},
+      recoverOptLock = #{recoverOptLock,jdbcType=INTEGER}
+    WHERE id = #{id,jdbcType=VARCHAR}
+    </update>
+
+    <delete id="deleteEventArchiveLogById" parameterType="java.lang.String">
+        DELETE FROM sp_event_archive_log WHERE #{id}
+    </delete>
+
+    <delete id="deleteOperateArchiveLog" parameterType="java.lang.String">
+      DELETE  FROM sp_system_operate_archive_log WHERE #{id}
+    </delete>
+
+    <select id="querySysByPage" parameterType="java.util.HashMap"
+            resultType="com.dto.pojo.spsys.system.SysOperateArchiveLogRsp">
+        SELECT sys.ID AS id,sys.STATUS AS status, sys.ISDEL AS isDel,sys.CREATED_BY AS createdBy,sys.INCIDENT_NUM AS
+        incidentNum,
+        sys.downOptLock AS downOptLock,sys.recoverOptLock AS recoverOptLock,sys.PATH AS path,
+        DATE_FORMAT(sys.START_DATE, '%Y-%m-%d %H:%i:%s') AS startDate,
+        DATE_FORMAT(sys.END_DATE, '%Y-%m-%d %H:%i:%s') AS endDate,
+        DATE_FORMAT(sys.CREATE_DATE, '%Y-%m-%d %H:%i:%s') AS createDate,
+        a.NAME AS createdUserName
+        FROM sp_system_operate_archive_log sys LEFT JOIN sp_Admins a ON sys.CREATED_BY = a.ID WHERE 1 = 1
+        <if test="name != null">
+
+        </if>
+        <if test="sort != null">
+            ORDER BY ${sort}
+        </if>
+        <if test="sort == null">
+            ORDER BY sys.CREATE_DATE
+        </if>
+        <if test="order != null">
+            ${order}
+        </if>
+        <if test="order == null">
+            DESC
+        </if>
+    </select>
+
+    <insert id="saveSystemOperateArchiveLog" parameterType="com.dao.entity.spsys.SpSystemOperateArchiveLog">
+        INSERT  INTO sp_system_operate_archive_log (id, status, start_date,
+        end_date, incident_num, path,
+        description, create_date, ISDEL,
+        CREATED_BY, downOptLock, recoverOptLock)
+        VALUES (#{id,jdbcType=VARCHAR}, #{status,jdbcType=VARCHAR}, #{startDate,jdbcType=TIMESTAMP},
+        #{endDate,jdbcType=TIMESTAMP}, #{incidentNum,jdbcType=VARCHAR}, #{path,jdbcType=VARCHAR},
+        #{description,jdbcType=VARCHAR}, #{createDate,jdbcType=TIMESTAMP}, #{isdel,jdbcType=VARCHAR},
+        #{createdBy,jdbcType=VARCHAR}, #{downOptLock,jdbcType=INTEGER}, #{recoverOptLock,jdbcType=INTEGER})
+    </insert>
+</mapper>

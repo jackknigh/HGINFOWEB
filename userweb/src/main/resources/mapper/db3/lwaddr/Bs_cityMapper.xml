@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dao.db3.lwaddr.Bs_cityMapper1" >
+  <resultMap id="BaseResultMap" type="com.dao.entity.lwaddress.Bs_city" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="CITY_CODE" property="cityCode" jdbcType="VARCHAR" />
+    <result column="CITY_NAME" property="cityName" jdbcType="VARCHAR" />
+    <result column="SHORT_NAME" property="shortName" jdbcType="VARCHAR" />
+    <result column="PROVINCE_CODE" property="provinceCode" jdbcType="VARCHAR" />
+    <result column="LNG" property="lng" jdbcType="VARCHAR" />
+    <result column="LAT" property="lat" jdbcType="VARCHAR" />
+    <result column="SORT" property="sort" jdbcType="INTEGER" />
+    <result column="GMT_CREATE" property="gmtCreate" jdbcType="TIMESTAMP" />
+    <result column="GMT_MODIFIED" property="gmtModified" jdbcType="TIMESTAMP" />
+    <result column="MEMO" property="memo" jdbcType="VARCHAR" />
+    <result column="DATA_STATE" property="dataState" jdbcType="INTEGER" />
+    <result column="TENANT_CODE" property="tenantCode" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, CITY_CODE, CITY_NAME, SHORT_NAME, PROVINCE_CODE, LNG, LAT, SORT, GMT_CREATE, 
+    GMT_MODIFIED, MEMO, DATA_STATE, TENANT_CODE
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from bs_city
+    where id = #{id,jdbcType=VARCHAR}
+  </select>
+
+  
+  <select id="selectCityAllName" resultMap="BaseResultMap">
+    SELECT CITY_CODE,CITY_NAME,SHORT_NAME,PROVINCE_CODE FROM bs_city
+  </select>
+
+  <select id="selectCityAllNameByProvinceCode" resultMap="BaseResultMap">
+    SELECT CITY_CODE,CITY_NAME,SHORT_NAME,PROVINCE_CODE FROM bs_city WHERE PROVINCE_CODE = #{provinceCode}
+  </select>
+
+  <select id="selectCityNameByCityCode" resultMap="BaseResultMap">
+    SELECT CITY_CODE,CITY_NAME,PROVINCE_CODE,SHORT_NAME FROM bs_city WHERE CITY_CODE = #{cityCode}
+  </select>
+
+</mapper>

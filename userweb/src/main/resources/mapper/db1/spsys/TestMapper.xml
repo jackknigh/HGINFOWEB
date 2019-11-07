@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.spinfosec.dao.TestDao" >
+    <sql id="BASE_TABLE">
+    test
+  </sql>
+
+    <sql id="BASE_COLUMN">
+    id,name,age
+  </sql>
+
+    <insert id="insert" parameterType="com.dao.entity.spsys.Test">
+        INSERT INTO
+        <include refid="BASE_TABLE"/>
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            id,name,age
+        </trim>
+        <trim prefix="VALUES(" suffix=")" suffixOverrides=",">
+            #{id, jdbcType=VARCHAR},#{name, jdbcType=VARCHAR},#{age, jdbcType=INTEGER}
+        </trim>
+    </insert>
+
+    <select id="selectTests" resultType="com.dao.entity.spsys.Test">
+        SELECT
+        <include refid="BASE_COLUMN"/>
+        FROM
+        <include refid="BASE_TABLE"/>
+    </select>
+
+
+</mapper>
