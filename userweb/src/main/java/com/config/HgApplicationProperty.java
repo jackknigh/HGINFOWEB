@@ -11,6 +11,9 @@ public class HgApplicationProperty {
     @Value("${sysPropertys.standardAddress}")
     private String standardAddress;
 
+    @Value("${sysPropertys.grace}")
+    private String grace;
+
     @Value("${sysPropertys.loginWithAutoCode}")
     private String loginWithAutoCode;
 
@@ -22,6 +25,10 @@ public class HgApplicationProperty {
 
     @Value("${sysPropertys.cityCode}")
     private String cityCode;
+
+    //切割集合大小
+    @Value("${sysPropertys.splitListSize}")
+    private int splitListSize;
 
     @Value("${sysPropertys.weightOfNum1}")
     private String weightOfNum1;
@@ -69,6 +76,23 @@ public class HgApplicationProperty {
 
     @Value("${sysPropertys.delectTableIndex}")
     private  String delectTableIndex;
+
+
+    public String getGrace() {
+        return grace;
+    }
+
+    public void setGrace(String grace) {
+        this.grace = grace;
+    }
+
+    public int getSplitListSize() {
+        return splitListSize;
+    }
+
+    public void setSplitListSize(int splitListSize) {
+        this.splitListSize = splitListSize;
+    }
 
     public String getStandardAddress() {
         return standardAddress;

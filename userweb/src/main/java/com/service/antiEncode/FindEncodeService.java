@@ -16,5 +16,5 @@ public interface FindEncodeService {
      *
      * @return
      */
-     Sec_addr getLngLatFromOneAddr(Sec_addr sec_addr,String key,String url);
+     Sec_addr getLngLatFromOneAddr(Sec_addr sec_addr, String key, String url);
 }

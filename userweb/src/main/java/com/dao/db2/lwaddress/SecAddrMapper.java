@@ -14,5 +14,5 @@ public interface SecAddrMapper {
 
     List<Sec_addr> searchError();
 
-    void update(List<Sec_addr> secAddrs);
+    void update(Sec_addr secAddrs);
 }

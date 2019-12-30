@@ -8,10 +8,13 @@
   </resultMap>
 
   <select id="selectAll" resultMap="BaseResultMap">
-        select row,phone,amount from  phone  where phone !='' order by phone desc limit #{number1},#{number2}
+        select row,phone,amount from  phone order by phone desc limit #{number1},#{number2}
   </select>
   <select id="selectAllAddress" resultType="com.dao.entity.lwaddress.Address">
-        select row,street,amount from  address order by row desc limit #{number1},#{number2}
+        select `row`,street,amount from  address order by `row` desc limit #{number1},#{number2}
+  </select>
+  <select id="selectAllAddressPhone" resultType="com.dao.entity.lwaddress.Address">
+        select `row`,street,amount from  address_phone where street is not null
   </select>
 
 </mapper>

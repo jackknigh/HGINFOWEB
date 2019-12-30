@@ -3,6 +3,7 @@ package com.config;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
 import com.service.system.AOPService;
+import com.spinfosec.system.TMCException;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
@@ -152,7 +153,9 @@ public class WebControllerAop {
             LOGGER.info("耗时：" + (end - begin) / 1000000 + "ms");
 
             return obj;
-        } catch (Throwable throwable) {
+        }catch (TMCException e){
+            throw e;
+        }  catch (Throwable throwable) {
             throwable.printStackTrace();
         }
         return null;

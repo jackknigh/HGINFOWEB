@@ -911,6 +911,51 @@ public class DateUtil
         res[1] =sdf.format(cEndDate.getTime())+" 23:59:59";
         return res;
     }
+
+    /**
+     * 日期格式化－将<code>Date</code>类型的日期格式化为<code>String</code>型
+     *
+     * @param date    日期
+     * @param pattern 格式化字串
+     * @return 返回类型 String 日期字符串
+     */
+    public static String format(Date date, String pattern) {
+        if (date == null) {
+            return "";
+        } else {
+            return getFormatter(pattern).format(date);
+        }
+    }
+
+    /**
+     * 将日期类型转换为simpleDateFormat类型
+     *
+     * @param parttern 要转换的日期类型
+     * @return 返回类型 SimpleDateFormat 返回一个SimpleDateFormat类型的日期字符串
+     */
+    private static SimpleDateFormat getFormatter(String parttern) {
+        return new SimpleDateFormat(parttern);
+    }
+
+    /**
+     * 获取当前日期
+     *
+     * @return 返回类型 Date 返回类型 一个包含年月日的<code>Date</code>型日期
+     */
+    public static synchronized Date getCurrDate() {
+        Calendar calendar = Calendar.getInstance();
+        return calendar.getTime();
+    }
+
+    /**
+     * 获取当前完整时间
+     *
+     * @return 返回类型 String 一个包含年月日时分秒的<code>String</code>型日期。yyyy-MM-dd hh:mm:ss
+     */
+    public static String getCurrDateTimeStr() {
+        return format(getCurrDate(), DATETIME_FORMAT_PATTERN);
+    }
+
     /**
      * 历史同期，同比开始结束时间
      * beginDate=beginDate-1年

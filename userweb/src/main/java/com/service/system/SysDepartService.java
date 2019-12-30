@@ -129,7 +129,7 @@ public interface SysDepartService {
      *<li>@author CuiLiang @date 2019-03-25 11:29  </li>
      *</ul>
      */
-    List<SysDepart> selectAllLike(String depCodeLike,String depCode);
+    List<SysDepart> selectAllLike(String depCodeLike, String depCode);
     /***
      *<p>方法:查询所有的子机构代码层级嵌套 TODO </p>
      *<ul>
@@ -170,7 +170,7 @@ public interface SysDepartService {
      *<li>@date 2018-12-12 8:51  </li>
      *</ul>
      */
-    SysDepart selectByDepCode( String depCode);
+    SysDepart selectByDepCode(String depCode);
 
     String updateStateCloseByCodes(List<String> ids);
 

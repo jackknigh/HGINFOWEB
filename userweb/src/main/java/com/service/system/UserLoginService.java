@@ -25,7 +25,7 @@ public interface UserLoginService  {
      * @return  数据集合
      * @date 2019-01-22
      */
-    public LoginUserBean getLoginUser( String userName, String password);
+    public LoginUserBean getLoginUser(String userName, String password);
 
     /**
      * 鉴权获取token
@@ -33,5 +33,5 @@ public interface UserLoginService  {
      */
     public Token getToken();
 
-    LoginUserBean getLoginUserBySfzh( String sfzh);
+    LoginUserBean getLoginUserBySfzh(String sfzh);
 }

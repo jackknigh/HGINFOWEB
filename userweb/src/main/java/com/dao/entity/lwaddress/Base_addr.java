@@ -18,6 +18,8 @@ public class Base_addr implements Serializable {
 
     private String name3;
 
+    private String idCard;
+
     private String phone;
 
     private String province;
@@ -37,6 +39,26 @@ public class Base_addr implements Serializable {
     private String streWeight;
 
     private String pcWeight;
+
+    private String alley;
+
+    private String alleyNum;
+
+    private String plot;
+
+    private String buildingNum;
+
+    private String unitNum;
+
+    private String floorNum;
+
+    private String doorplateNum;
+
+    private Integer mergeNum;
+
+    private String earliestTime;
+
+    private String latestTime;
 
     //第一步骤的总分
     private String mulWeight;
@@ -92,6 +114,96 @@ public class Base_addr implements Serializable {
     private String tableName;
 
     private Integer countId;
+
+    private String createTime;
+
+    public String getAlley() {
+        return alley;
+    }
+
+    public void setAlley(String alley) {
+        this.alley = alley;
+    }
+
+    public String getAlleyNum() {
+        return alleyNum;
+    }
+
+    public void setAlleyNum(String alleyNum) {
+        this.alleyNum = alleyNum;
+    }
+
+    public String getPlot() {
+        return plot;
+    }
+
+    public void setPlot(String plot) {
+        this.plot = plot;
+    }
+
+    public String getBuildingNum() {
+        return buildingNum;
+    }
+
+    public void setBuildingNum(String buildingNum) {
+        this.buildingNum = buildingNum;
+    }
+
+    public String getUnitNum() {
+        return unitNum;
+    }
+
+    public void setUnitNum(String unitNum) {
+        this.unitNum = unitNum;
+    }
+
+    public String getFloorNum() {
+        return floorNum;
+    }
+
+    public void setFloorNum(String floorNum) {
+        this.floorNum = floorNum;
+    }
+
+    public String getDoorplateNum() {
+        return doorplateNum;
+    }
+
+    public void setDoorplateNum(String doorplateNum) {
+        this.doorplateNum = doorplateNum;
+    }
+
+    public Integer getMergeNum() {
+        return mergeNum;
+    }
+
+    public void setMergeNum(Integer mergeNum) {
+        this.mergeNum = mergeNum;
+    }
+
+    public String getEarliestTime() {
+        return earliestTime;
+    }
+
+    public void setEarliestTime(String earliestTime) {
+        this.earliestTime = earliestTime;
+    }
+
+    public String getLatestTime() {
+        return latestTime;
+    }
+
+    public void setLatestTime(String latestTime) {
+        this.latestTime = latestTime;
+    }
+
+    public String getIdCard() {
+        return idCard;
+    }
+
+    public void setIdCard(String idCard) {
+        this.idCard = idCard;
+    }
 
     public String getLongitude() {
         return longitude;
@@ -198,6 +310,9 @@ public class Base_addr implements Serializable {
     }
 
     public BigDecimal getProWeight() {
+        if(proWeight == null){
+            return new BigDecimal(0);
+        }
         return new BigDecimal(proWeight);
     }
 
@@ -214,6 +329,9 @@ public class Base_addr implements Serializable {
     }
 
     public BigDecimal getCityWeight() {
+        if(cityWeight == null){
+            return new BigDecimal(0);
+        }
         return new BigDecimal(cityWeight);
     }
 
@@ -230,6 +348,9 @@ public class Base_addr implements Serializable {
     }
 
     public BigDecimal getAreaWeight() {
+        if(areaWeight == null){
+            return new BigDecimal(0);
+        }
         return new BigDecimal(areaWeight);
 
     }
@@ -247,6 +368,9 @@ public class Base_addr implements Serializable {
     }
 
     public BigDecimal getStreWeight() {
+        if(streWeight == null){
+            return new BigDecimal(0);
+        }
         return new BigDecimal(streWeight);
 
     }
@@ -256,6 +380,9 @@ public class Base_addr implements Serializable {
     }
 
     public BigDecimal getPcWeight() {
+        if(pcWeight == null){
+            return new BigDecimal(0);
+        }
         return new BigDecimal(pcWeight);
 
     }
@@ -265,6 +392,9 @@ public class Base_addr implements Serializable {
     }
 
     public BigDecimal getMulWeight() {
+        if(mulWeight == null){
+            return new BigDecimal(0);
+        }
         return new BigDecimal(mulWeight);
 
     }
@@ -290,6 +420,9 @@ public class Base_addr implements Serializable {
     }
 
     public BigDecimal getNameScore() {
+        if(nameScore == null){
+            return new BigDecimal(0);
+        }
         return new BigDecimal(nameScore);
 
     }
@@ -299,6 +432,9 @@ public class Base_addr implements Serializable {
     }
 
     public BigDecimal getPhoneScore() {
+        if(phoneScore == null){
+            return new BigDecimal(0);
+        }
         return new BigDecimal(phoneScore);
 
     }
@@ -309,6 +445,9 @@ public class Base_addr implements Serializable {
 
 
     public BigDecimal getLatitude() {
+        if(latitude == null){
+            return new BigDecimal(0);
+        }
         return new BigDecimal(latitude);
 
     }
@@ -334,6 +473,9 @@ public class Base_addr implements Serializable {
     }
 
     public BigDecimal getContrastScore() {
+        if(contrastScore == null){
+            return new BigDecimal(0);
+        }
         return new BigDecimal(contrastScore);
     }
 
@@ -390,6 +532,9 @@ public class Base_addr implements Serializable {
     }
 
     public BigDecimal getTotal1() {
+        if(total1 == null){
+            return new BigDecimal(0);
+        }
         return new BigDecimal(total1);
     }
 
@@ -398,6 +543,9 @@ public class Base_addr implements Serializable {
     }
 
     public BigDecimal getTotal2() {
+        if(total2 == null){
+            return new BigDecimal(0);
+        }
         return new BigDecimal(total2);
 
     }
@@ -407,8 +555,10 @@ public class Base_addr implements Serializable {
     }
 
     public BigDecimal getTotal3() {
+        if(total3 == null){
+            return new BigDecimal(0);
+        }
         return new BigDecimal(total3);
-
     }
 
     public void setTotal3(BigDecimal total3) {
@@ -416,6 +566,9 @@ public class Base_addr implements Serializable {
     }
 
     public BigDecimal getTotal4() {
+        if(total4 == null){
+            return new BigDecimal(0);
+        }
         return new BigDecimal(total4);
 
     }
@@ -425,8 +578,10 @@ public class Base_addr implements Serializable {
     }
 
     public BigDecimal getTotal5() {
+        if(total5 == null){
+            return new BigDecimal(0);
+        }
         return new BigDecimal(total5);
-
     }
 
     public void setTotal5(BigDecimal total5) {
@@ -459,4 +614,11 @@ public class Base_addr implements Serializable {
         this.tableName = tableName == null ? null : tableName.trim();
     }
 
+    public String getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(String createTime) {
+        this.createTime = createTime;
+    }
 }

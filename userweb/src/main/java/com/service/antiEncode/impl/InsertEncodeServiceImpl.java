@@ -98,6 +98,7 @@ public class InsertEncodeServiceImpl implements InsertEncodeService {
     public void errorProcess() {
         //查出所有异常数据
         List<Sec_addr> secAddrs = secAddrMapper.searchError();
+        log.error("开始异常重试机制。。。。。。。。共"+secAddrs.size()+"条异常数据");
 
         for (Sec_addr secAddr : secAddrs) {
             //调用高德地图查询经纬度
@@ -106,17 +107,15 @@ public class InsertEncodeServiceImpl implements InsertEncodeService {
                 log.error("所有key调用次数上限了");
                 return;
             }
-            secAddr.setLongitude(secAddr1.getLongitude());
-            secAddr.setLatitude(secAddr1.getLatitude());
-            secAddr.setType(secAddr1.getType());
+            try {
+                secAddrMapper.update(secAddr1);
+            } catch (Exception e) {
+                e.printStackTrace();
+                log.error(JSONObject.toJSONString(secAddrs));
+            }
         }
 
-        try {
-            secAddrMapper.update(secAddrs);
-        } catch (Exception e) {
-            e.printStackTrace();
-            log.error(JSONObject.toJSONString(secAddrs));
-        }
+
     }
 
     //判断key的调用次数是否上限

@@ -112,6 +112,6 @@ public interface SysRoleService {
     List<String> selectNameByIds(List<String> ids);
 
 
-    Map<String,List<String>> delByIds (List<String> ids);
+    Map<String,List<String>> delByIds(List<String> ids);
 
 }

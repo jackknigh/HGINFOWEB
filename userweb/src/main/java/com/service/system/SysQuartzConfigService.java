@@ -7,9 +7,9 @@ import java.util.List;
 
 public interface SysQuartzConfigService {
 
-    List<SysQuartzConfig> listAllOk(String depCode,String userId,String taskType,Integer state);
+    List<SysQuartzConfig> listAllOk(String depCode, String userId, String taskType, Integer state);
 
-    PageInfo list(Integer currentPage, Integer pageSize,String depCode,String userId,String taskType);
+    PageInfo list(Integer currentPage, Integer pageSize, String depCode, String userId, String taskType);
 
     SysQuartzConfig detail(String id);
 
@@ -17,5 +17,5 @@ public interface SysQuartzConfigService {
 
     void delete(List<String> ids);
 
-    void startUse(List<String> ids,String state) throws ClassNotFoundException;
+    void startUse(List<String> ids, String state) throws ClassNotFoundException;
 }

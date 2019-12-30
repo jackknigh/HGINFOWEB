@@ -60,7 +60,7 @@ public class Bs_cityServiceImpl implements Bs_cityService {
                 matcher = pattern.matcher(addressUse);
                 if (matcher.find()) {
                     address = address.replace(matcher.group(),"");
-                    cityName = cityAllName.get(i).getCityName();;
+                    cityName = cityAllName.get(i).getCityName();
                     cityCode = cityAllName.get(i).getCityCode();
                     provincecodesec = cityAllName.get(i).getProvinceCode();
 

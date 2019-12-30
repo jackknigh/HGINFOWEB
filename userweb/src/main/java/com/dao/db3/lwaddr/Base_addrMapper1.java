@@ -20,9 +20,13 @@ public interface Base_addrMapper1 {
 
     int insert3_2(List<Base_addr> base_addr);
 
+    int insert3_2_1(List<Base_addr> base_addr);
+
     int insert5(Base_addr message);
 
     int insert5_2(List<Base_addr> base_addr);
+
+    int insert5_2_1(List<Base_addr> base_addr);
 
     int insert6(List<Base_addr> message);
 
@@ -34,5 +38,7 @@ public interface Base_addrMapper1 {
 
     int insert4(List<Base_addr> message);
 
-    Base_addr selectIsExistence(Integer rowId);
+    void updateMerge(@Param("mergeId") String mergeId, @Param("basicsId") String basicsId);
+
+    List<Base_addr> selectBaseAddr();
 }

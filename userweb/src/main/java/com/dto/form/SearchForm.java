@@ -5,7 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 import java.io.Serializable;
 
-@ApiModel(value = "信息搜索条件", description = "信息搜索条件")
+@ApiModel(value = "人员信息搜索条件", description = "人员信息搜索条件")
 public class SearchForm implements Serializable {
     @ApiModelProperty(value = "姓名", name = "name")
     private String name;

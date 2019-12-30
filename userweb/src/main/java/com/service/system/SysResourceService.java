@@ -102,7 +102,7 @@ public interface SysResourceService {
      * @return 1代表成功
      * @date 2019-01-16
      */
-    int updateStatus(Map<String,Object> queryMap);
+    int updateStatus(Map<String, Object> queryMap);
 
     /**
      * 查询资源中的所有组件
@@ -111,7 +111,7 @@ public interface SysResourceService {
      * @return 实体类集合
      * @date 2019-01-16
      */
-    List<SysResource> selectComponent(Map<String,Object> queryMap);
+    List<SysResource> selectComponent(Map<String, Object> queryMap);
 
     /**
      * 根据功能id,角色id查询所有资源
@@ -145,7 +145,7 @@ public interface SysResourceService {
      * @param ids
      * @return
      */
-    int deleteResourceByIds (List<String> ids);
+    int deleteResourceByIds(List<String> ids);
 
     /**
      * 根据url获取资源

@@ -1,9 +1,14 @@
 package com.utils.sys.lwaddress;
 
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import static com.dto.constants.Constants.*;
 
 /**
- * 全角半角字符串转换工具类
+ * 正则工具类
  */
 public class AsciiUtil {
     public static final char SBC_SPACE = 12288; // 全角空格 12288
@@ -50,15 +55,202 @@ public class AsciiUtil {
     }
 
     /**
+     * 大写字母转小写字母
+     * @param str
+     * @return
+     */
+    public static String toLowerCase(String str) {
+        char[] s=str.toCharArray();
+        for(int i=0;i<s.length;i++){
+            if(s[i]>='A' && s[i]<='Z')
+                s[i]+=32;
+        }
+        str="";
+        for(int j=0;j<s.length;j++){
+            str+=s[j];
+        }
+        return str;
+    }
+
+    /**
+     * 正则处理
+     * @param shortAddr
+     * @param name
+     * @return
+     */
+    public static String RegProcess(String shortAddr,String name){
+
+        //全角转半角
+        shortAddr = sbc2dbcCase(shortAddr);
+
+        //去除五位以上的连续数字
+        shortAddr =shortAddr.replaceAll(REGEX_NUMBER,"");
+
+        //数字+一+数字，就把中文一改为-
+        Pattern pattern  = Pattern.compile(REGEX_SHUZIYI);
+        Matcher matcher = pattern.matcher(shortAddr);
+        if (matcher.find()) {
+            if(shortAddr.split(REGEX_SHUZIYI).length>0){
+                shortAddr = shortAddr.split(REGEX_SHUZIYI)[0]+matcher.group(2)+"-"+matcher.group(3);
+            }
+        }
+
+        //中文数字转阿拉伯数字
+        Pattern pattern8  = Pattern.compile(REGEX_ZSHUZI);
+        Matcher matcher8 = pattern8.matcher(shortAddr);
+        while (matcher8.find()) {
+            String group = matcher8.group();
+            String group1 = group;
+            group = group.replaceAll("十+","十");
+            if(group.indexOf("百")>group.indexOf("十")){
+                continue;
+            }
+            int count = 0;
+            String[] split = group.split("");
+            for (String s : split) {
+                if("十".equals(s)){
+                    count += 1;
+                }
+            }
+            if(count>1){
+                continue;
+            }
+            if(group.length()<2 || group.length()>5){
+                continue;
+            }
+            String s = SwitchNumber.testA(group);
+            shortAddr = shortAddr.replaceAll(group1,s);
+        }
+
+        //中文字符转数字
+        shortAddr = SwitchNumber.caseStr2Num(shortAddr);
+
+        //数字+o+数字，就把中文o改为0
+        Pattern pattern9  = Pattern.compile(REGEX_SHUZILIN);
+        Matcher matcher9 = pattern9.matcher(shortAddr);
+        if (matcher9.find()) {
+            if(shortAddr.split(REGEX_SHUZILIN).length>0){
+                shortAddr = shortAddr.split(REGEX_SHUZILIN)[0]+matcher9.group(2)+"0"+matcher9.group(3);
+            }
+        }
+
+        //字符串中的大写字母改为小写字母
+        shortAddr = AsciiUtil.toLowerCase(shortAddr);
+        //幢、栋、弄、单元 改为-
+        shortAddr = shortAddr.replaceAll(REGEX_DANYUAN,"-");
+        //特殊字符处理
+        shortAddr = AsciiUtil.SpecialHandl(shortAddr);
+        if(!StringUtils.isBlank(name)){
+            shortAddr = shortAddr.replace(name, "");
+        }
+        return shortAddr;
+    }
+
+    /**
      * 特殊情况处理
      * @param str
      * @return
      */
     public static String SpecialHandl(String str) {
-        str = sbc2dbcCase(str);
-        str = str.replaceAll(REGEX_POSTCADE, "").replaceAll("\\r", "")
-                .replaceAll("\\n", "").replaceAll(REGEX_SYMBOL,"")
-                .replaceAll(REGEX_PHONE, "");
+
+        str = str.replaceAll(REGEX_HENG,"-");
+
+        //去除转义字符
+        str = str.replaceAll(REGEX_ZHUANYI,"");
+
+
+        //去除 特殊符号及后面的内容
+        str = str.replaceAll(REGEX_FUHAO,"");
+
+        //去除特殊字符(特殊符号、指定邮编、手机号)
+        str = str.replaceAll(REGEX_POSTCADE, "").replaceAll("\\\\r", "").replaceAll("\\n", "")
+                .replaceAll("\\\\n", "").replaceAll(REGEX_SYMBOL,"").replaceAll("\\r", "")
+                .replaceAll(REGEX_PHONE, "").replaceAll(REGEX_KUOHAO,"") .replaceAll("\\\\t", "")
+                .replaceAll("\\\\", "");
+
+        //数字+楼+号 变成 数字-号
+        Pattern pattern4  = Pattern.compile(REGEX_LOU);
+        Matcher matcher4 = pattern4.matcher(str);
+        if (matcher4.find()) {
+            str = str.replaceAll(REGEX_LOU, matcher4.group(2)+"-"+matcher4.group(3));
+        }
+
+        //去除单元
+        Pattern pattern3  = Pattern.compile(REGEX_QUDANYUAN);
+        Matcher matcher3 = pattern3.matcher(str);
+        if (matcher3.find()) {
+            str = str.replaceAll(REGEX_QUDANYUAN, matcher3.group(2)+"-"+matcher3.group(5));
+        }
+
+        //数字+号后面如果有大小写英文或者阿拉伯、中文数字就保留号后面的字符
+        Pattern pattern  = Pattern.compile(REGEX_CCHANGHAO);
+        Matcher matcher = pattern.matcher(str);
+        if(!matcher.find()){
+//            Pattern pattern  = Pattern.compile(REGEX_CHANGHAO);
+//            Matcher matcher = pattern.matcher(str);
+//            if (matcher.find()) {
+//                if(str.split(REGEX_CHANGHAO).length>0) {
+//                    str = str.split(REGEX_CHANGHAO)[0] + matcher.group();
+//                }
+//                return str;
+//            }else {
+                Pattern pattern1 = Pattern.compile(REGEX_DUANHAO);
+                Matcher matcher1 = pattern1.matcher(str);
+                if (matcher1.find()) {
+                    if (str.split(REGEX_DUANHAO).length > 0) {
+                        str = str.split(REGEX_DUANHAO)[0] + matcher1.group();
+                    }
+                    return str;
+                }
+//            }
+    }
+
+        //去除 数字+室 后面的内容
+        Pattern pattern2  = Pattern.compile(REGEX_SHI);
+        Matcher matcher2 = pattern2.matcher(str);
+        if (matcher2.find()) {
+            if(str.split(REGEX_SHI).length>0){
+                str = str.split(REGEX_SHI)[0]+matcher2.group();
+            }
+        }
+
+        //去除 公司 后面的内容
+        Pattern pattern5  = Pattern.compile(REGEX_GONGSI);
+        Matcher matcher5 = pattern5.matcher(str);
+        if (matcher5.find()) {
+            str = matcher5.group();
+        }
+
+        //如果( 后面带数字
+        Pattern pattern6  = Pattern.compile(REGEX_ZKH);
+        Matcher matcher6 = pattern6.matcher(str);
+        if (matcher6.find()) {
+            String group = matcher6.group();
+            Pattern pattern7  = Pattern.compile(REGEX_SHUZI);
+            Matcher matcher7 = pattern7.matcher(group);
+            if (matcher7.find()) {
+                str = str.replace("(","");
+            }else {
+                str = str.replace(group,"");
+            }
+        }
+        return str;
+    }
+
+    /**
+     * 特殊情况收尾处理
+     * @param str
+     * @return
+     */
+    public static String SpecialEndHandl(String str) {
+        //去除tod
+        //去除首字母中的tod
+        str = str.replaceAll("(tod)","");
+        //去除首字母中的-，t
+        str = str.replaceAll(REGEX_GANG,"");
+        if(str.startsWith("-")){
+            str = str.substring(1);
+        }
         return str;
     }
 }

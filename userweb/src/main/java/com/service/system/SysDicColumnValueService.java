@@ -13,7 +13,7 @@ public interface SysDicColumnValueService {
 
     int save(SysDicColumnValue sysDicColumnValue);
 
-    void startUse(List<String> ids,int state);
+    void startUse(List<String> ids, int state);
 
     void delete(List<String> ids);
 }

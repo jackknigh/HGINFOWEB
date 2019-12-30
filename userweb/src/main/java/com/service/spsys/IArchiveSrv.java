@@ -51,7 +51,7 @@ public interface IArchiveSrv
 	 * @return
 	 */
 	SpSystemOperateArchiveLog createSysOperateLogArchive(SpSystemOperateArchiveLog operateArchiveLog, String userId,
-														 String folderPath);
+                                                         String folderPath);
 
 	/**
 	 * 根据ID获取安全日志归档记录

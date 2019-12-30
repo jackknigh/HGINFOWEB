@@ -12,6 +12,14 @@ public class ResponseMessage implements Serializable {
     private String code;
     private Object bean;
 
+    public ResponseMessage() {
+    }
+
+    public ResponseMessage(String msg, String code) {
+        this.msg = msg;
+        this.code = code;
+    }
+
     public String getMsg() {
         return msg;
     }
@@ -121,6 +129,19 @@ public class ResponseMessage implements Serializable {
         message.setCode(rspCode.getCode());
         message.setMsg(rspCode.getDescription());
         message.setBean(bean);
+        return message;
+    }
+
+    /**
+     * 抛出自定义异常输出用的
+     * @param rspCode
+     * @return
+     */
+    public static ResponseMessage sendDefined(com.spinfosec.system.RspCode rspCode){
+        ResponseMessage message = new ResponseMessage();
+        message.setCode(rspCode.getCode());
+        message.setMsg(rspCode.getDescription());
+        message.setBean("");
         return message;
     }
   

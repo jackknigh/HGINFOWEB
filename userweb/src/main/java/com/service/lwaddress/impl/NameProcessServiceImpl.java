@@ -15,27 +15,43 @@ public class NameProcessServiceImpl implements NameProcessService {
         for(int i=0;i<a2.length;i++){
              if(a2[i].equals("*")){
                  return false;
-             };
+             }
         }
 
-            if (a1.length == a2.length) {
-                for (int i = 0; i <=a1.length; i++) {
-                    if(i==a1.length) {
-                        return true;
-                    }
-                        if (a1[i].equals(a2[i])|| a1[i].equals("*") ) {
-                            continue;
-                        }else {
-                            return false;
-                        }
-                        }
-
-                }else{
-                return  false;
+        //如果姓相同(以*前一位元素作为姓的判断依据)
+        for (int i = 0; i < a1.length; i++) {
+            if("*".equals(a1[i]) && i>0){
+                if(a2.length-1>=i && a1[i-1].equals(a2[i-1])){
+                    return true;
+                }
             }
-
-        return false;
         }
+        return false;
+    }
+
+    @Override
+    public Boolean phoneLikedProcess(String[] a1, String[] a2) {
+        /*判断被传入字符是否为无星星字符*/
+        for(int i=0;i<a2.length;i++){
+            if(a2[i].equals("*")){
+                return false;
+            }
+        }
+
+        if (a1.length == a2.length) {
+            for (int i = 0; i <=a1.length; i++) {
+                if(i==a1.length) {
+                    return true;
+                }
+                if (a1[i].equals(a2[i])|| a1[i].equals("*") ) {
+                    continue;
+                }else {
+                    return false;
+                }
+            }
+        }
+        return false;
+    }
 
     @Override
     public Boolean a2nameLikedProcess(String[] a1, String[] a2) {
@@ -44,8 +60,7 @@ public class NameProcessServiceImpl implements NameProcessService {
         for(int i=0;i<a2.length;i++){
             if(a2[i].equals("*")){
                 index=1;
-
-            };
+            }
         }
         if(index==1){
             if (a1.length == a2.length) {
@@ -66,10 +81,9 @@ public class NameProcessServiceImpl implements NameProcessService {
 
     @Override
     public Boolean a3nameLikedProcess(String[] a1, String[] a2) {
-        if(a1[0]==a2[0]){
+        if(a1[0].equals(a2[0])){
             return true;
-        }
-        else{
+        }else{
             return false;
         }
     }
@@ -82,6 +96,11 @@ public class NameProcessServiceImpl implements NameProcessService {
             return true;
         }
         return false;
+    }
+
+    public  String beforeStr(String[]  str){
+
+        return null;
     }
 
 }

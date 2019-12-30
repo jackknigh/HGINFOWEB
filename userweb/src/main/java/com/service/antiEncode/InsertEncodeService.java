@@ -14,7 +14,7 @@ public interface InsertEncodeService {
      *
      * @return
      */
-     void  insertLngLat(int start,int number);
+     void  insertLngLat(int start, int number);
 
     /**
      * 初始化配置信息

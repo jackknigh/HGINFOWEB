@@ -15,9 +15,29 @@ public class Constants {
     public static final Integer AUDIT_FINISH = -4;     //完成
 
     //特殊字符相关
-    public static final String REGEX_SYMBOL = "[`~!@#$%^&*+=|{}':;',\\[\\]<>/?~！@#� \uE009\uF8F5￥%……& _;*——+|{}【】‘；：”“’。，、？.。]";     //完成
-    public static final String REGEX_POSTCADE = "\\(\\d{6}\\)|\\（\\d{6}\\）|000000|325024";
-    public static final String REGEX_PHONE = "1\\d{10}|^1\\D{10}|\\d{3}-\\d{8}";
+    public static final String REGEX_SYMBOL = "[\"丿–·③④⑤`~!@#$%^&*+=|{}':;',\\[\\]<>/?~！@#� \uE009\uF8F5￥%……& _;*+|{}【】‘；：”“’。，、？.。]";     //完成
+    public static final String REGEX_POSTCADE = "000000|325024|325000";
+    public static final String REGEX_CHANGHAO = "\\d+号.*\\d+-\\d+";
+    public static final String REGEX_CCHANGHAO = "\\d+号.*[a-zA-Z\\d一二三四五六七八九十零壹贰叁肆伍陆柒捌玖拾]+";
+    public static final String REGEX_ZSHUZI = "[一二三四五六七八九十百]+";
+    public static final String REGEX_DUANHAO = "\\d+号";
+    public static final String REGEX_GANG = "-{2,}";
+    public static final String REGEX_ZHUANYI = "(nbsp)+|(null)+|(amp)+|(undefined)+|(╲n)+|(╲r)+|\\).*";
+    public static final String REGEX_NUMBER = "\\d{5,}";
+    public static final String REGEX_SHI = "\\d+室";
+    public static final String REGEX_GONGSI = ".*公司|.*大学";
+    public static final String REGEX_SHUZI = "\\d.*|.*公司";
+    public static final String REGEX_ZKH = "\\(.*";
+    public static final String REGEX_HENG = "mdash";
+    public static final String REGEX_KUOHAO = "\\(.*?\\)|\\（.*?\\）|\\[.*?\\]|\\【.*?\\】|\\{.*?\\}|\\<.*?\\>|\\《.*?\\》";
+    public static final String REGEX_FUHAO= ",.+|，.+|;.+|；.+";
+    public static final String REGEX_SHUZIYI = "((\\d+)一(\\d+))";
+    public static final String REGEX_SHUZILIN = "((\\d+)o(\\d+))";
+    public static final String REGEX_QUDANYUAN = "((\\d+)-((\\d+)-)+(\\d+))";
+    public static final String REGEX_DANYUAN = "幢|栋|弄|单元|棟|—|～|橦";
+    public static final String REGEX_LOU = "((\\d+)楼(\\d+))";
+    public static final String REGEX_PHONE = "\\d{2}-1\\d{10}|1\\d{10}|\\d{3,4}-\\d{7,8}";
+    public static final String REGEX_IDCARD = "\\d{17}[\\d|x|X]|\\d{15}";
 
     public static final long DAY = 1 * 24 * 60 * 60 * 1000;
 

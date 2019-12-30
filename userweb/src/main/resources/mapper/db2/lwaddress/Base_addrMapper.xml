@@ -9,6 +9,7 @@
         <result column="name1" property="name1" jdbcType="VARCHAR"/>
         <result column="name2" property="name2" jdbcType="VARCHAR"/>
         <result column="name3" property="name3" jdbcType="VARCHAR"/>
+        <result column="id_card" property="idCard" jdbcType="VARCHAR"/>
         <result column="phone" property="phone" jdbcType="VARCHAR"/>
         <result column="province" property="province" jdbcType="VARCHAR"/>
         <result column="pro_weight" property="proWeight" jdbcType="VARCHAR"/>
@@ -19,6 +20,16 @@
         <result column="street" property="street" jdbcType="VARCHAR"/>
         <result column="stre_weight" property="streWeight" jdbcType="VARCHAR"/>
         <result column="pc_weight" property="pcWeight" jdbcType="VARCHAR"/>
+        <result column="alley" property="alley" jdbcType="VARCHAR"/>
+        <result column="alley_num" property="alleyNum" jdbcType="VARCHAR"/>
+        <result column="plot" property="plot" jdbcType="VARCHAR"/>
+        <result column="building_num" property="buildingNum" jdbcType="VARCHAR"/>
+        <result column="unit_num" property="unitNum" jdbcType="VARCHAR"/>
+        <result column="floor_num" property="floorNum" jdbcType="VARCHAR"/>
+        <result column="doorplate_num" property="doorplateNum" jdbcType="VARCHAR"/>
+        <result column="merge_num" property="mergeNum" jdbcType="INTEGER"/>
+        <result column="earliest_time" property="earliestTime" jdbcType="VARCHAR"/>
+        <result column="latest_time" property="latestTime" jdbcType="VARCHAR"/>
         <result column="mul_weight" property="mulWeight" jdbcType="VARCHAR"/>
         <result column="str_score" property="strScore" jdbcType="VARCHAR"/>
         <result column="number_score" property="numberScore" jdbcType="VARCHAR"/>
@@ -46,19 +57,20 @@
         <result column="row_id" property="rowId" jdbcType="INTEGER"/>
         <result column="table_name" property="tableName" jdbcType="VARCHAR"/>
         <result column="count_id" property="countId" jdbcType="INTEGER"/>
+        <result column="create_time" property="createTime" jdbcType="VARCHAR"/>
     </resultMap>
     <sql id="Base_Column_List">
-    id, addr_jj, addr_sj, short_addr, name1, name2, name3, phone, province, pro_weight, 
+    id, addr_jj, addr_sj, short_addr, name1, name2, name3,id_card, phone, province, pro_weight,
     city, city_weight, area, area_weight, street, stre_weight, pc_weight, mul_weight, 
     str_score, number_score, name_score, phone_score, longitude, latitude, addr_sign1, 
     addr_sign2, contrast_score, contrast_id, p1type, p2type, p3type, p4type, p5type, 
-    total1, total2, total3, total4, total5, short_phone,old_name1,old_phone,row_id,table_name,count_id
+    total1, total2, total3, total4, total5, short_phone,old_name1,old_phone,row_id,table_name,count_id,create_time
   </sql>
 
 
     <insert id="insert1" parameterType="com.dao.entity.lwaddress.Base_addr" flushCache="true">
         insert  into sec_addr
-        (id,addr_sj,short_addr,name1,phone,short_phone,addr_sign1,addr_sign2,province,pro_weight,
+        (id,addr_sj,short_addr,name1,phone,short_phone,addr_sign1,addr_sign2,province,pro_weight,id_card,
         city,city_weight,area,area_weight,street,stre_weight,mul_weight,p1type,old_name1,old_phone,row_id,table_name,count_id)
         values
         <foreach collection="list" item="item" index="index" separator="," >
@@ -66,6 +78,7 @@
             #{item.addrSj,jdbcType=VARCHAR},
             #{item.shortAddr,jdbcType=VARCHAR},
             #{item.name1,jdbcType=VARCHAR},
+            #{item.idCard,jdbcType=VARCHAR},
             #{item.phone,jdbcType=VARCHAR},
             #{item.shortPhone,jdbcType=VARCHAR},
             #{item.addrSign1,jdbcType=VARCHAR},
@@ -118,13 +131,14 @@
 
         <!--<foreach collection="list" item="item" index="index" separator=";">-->
         insert   into merge_addr
-        (id,short_addr, name1, phone,short_phone,province,pro_weight,
+        (id,short_addr, name1, phone,short_phone,province,pro_weight,id_card,
         city,city_weight,area,area_weight,street,stre_weight,mul_weight,addr_sign1,addr_sign2,
         contrast_score,contrast_id,p2type,str_score,number_score,old_name1,old_phone,row_id,table_name,count_id)
         values
         (#{id,jdbcType=VARCHAR},
         #{shortAddr,jdbcType=VARCHAR},
         #{name1,jdbcType=VARCHAR},
+        #{idCard,jdbcType=VARCHAR},
         #{phone,jdbcType=VARCHAR},
         #{shortPhone,jdbcType=VARCHAR},
         #{province,jdbcType=VARCHAR},
@@ -154,20 +168,35 @@
     </insert>
 
     <select id="selectByShortPhone" resultMap="BaseResultMap">
-    SELECT  id,addr_sj,short_addr, name1, phone,province,pro_weight,
+    SELECT  id,addr_sj,short_addr, name1,id_card, phone,province,pro_weight,
     city,city_weight,area,area_weight,street,stre_weight,mul_weight,
-   p3type,concat(substring(phone,2,2),right(phone,4)) as short_phone,old_name1,old_phone,row_id,table_name,count_id
-     FROM sec_addr where short_phone = #{shortPhone}  order by mul_weight desc
+   p3type,short_phone,old_name1,old_phone,row_id,table_name,count_id,create_time
+     FROM sec_addr
+     <where>
+        <if test="shortPhone == null">
+            and short_phone is null
+        </if>
+        <if test="shortPhone != null">
+            and short_phone = #{shortPhone}
+        </if>
+        <if test="street != null">
+            and (city = #{street} or city is null)
+        </if>
+     </where>
+      order by mul_weight desc
 
   </select>
     <select id="selectAddr_sj" resultMap="BaseResultMap">
-    SELECT id,addr_sj,name1,phone,short_phone,row_id,table_name,count_id  FROM base_addr
+    SELECT
+            id,addr_sj,name1,phone,short_phone,row_id,table_name,
+            count_id,id_card,alley,alley_num,plot,building_num,unit_num,
+            floor_num,doorplate_num,merge_num,earliest_time,latest_time,create_time  FROM base_addr
     where count_id > #{number1} limit #{number2}
   </select>
 
     <insert id="insert3_2" parameterType="com.dao.entity.lwaddress.Base_addr">
         insert   into merge_addr
-        (id,addr_sj,short_addr, name1, phone,short_phone,province,pro_weight,
+        (id,addr_sj,short_addr, name1, phone,short_phone,province,pro_weight,id_card,
         city,city_weight,area,area_weight,street,stre_weight,mul_weight,addr_sign1,addr_sign2,
         contrast_score,contrast_id,p2type,str_score,number_score,old_name1,old_phone,row_id,table_name,count_id)
         values
@@ -176,6 +205,7 @@
             #{item.addrSj,jdbcType=VARCHAR},
             #{item.shortAddr,jdbcType=VARCHAR},
             #{item.name1,jdbcType=VARCHAR},
+            #{item.idCard,jdbcType=VARCHAR},
             #{item.phone,jdbcType=VARCHAR},
             #{item.shortPhone,jdbcType=VARCHAR},
             #{item.province,jdbcType=VARCHAR},
@@ -221,13 +251,14 @@
         <!--<foreach collection="list" item="item" index="index" separator=";">-->
         insert   into basics_addr
         (id,short_addr, name1, phone,short_phone,province,pro_weight,
-        city,city_weight,area,area_weight,street,stre_weight,mul_weight,
+        city,city_weight,area,area_weight,street,stre_weight,mul_weight,id_card,
         p2type,addr_sign1,addr_sign2,number_score,old_name1,old_phone,row_id,table_name,count_id)
         values
 
         (#{id,jdbcType=VARCHAR},
         #{shortAddr,jdbcType=VARCHAR},
         #{name1,jdbcType=VARCHAR},
+        #{idCard,jdbcType=VARCHAR},
         #{phone,jdbcType=VARCHAR},
         #{shortPhone,jdbcType=VARCHAR},
         #{province,jdbcType=VARCHAR},
@@ -256,7 +287,7 @@
     <insert id="insert5_2" parameterType="com.dao.entity.lwaddress.Base_addr">
         insert   into basics_addr
         (id,addr_sj,short_addr, name1, phone,short_phone,province,pro_weight,
-        city,city_weight,area,area_weight,street,stre_weight,mul_weight,
+        city,city_weight,area,area_weight,street,stre_weight,mul_weight,id_card,
         p2type,addr_sign1,addr_sign2,number_score,old_name1,old_phone,row_id,table_name,count_id)
         values
         <foreach collection="list" item="item" index="index" separator=",">
@@ -264,6 +295,7 @@
             #{item.addrSj,jdbcType=VARCHAR},
             #{item.shortAddr,jdbcType=VARCHAR},
             #{item.name1,jdbcType=VARCHAR},
+            #{item.idCard,jdbcType=VARCHAR},
             #{item.phone,jdbcType=VARCHAR},
             #{item.shortPhone,jdbcType=VARCHAR},
             #{item.province,jdbcType=VARCHAR},
@@ -287,6 +319,80 @@
             )
         </foreach>
 
+    </insert>
+    <insert id="insertBasics" parameterType="com.dao.entity.lwaddress.Base_addr">
+        insert   into basics_addr
+        (id,addr_sj,short_addr, name1, phone,short_phone,province,pro_weight,
+        city,city_weight,area,area_weight,street,stre_weight,mul_weight,addr_sign1,addr_sign2,id_card,
+        contrast_score,contrast_id,p2type,str_score,number_score,old_name1,old_phone,row_id,table_name,count_id,create_time)
+        values
+            (#{id,jdbcType=VARCHAR},
+            #{addrSj,jdbcType=VARCHAR},
+            #{shortAddr,jdbcType=VARCHAR},
+            #{name1,jdbcType=VARCHAR},
+            #{idCard,jdbcType=VARCHAR},
+            #{phone,jdbcType=VARCHAR},
+            #{shortPhone,jdbcType=VARCHAR},
+            #{province,jdbcType=VARCHAR},
+            '${proWeight}',
+            #{city,jdbcType=VARCHAR},
+            '${cityWeight}',
+            #{area,jdbcType=VARCHAR},
+            '${areaWeight}',
+            #{street,jdbcType=VARCHAR},
+            '${streWeight}',
+            '${mulWeight}',
+            #{addrSign1,jdbcType=VARCHAR},
+            #{addrSign2,jdbcType=VARCHAR},
+            '${contrastScore}',
+            #{contrastId,jdbcType=VARCHAR},
+            #{p2type,jdbcType=INTEGER},
+            #{strScore,jdbcType=VARCHAR},
+            #{numberScore,jdbcType=VARCHAR},
+            #{oldName1,jdbcType=VARCHAR},
+            #{oldPhone,jdbcType=VARCHAR},
+            #{rowId,jdbcType=INTEGER},
+            #{tableName,jdbcType=VARCHAR},
+            #{countId,jdbcType=INTEGER},
+            #{createTime,jdbcType=VARCHAR}
+            )
+    </insert>
+    <insert id="insertMerge" parameterType="com.dao.entity.lwaddress.Base_addr">
+                insert   into merge_addr
+        (id,addr_sj,short_addr, name1, phone,short_phone,province,pro_weight,
+        city,city_weight,area,area_weight,street,stre_weight,mul_weight,addr_sign1,addr_sign2,id_card,
+        contrast_score,contrast_id,p2type,str_score,number_score,old_name1,old_phone,row_id,table_name,count_id,create_time)
+        values
+            (#{id,jdbcType=VARCHAR},
+            #{addrSj,jdbcType=VARCHAR},
+            #{shortAddr,jdbcType=VARCHAR},
+            #{name1,jdbcType=VARCHAR},
+            #{idCard,jdbcType=VARCHAR},
+            #{phone,jdbcType=VARCHAR},
+            #{shortPhone,jdbcType=VARCHAR},
+            #{province,jdbcType=VARCHAR},
+            '${proWeight}',
+            #{city,jdbcType=VARCHAR},
+            '${cityWeight}',
+            #{area,jdbcType=VARCHAR},
+            '${areaWeight}',
+            #{street,jdbcType=VARCHAR},
+            '${streWeight}',
+            '${mulWeight}',
+            #{addrSign1,jdbcType=VARCHAR},
+            #{addrSign2,jdbcType=VARCHAR},
+            '${contrastScore}',
+            #{contrastId,jdbcType=VARCHAR},
+            #{p2type,jdbcType=INTEGER},
+            #{strScore,jdbcType=VARCHAR},
+            #{numberScore,jdbcType=VARCHAR},
+            #{oldName1,jdbcType=VARCHAR},
+            #{oldPhone,jdbcType=VARCHAR},
+            #{rowId,jdbcType=INTEGER},
+            #{tableName,jdbcType=VARCHAR},
+            #{countId,jdbcType=INTEGER},
+            #{createTime,jdbcType=VARCHAR}
+            )
     </insert>
 
     <select id="selectSum"  parameterType="java.lang.Integer" resultType="java.lang.Integer">
@@ -315,7 +421,18 @@
             #{item.id,jdbcType=VARCHAR}
         </foreach>
     </delete>
-
+    <delete id="deleteMergeById">
+        delete from merge_addr where id = #{id}
+    </delete>
+    <delete id="deleteBasicsById">
+                delete from basics_addr where id = #{id}
+    </delete>
+    <delete id="deleteBasicsNormal">
+        delete from basics_addr_normal where id = #{id}
+    </delete>
+    <delete id="deleteMergeNormal">
+        delete from merge_addr_normal where contrast_id = #{id}
+    </delete>
     <select id="selectMsg" resultType="com.dto.vo.BaseAddrVo">
         SELECT
         id,
@@ -359,43 +476,57 @@
             </if>
         </where>
     </select>
-    <select id="getCity" resultType="com.dto.pojo.lwaddr.AddressName" parameterType="java.lang.String">
+    <select id="getCity" resultType="com.dao.entity.lwaddress.Bs_city" parameterType="java.lang.String">
         SELECT
-            PROVINCE_CODE AS CODE,
-            CITY_NAME AS NAME,
+            CITY_CODE AS cityCode,
+            PROVINCE_CODE AS provinceCode,
+            CITY_NAME AS cityName,
             SHORT_NAME AS shortName
         FROM
             bs_city
         WHERE
             CITY_CODE = #{cityCode}
     </select>
-    <select id="getProvince" resultType="com.dto.pojo.lwaddr.AddressName" parameterType="java.lang.String">
+    <select id="getProvince" resultType="com.dao.entity.lwaddress.Bs_province" parameterType="java.lang.String">
         SELECT
-            PROVINCE_NAME AS NAME,
+            PROVINCE_CODE AS provinceCode,
+            PROVINCE_NAME AS provinceName,
             SHORT_NAME AS shortName
         FROM
             bs_province
         WHERE
             PROVINCE_CODE = #{code}
     </select>
-    <select id="getArea" resultType="com.dto.pojo.lwaddr.AddressName" parameterType="java.lang.String">
+    <select id="getArea" resultType="com.dao.entity.lwaddress.Bs_area" parameterType="java.lang.String">
         SELECT
-            AREA_CODE AS CODE,
-            AREA_NAME AS NAME,
-            SHORT_NAME AS shortName
+            AREA_CODE AS areaCode,
+            AREA_NAME AS areaName,
+            b1.SHORT_NAME AS shortName,
+            PROVINCE_CODE AS provinceCode,
+            b1.CITY_CODE AS cityCode
         FROM
-            bs_area
+            bs_area b1
+        INNER JOIN
+            bs_city b2
+        ON
+            b1.CITY_CODE = b2.CITY_CODE
         WHERE
-            CITY_CODE = #{cityCode}
+            b1.CITY_CODE = #{cityCode}
     </select>
-    <select id="getStreetName" resultType="com.dto.pojo.lwaddr.AddressName" parameterType="java.lang.String">
+    <select id="getStreetName" resultType="com.dao.entity.lwaddress.Bs_street" parameterType="java.lang.String">
         SELECT
-            STREET_NAME AS NAME,
-            SHORT_NAME AS shortName
+            PROVINCE_CODE as provinceCode,
+            b2.CITY_CODE as cityCode,
+            bs_street.AREA_CODE as areaCode,
+            STREET_CODE as streetCode,
+            STREET_NAME as streetName,
+            SHORT_NAME as shortName
         FROM
             bs_street
-        WHERE
-            AREA_CODE = #{code};
+        INNER JOIN
+        (
+        SELECT PROVINCE_CODE,bs_area.CITY_CODE,AREA_CODE from bs_area inner join bs_city ON bs_area.CITY_CODE = bs_city.CITY_CODE WHERE AREA_CODE = #{code}
+        ) b2 on bs_street.AREA_CODE= b2.AREA_CODE
     </select>
 <!--    <select id="selectByAddress" resultMap="BaseResultMap" parameterType="com.dao.entity.lwaddress.Address">-->
 <!--        SELECT * FROM basics_addr WHERE (street = #{street} AND area = #{area} AND city = #{city} AND province = #{province}) OR (street IS NULL AND area = #{area})-->
@@ -411,5 +542,142 @@
         <if test="street != null">
             street = #{street}
         </if>
+    </select>
+
+    <select id="searchContent" resultType="com.dto.vo.PersonMsgVo" parameterType="com.dto.form.SearchContentForm">
+        SELECT
+        id,
+        name1 as name,
+        phone as telNumber,
+        addr_sj as address,
+        short_addr as shortAddress,
+        contrast_id as contrastId,
+        province,
+        city,
+        area,
+        street,
+        short_addr as shortAddr
+        FROM
+        merge_addr
+        where
+        ( 1 = 1
+        <foreach collection="tableData" item="item" index="index"  close=")" separator=" ">
+            <if test="item.address != null">
+                ${item.condition} addr_sj like concat('%',#{item.address},'%')
+            </if>
+            <if test="item.telNumber != null">
+                ${item.condition} phone = #{item.telNumber}
+            </if>
+        </foreach>
+        order by create_time DESC
+        limit #{currentPage},#{pageSize}
+    </select>
+    <select id="searchMergeNum" resultType="java.lang.String" parameterType="java.lang.String">
+        SELECT COUNT(1) FROM merge_addr WHERE contrast_id = #{id}
+    </select>
+    <select id="searchPeopleListByBasic" resultType="com.dto.vo.PersonMsgVo">
+        SELECT id,name1 as name,phone as telNumber FROM lwaddr_standard.basics_addr WHERE id = #{id}
+    </select>
+    <select id="searchPeopleListByMerge" resultType="com.dto.vo.PersonMsgVo">
+        SELECT id,name1 as name,phone as telNumber FROM lwaddr_standard.merge_addr WHERE contrast_id = #{id}
+    </select>
+    <select id="searchAddressList" resultType="com.dto.vo.PersonMsgVo">
+         SELECT id,addr_sj as address,name1 as name,phone as telNumber FROM base_addr WHERE contrast_id = #{id} limit #{currentPage},#{pageSize}
+    </select>
+    <select id="searchMergeById" resultMap="BaseResultMap">
+        SELECT * FROM merge_addr WHERE id = #{id}
+    </select>
+    <select id="searchBasicsById" resultMap="BaseResultMap">
+        SELECT * FROM basics_addr WHERE id = #{id}
+    </select>
+    <select id="searchMergeKdNum" resultType="com.dto.vo.ChartData">
+        SELECT
+            COUNT(a.create_time) AS number,a.create_time as peopleTime
+        FROM
+        (
+        SELECT
+        concat(toString(toYear(toDateTime(ifNull(create_time,toString(now()))))),'-',toString(toMonth(toDateTime(ifNull(create_time,toString(now())))))) AS create_time
+         FROM merge_addr WHERE
+        create_time &gt; #{year}  AND contrast_id = #{id}
+        ) AS a
+        GROUP BY a.create_time
+    </select>
+    <select id="searchBasicsKdNum" resultType="com.dto.vo.ChartData">
+        SELECT
+            COUNT(a.create_time) AS number,a.create_time as peopleTime
+        FROM
+        (
+        SELECT
+            concat(toString(toYear(toDateTime(ifNull(create_time,toString(now()))))),'-',toString(toMonth(toDateTime(ifNull(create_time,toString(now())))))) AS create_time
+         FROM basics_addr WHERE
+        create_time &gt; #{year}  AND id = #{id}
+        ) AS a
+        GROUP BY a.create_time
+    </select>
+    <select id="searchBasicsByPhone" resultType="com.dto.vo.PersonMsgVo">
+        SELECT id,addr_sj as address FROM basics_addr WHERE phone = #{phone}
+    </select>
+    <select id="searchAddressById" resultType="java.lang.String">
+        SELECT addr_sj FROM basics_addr WHERE id = #{id}
+    </select>
+    <select id="searchMergeAcceptDelivery" resultType="com.dto.vo.AcceptDeliveryPeoperVo">
+        SELECT
+            name1 AS name,phone AS telNumber,ifNull(create_time,toString(now())) as specificDate
+         FROM merge_addr WHERE
+       ifNull(create_time,toString(now())) &gt; #{year} AND contrast_id = #{id}  AND ifNull(create_time,toString(now())) LIKE concat(#{time},'%')
+    </select>
+    <select id="searchBaiscAcceptDelivery" resultType="com.dto.vo.AcceptDeliveryPeoperVo">
+        SELECT
+            name1 AS name,phone AS telNumber,ifNull(create_time,toString(now())) as specificDate
+         FROM basics_addr WHERE
+        ifNull(create_time,toString(now())) &gt; #{year}  AND id = #{id} AND ifNull(create_time,toString(now())) LIKE concat(#{time},'%')
+    </select>
+    <select id="getTotal" resultType="java.lang.Long" parameterType="com.dto.form.SearchContentForm">
+        SELECT
+        count(*)
+        FROM
+        merge_addr
+        where
+        ( 1 = 1
+        <foreach collection="tableData" item="item" index="index"  close=")" separator=" ">
+            <if test="item.address != null and item.address != ''">
+                ${item.condition} addr_sj like concat('%',#{item.address},'%')
+            </if>
+            <if test="item.telNumber != null and item.telNumber !=''">
+                ${item.condition} phone = #{item.telNumber}
+            </if>
+        </foreach>
+    </select>
+    <select id="searchContrastIdByMerge" resultType="com.dto.vo.PersonMsgVo">
+        SELECT id,name1 as name,phone as telNumber,contrast_id as contrastId FROM lwaddr_standard.merge_addr WHERE id = #{id}
+    </select>
+    <select id="searchPeopleListByContrastId" resultType="com.dto.vo.PersonMsgVo">
+        SELECT id,name1 as name,phone as telNumber FROM lwaddr_standard.merge_addr WHERE contrast_id = #{id}
+    </select>
+    <select id="searchPeopleListByContrastIds" resultMap="BaseResultMap" parameterType="com.dto.vo.PersonMsgVo">
+        select * from merge_addr where contrast_id in
+        <foreach collection="list" item="item" index="index" open="("  close=")" separator=",">
+            #{item.contrastId}
+        </foreach>
+    </select>
+    <select id="searchBasicsMsg" resultMap="BaseResultMap" parameterType="com.dto.vo.PersonMsgVo">
+        select * from basics_addr where id in
+        <foreach collection="list" item="item" index="index" open="("  close=")" separator=",">
+            #{item.contrastId}
+        </foreach>
+    </select>
+    <select id="getTotalById" resultType="java.lang.Long">
+         SELECT count(1) FROM base_addr WHERE contrast_id = #{id}
+    </select>
+    <select id="searchMergeNums" resultType="com.dao.entity.lwaddress.MergeNums" parameterType="com.dto.vo.PersonMsgVo">
+        select contrast_id as id,count(1) as num from base_addr where contrast_id in
+        <foreach collection="list" item="item" index="index" open="("  close=")" separator=",">
+            #{item.id}
+        </foreach>
+         group by contrast_id
+    </select>
+
+    <select id="selectBaseAddr" resultMap="BaseResultMap">
+        select * from sec_addr where short_addr is not null
     </select>
 </mapper>

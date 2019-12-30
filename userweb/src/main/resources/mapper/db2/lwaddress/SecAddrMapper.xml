@@ -33,14 +33,12 @@
   </sql>
 
   <update id="update" parameterType="com.dao.entity.lwaddress.Sec_addr">
-    <foreach collection="list" item="item" index="index" separator=",">
-      update from third_addr set
-      latitude = #{item.latitude,jdbcType=VARCHAR},
-      longitude = #{item.longitude,jdbcType=VARCHAR},
-      type = #{item.type,jdbcType=INTEGER}
+      update third_addr set
+      latitude = #{latitude,jdbcType=VARCHAR},
+      longitude = #{longitude,jdbcType=VARCHAR},
+      type = #{type}
       where
-      id = #{item.id,jdbcType=VARCHAR}
-    </foreach>
+      id = #{id,jdbcType=VARCHAR}
   </update>
   <!--type=3-->
   <select id="selectAddrsec" resultMap="BaseResultMap">

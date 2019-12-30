@@ -29,35 +29,36 @@ public class EncodeStartWayServiceImpl implements EncodeStartWayService {
     public void startway(int start, int total, int batchcCount) {
         log.info("start susscces");
         int count = total / batchcCount + 1;
-//        for (int j = 0; j < count; j++) {
+        for (int j = 0; j < count; j++) {
             insertEncodeService.init();
-//            log.info("current j:" + j);
-//            if (batchcCount != 1) {
-//                if (j == total / batchcCount) {
-//                    batchcCount = total - j * batchcCount;
-//                }
-//                if (batchcCount == 0) {
-//                    log.info("success");
-//                    break;
-//                }
-//                insertEncodeService.insertLngLat(start, batchcCount);
-//                start = start + batchcCount;
-//                log.info("finish susscces");
-//            } else {
-//                if (total / batchcCount == 0) {
-//                    log.info("success");
-//                    break;
-//                }
-//                insertEncodeService.insertLngLat(start, batchcCount);
-//                start = start + batchcCount;
-//                log.info("finish susscces");
-//            }
-//        }
+            log.info("current j:" + j);
+            if (batchcCount != 1) {
+                if (j == total / batchcCount) {
+                    batchcCount = total - j * batchcCount;
+                }
+                if (batchcCount == 0) {
+                    log.info("success");
+                    break;
+                }
+                insertEncodeService.insertLngLat(start, batchcCount);
+                start = start + batchcCount;
+                log.info("finish susscces");
+            } else {
+                if (total / batchcCount == 0) {
+                    log.info("success");
+                    break;
+                }
+                insertEncodeService.insertLngLat(start, batchcCount);
+                start = start + batchcCount;
+                log.info("finish susscces");
+            }
+        }
 
         //异常数据重试机制
         for (int i = 0; i < 10; i++) {
             insertEncodeService.errorProcess();
         }
+        log.error("异常重试机制结束。。。。。。。");
 
     }
 }

@@ -5,9 +5,12 @@ import com.config.HgApplicationProperty;
 import com.dao.db2.lwaddress.*;
 import com.dao.db3.lwaddr.Base_addrMapper1;
 import com.dao.entity.lwaddress.*;
+import com.dto.pojo.lwaddr.AddressName;
 import com.service.lwaddress.Base_addrService;
 import com.service.lwaddress.Bs_utilService;
 import com.utils.sys.lwaddress.AsciiUtil;
+import com.utils.sys.lwaddress.DateUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,32 +44,57 @@ public class Bs_utilServiceImpl implements Bs_utilService {
     private Bs_provinceMapper bs_provinceMapper;
     @Autowired
     private Base_addrService base_addrService;
+    @Autowired
+    private Base_addrMapper bs_addrMapper;
 
     @Override
     @Async("asyncPromiseExecutor")
-    public void addressStart(int number1, int number2, BigDecimal n) {
+    public void addressStart(int number1, int number2, BigDecimal n,String reg) {
         List<Base_addr> list;
         Base_addr base_addr;
+
+        long startTime = System.currentTimeMillis();
 
         //用来存放所有省市区街道集合和分值对象的
         Map<String, Object> allMessage = new HashMap<>();
 
-        List<Bs_province> provinceMessage;
-        List<Bs_city> cityMessage;
-        List<Bs_area> areaMessage;
-        List<Bs_street> streetMessage;
+        List<Bs_province> provinceMessage = new ArrayList<>();
+        List<Bs_city> cityMessage = new ArrayList<>();
+        List<Bs_area> areaMessage = new ArrayList<>();
+        List<Bs_street> streetMessage = new ArrayList<>();
         List<Base_addr> updateMessage = new ArrayList<>();
+        List<Bs_street> streetNames;
 
-        //查询省市区街道的全称和简称存进各自的List集合中
-        provinceMessage = bs_provinceMapper.selectShortNameAndProvinceName();
-        cityMessage = bs_cityMapper.selectCityAllName();
-        areaMessage = bs_areaMapper.selectAreaMessage();
-        streetMessage = bs_streetMapper.selectStreetMessage();
+        //优先查询温州的省市区街道全程和简称
+
+        //配置的市的编号
+        String cityCode = applicationProperty.getCityCode();
+        //查询市
+        Bs_city cityName = bs_addrMapper.getCity(cityCode);
+        //查询省
+        Bs_province provinceName = bs_addrMapper.getProvince(cityName.getProvinceCode());
+        //查询区
+        List<Bs_area> areaNames = bs_addrMapper.getArea(cityCode);
+        //查询街道不需要去除
+        for (Bs_area areaName : areaNames) {
+            //查询街道
+            streetNames = bs_addrMapper.getStreetName(areaName.getAreaCode());
+            streetMessage.addAll(streetNames);
+        }
+        provinceMessage.add(provinceName);
+        cityMessage.add(cityName);
+        areaMessage.addAll(areaNames);
+
+//        //todo 全国的查询省市区街道的全称和简称存进各自的List集合中
+//        provinceMessage.addAll(bs_provinceMapper.selectShortNameAndProvinceName());
+//        cityMessage.addAll(bs_cityMapper.selectCityAllName());
+//        areaMessage.addAll(bs_areaMapper.selectAreaMessage());
+//        streetMessage.addAll(bs_streetMapper.selectStreetMessage());
 
         allMessage.put("provinceMessage", provinceMessage);
         allMessage.put("cityMessage", cityMessage);
-        allMessage.put("areaMessage", areaMessage);
         allMessage.put("streetMessage", streetMessage);
+        allMessage.put("areaMessage", areaMessage);
 
         //分值计算
         BigDecimal dec1 = new BigDecimal(-5);
@@ -87,7 +115,7 @@ public class Bs_utilServiceImpl implements Bs_utilService {
         allMessage.put("dec7", dec7);
         allMessage.put("dec8", dec8);
 
-        //如果是增量查询增量表
+//        //如果是增量查询增量表
         if (applicationProperty.getInsertIndex().equals("1")) {
             list = base_addrMapper.selectFromInsertAddr_sj(number1, number2);
         } else {
@@ -95,24 +123,51 @@ public class Bs_utilServiceImpl implements Bs_utilService {
             list = base_addrMapper.selectAddr_sj(number1, number2);
         }
 
+//        Base_addr baseAddr = new Base_addr();
+//        baseAddr.setAddrSj("瑶溪街道瑶溪镇雄心村商品房3-304室");
+//        list = new ArrayList<>();
+//        list.add(baseAddr);
+
         //将查到的数据加入集合中
         for (int i = 0; i < list.size(); i++) {
             //如果长地址不为空
             if (list.get(i).getAddrSj() != null) {
                 //处理特殊字符串
-                String addrSj = AsciiUtil.SpecialHandl(list.get(i).getAddrSj());
-                addrSj = addrSj.replace(list.get(i).getName1(),"");
+                String addrSj = AsciiUtil.RegProcess(list.get(i).getAddrSj(),list.get(i).getName1());
                 //参数是所有标准地址集合和加减分值
+                //todo 这里需要添加街路巷、小区的算分和切割
                 base_addr = base_addrService.addrSet(addrSj, allMessage);
+
+                String shortAddr = base_addr.getShortAddr();
+                shortAddr = AsciiUtil.SpecialEndHandl(shortAddr);
+                //去除省市区
+                base_addr.setShortAddr(shortAddr.replaceAll(reg, ""));
                 base_addr.setId(list.get(i).getId());
-                base_addr.setCountId(list.get(i).getCountId());
-                base_addr.setOldPhone(list.get(i).getPhone());
-                base_addr.setOldName1(list.get(i).getName1());
+                base_addr.setAddrSj(list.get(i).getAddrSj());
                 base_addr.setName1(list.get(i).getName1());
+                base_addr.setOldName1(list.get(i).getName1());
                 base_addr.setPhone(list.get(i).getPhone());
+                base_addr.setOldPhone(list.get(i).getPhone());
                 base_addr.setShortPhone(list.get(i).getShortPhone());
                 base_addr.setRowId(list.get(i).getRowId());
                 base_addr.setTableName(list.get(i).getTableName());
+                base_addr.setCountId(list.get(i).getCountId());
+                base_addr.setIdCard(list.get(i).getIdCard());
+                base_addr.setAlley(list.get(i).getAlley());
+                base_addr.setAlleyNum(list.get(i).getAlleyNum());
+                base_addr.setPlot(list.get(i).getPlot());
+                base_addr.setBuildingNum(list.get(i).getBuildingNum());
+                base_addr.setUnitNum(list.get(i).getUnitNum());
+                base_addr.setFloorNum(list.get(i).getFloorNum());
+                base_addr.setDoorplateNum(list.get(i).getDoorplateNum());
+                base_addr.setMergeNum(list.get(i).getMergeNum());
+                base_addr.setEarliestTime(list.get(i).getEarliestTime());
+                base_addr.setLatestTime(list.get(i).getLatestTime());
+                if(StringUtils.isBlank(list.get(i).getCreateTime())){
+                    base_addr.setCreateTime(DateUtil.getCurrDateTimeStr());
+                }else {
+                    base_addr.setCreateTime(list.get(i).getCreateTime());
+                }
                 updateMessage.add(base_addr);
             } else {
                 continue;
@@ -141,6 +196,9 @@ public class Bs_utilServiceImpl implements Bs_utilService {
             log.error(JSONObject.toJSONString(updateMessage));
             log.error(e.getMessage());
         }
+
+        long endTime = System.currentTimeMillis();
+        log.info("完成{} 条数据共用时：{} 毫秒",list.size(),endTime-startTime);
     }
 
     /*

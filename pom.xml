@@ -45,6 +45,18 @@
             <!--<scope>runtime</scope>-->
         </dependency>
 
+        <!--   远程服务器创建文件     -->
+        <dependency>
+            <groupId>ch.ethz.ganymed</groupId>
+            <artifactId>ganymed-ssh2</artifactId>
+            <version>build210</version>
+        </dependency>
+        <dependency>
+            <groupId>com.jcraft</groupId>
+            <artifactId>jsch</artifactId>
+            <version>0.1.54</version>
+        </dependency>
+
         <!-- 加解密相关 -->
 
         <dependency>
