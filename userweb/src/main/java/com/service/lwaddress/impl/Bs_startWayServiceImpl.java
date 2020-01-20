@@ -2,12 +2,11 @@ package com.service.lwaddress.impl;
 
 import com.config.HgApplicationProperty;
 import com.dao.db2.lwaddress.Base_addrMapper;
-import com.dao.entity.lwaddress.Bs_area;
-import com.dao.entity.lwaddress.Bs_city;
-import com.dao.entity.lwaddress.Bs_province;
-import com.dao.entity.lwaddress.Bs_street;
+import com.dao.db3.lwaddr.Base_addrMapper1;
+import com.dao.entity.lwaddress.*;
 import com.service.lwaddress.Bs_startWayService;
 import com.service.lwaddress.Bs_utilService;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +30,8 @@ public class Bs_startWayServiceImpl implements Bs_startWayService {
     @Autowired
     private Base_addrMapper bs_addrMapper;
     @Autowired
+    private Base_addrMapper1 base_addrMapper1;
+    @Autowired
     private Executor asyncPromiseExecutor;
 
     private static final Logger log = LoggerFactory.getLogger(Bs_startWayServiceImpl.class);
@@ -45,15 +46,6 @@ public class Bs_startWayServiceImpl implements Bs_startWayService {
         int startValue = start;
         //通过总数和步进值得出循环几次操作
         for (int j = 0; j < startCount; j++) {
-//            getThreadInfo();
-           /* if (j != 0 && j % 500 == 0) {
-                try {
-                    Thread.sleep(5 * 60 * 1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                    log.debug(e + "");
-                }
-            }*/
             log.debug("current j:" + j);
             //如果步进值不等于1
             if (batchcCount != 1) {
@@ -89,6 +81,11 @@ public class Bs_startWayServiceImpl implements Bs_startWayService {
         log.debug("finish susscces");
     }
 
+
+    /**
+     * 获取线程池实时情况
+     * @return
+     */
     @Override
     public Map getThreadInfo() {
         Map map =new HashMap();
@@ -109,6 +106,31 @@ public class Bs_startWayServiceImpl implements Bs_startWayService {
             map.put("当前可用队列长度-->",threadPoolExecutor.getQueue().remainingCapacity());
         }
         return map;
+    }
+
+    /**
+     * 增量方法
+     */
+    @Override
+    public void increment() {
+        String reg = getReg();
+        // 获取增量表的数据，模拟进来的数据，正常被处理后的数据p5type=7,异常数据=6
+        List<Base_addr> baseAddrList = bs_addrMapper.getInsertDate();
+        log.info("===========================================查到增量数据 {} 条",baseAddrList.size());
+
+        if(baseAddrList.size()<1){
+            return;
+        }
+
+        for (Base_addr base_addr : baseAddrList) {
+            if (StringUtils.isBlank(base_addr.getPhone()) || base_addr.getPhone().length() < 5) {
+                //插入废弃表
+                base_addrMapper1.insertDiscard(base_addr);
+                base_addrMapper1.updateP5type(base_addr);
+            }
+            //增量碰撞处理
+            bs_utilService.increment(base_addr, reg);
+        }
     }
 
     //配置的区的省市区街道关键字正则生成，并去除对应参数中包含的关键字
@@ -140,18 +162,4 @@ public class Bs_startWayServiceImpl implements Bs_startWayService {
         log.info(regex.toString());
         return regex.toString();
     }
-
-
-//    public void getThreadInfo() {
-//        Object[] myThread = {asyncPromiseExecutor};
-//        for (Object thread : myThread) {
-//            ThreadPoolTaskExecutor threadTask = (ThreadPoolTaskExecutor) thread;
-//            ThreadPoolExecutor threadPoolExecutor = threadTask.getThreadPoolExecutor();
-//            log.info("提交任务数" + threadPoolExecutor.getTaskCount());
-//            log.info("完成任务数" + threadPoolExecutor.getCompletedTaskCount());
-//            log.info("当前有" + threadPoolExecutor.getActiveCount() + "个线程正在处理任务");
-//            log.info("还剩" + threadPoolExecutor.getQueue().size() + "个任务");
-//            log.info("当前可用队列长度-->", threadPoolExecutor.getQueue().remainingCapacity());
-//        }
-//    }
 }

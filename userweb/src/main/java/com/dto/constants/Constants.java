@@ -31,7 +31,8 @@ public class Constants {
     public static final String REGEX_HENG = "mdash";
     public static final String REGEX_KUOHAO = "\\(.*?\\)|\\（.*?\\）|\\[.*?\\]|\\【.*?\\】|\\{.*?\\}|\\<.*?\\>|\\《.*?\\》";
     public static final String REGEX_FUHAO= ",.+|，.+|;.+|；.+";
-    public static final String REGEX_SHUZIYI = "((\\d+)一(\\d+))";
+    public static final String REGEX_SHUZIYI = "(一(\\d+))";
+    public static final String REGEX_KONG = "((\\d+) (\\d+))";
     public static final String REGEX_SHUZILIN = "((\\d+)o(\\d+))";
     public static final String REGEX_QUDANYUAN = "((\\d+)-((\\d+)-)+(\\d+))";
     public static final String REGEX_DANYUAN = "幢|栋|弄|单元|棟|—|～|橦";

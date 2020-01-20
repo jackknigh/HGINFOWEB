@@ -115,4 +115,13 @@ public interface Base_addrMapper {
 
     List<MergeNums> searchMergeNums(List<PersonMsgVo> list);
 
+    List<Base_addr> selectDataByPhone(@Param("phone") String phone, @Param("street") String street);
+
+    List<Base_addr> selectData(@Param("startCount") int startCount,@Param("count") int count);
+
+    List<Base_addr> getBaseAddrs(@Param("start")int start, @Param("count")int count, @Param("phone")String phone);
+
+    List<Base_addr> getDate(@Param("shortPhone")String shortPhone,@Param("province")String province,@Param("city")String city,@Param("area")String area,@Param("street")String street);
+
+    List<Base_addr> getInsertDate();
 }

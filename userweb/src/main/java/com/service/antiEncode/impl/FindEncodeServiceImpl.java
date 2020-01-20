@@ -68,7 +68,7 @@ public class FindEncodeServiceImpl implements FindEncodeService {
 //        JSONObject jsonObject = JSONObject.fromObject(result);
         JSONObject jsonObject = JSON.parseObject(result);
 
-        System.out.println(result);
+//        System.out.println(result);
         // 拿到返回报文的status值，高德的该接口返回值有两个：0-请求失败，1-请求成功；
         int status = Integer.valueOf(jsonObject.getString("status"));
 

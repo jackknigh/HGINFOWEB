@@ -113,16 +113,58 @@ public class MatchRunnable implements Callable<HashMap<String, Object>> {
                 strMapa.put("strb", (String[]) stringMap1.get("strb1"));
                 strMapb.put("strb", (String[]) stringMap1.get("strb2"));
 
+                //满分
+                BigDecimal bsum = new BigDecimal(100);
+                //数字及格线
+                BigDecimal numPass = new BigDecimal(applicationProperty.getNumPass());
+                //字符及格线
+                BigDecimal strPass = new BigDecimal(applicationProperty.getStrPass());
+
+                BigDecimal sum = new BigDecimal(0);
+
                 /*返回一个map出来，其中包括计算用的Double的sum,String的integerer[]*/
                 //数字和字符相似度匹配
                 Map<String, Object> processresult1 = processGradeService.processDemo(strMapa, num);
+
+
+                //理论最大值
+                BigDecimal asummax = (BigDecimal)processresult1.get("asummax");
+                //实际得分
+                BigDecimal asum = (BigDecimal)processresult1.get("asum");
+
                 Map<String, Object> processresult2 = processGradeService.processDemo(strMapb, str);
+
+                //理论最大值
+                BigDecimal asummax1 = (BigDecimal)processresult2.get("asummax");
+                //实际得分
+                BigDecimal asum1 = (BigDecimal)processresult2.get("asum");
+
 
                 BigDecimal suma = (BigDecimal) processresult1.get("sum");
                 BigDecimal sumb = (BigDecimal) processresult2.get("sum");
 
-                //计算相似度
-                BigDecimal sum = processGradeService.getSum(suma, sumb, (String[]) stringMap1.get("strb1"),(String[]) stringMap.get("strb1"),(String[]) stringMap1.get("strb2"),(String[]) stringMap.get("strb2"));
+                if(!baseAddrBasics.getShortAddr().contains(addressMessage.get(i).getShortAddr())){
+                    BigDecimal divide = bsum.divide(asummax,4, BigDecimal.ROUND_HALF_UP).multiply(asum).divide(numPass,4, BigDecimal.ROUND_HALF_UP);
+
+                    //如果数字没到及格线
+                    if(divide.compareTo(new BigDecimal(1))<0){
+                        continue;
+                    }
+
+                    //如果字符没到及格线
+                    if(bsum.divide(asummax1,4, BigDecimal.ROUND_HALF_UP).multiply(asum1).divide(strPass,4, BigDecimal.ROUND_HALF_UP).compareTo(new BigDecimal(1))<=0){
+                        continue;
+                    }
+
+                    //计算相似度
+                    sum = processGradeService.getSum(suma, sumb, (String[]) stringMap1.get("strb1"),(String[]) stringMap.get("strb1"),(String[]) stringMap1.get("strb2"),(String[]) stringMap.get("strb2"));
+                    bs_addr.setNumberScore((String) processresult1.get("integer"));
+                    bs_addr.setStrScore((String) processresult2.get("integer"));
+                }else {
+                    sum = new BigDecimal(100);
+                    bs_addr.setNumberScore((String) processresult1.get("integer")+"(包含关系)");
+                    bs_addr.setStrScore((String) processresult2.get("integer")+"(包含关系)");
+                }
 
                 //带姓名分占比的
 //                BigDecimal sum = processGradeService.getSum(suma,sumb,baseAddrBasics.getName1(),addressMessage.get(i).getName1(),(String[]) stringMap1.get("strb1"),(String[]) stringMap.get("strb1"),(String[]) stringMap1.get("strb2"),(String[]) stringMap.get("strb2"));
@@ -141,8 +183,6 @@ public class MatchRunnable implements Callable<HashMap<String, Object>> {
                     bs_addr.setAddrSj(addressMessage.get(i).getAddrSj());
                     bs_addr.setContrastScore(sum);
                     bs_addr.setContrastId(baseAddrBasics.getId());
-                    bs_addr.setNumberScore((String) processresult1.get("integer"));
-                    bs_addr.setStrScore((String) processresult2.get("integer"));
                     bs_addr.setShortAddr(addressMessage.get(i).getShortAddr());
                     bs_addr.setOldPhone(addressMessage.get(i).getOldPhone());
                     bs_addr.setOldName1(addressMessage.get(i).getOldName1());
@@ -154,14 +194,26 @@ public class MatchRunnable implements Callable<HashMap<String, Object>> {
                     bs_addr.setAreaWeight(addressMessage.get(i).getAreaWeight());
                     bs_addr.setStreet(addressMessage.get(i).getStreet());
                     bs_addr.setStreWeight(addressMessage.get(i).getStreWeight());
+                    bs_addr.setAlley(addressMessage.get(i).getAlley());
+                    bs_addr.setAlleyNum(addressMessage.get(i).getAlleyNum());
+                    bs_addr.setPlot(addressMessage.get(i).getPlot());
+                    bs_addr.setBuildingNum(addressMessage.get(i).getBuildingNum());
+                    bs_addr.setFloorNum(addressMessage.get(i).getFloorNum());
+                    bs_addr.setUnitNum(addressMessage.get(i).getUnitNum());
+                    bs_addr.setDoorplateNum(addressMessage.get(i).getDoorplateNum());
+                    bs_addr.setMergeNum(addressMessage.get(i).getMergeNum());
+                    bs_addr.setEarliestTime(addressMessage.get(i).getEarliestTime());
+                    bs_addr.setLatestTime(addressMessage.get(i).getLatestTime());
                     bs_addr.setMulWeight(addressMessage.get(i).getMulWeight());
                     bs_addr.setAddrSign1(addressMessage.get(i).getAddrSign1());
                     bs_addr.setAddrSign2(addressMessage.get(i).getAddrSign2());
                     bs_addr.setRowId(addressMessage.get(i).getRowId());
                     bs_addr.setTableName(addressMessage.get(i).getTableName());
                     bs_addr.setCountId(addressMessage.get(i).getCountId());
-                    bs_addr.setCreateTime(addressMessage.get(i).getCreateTime());
+                    bs_addr.setCreateTime(DateUtil.getCurrDateTimeStr());
                     bs_addr.setIdCard(addressMessage.get(i).getIdCard());
+                    bs_addr.setLatestTime(addressMessage.get(i).getLatestTime());
+                    bs_addr.setEarliestTime(addressMessage.get(i).getEarliestTime());
                     bs_addr.setP2type(222);
                     if (addressMessage.get(i).getP3type() != null) {
                         bs_addr.setP3type(223);
@@ -172,7 +224,7 @@ public class MatchRunnable implements Callable<HashMap<String, Object>> {
 
 
                     //如果是根据手机号清洗就需要反写
-                    if ("0".equals(applicationProperty.getStandardAddress())) {
+                    if ("0".equals(applicationProperty.getStandardAddress()) || "2".equals(applicationProperty.getStandardAddress())) {
                         if (phone1 != null) {
                             /*手机反写*/
                             if (addressMessage.get(i).getPhone() != null) {

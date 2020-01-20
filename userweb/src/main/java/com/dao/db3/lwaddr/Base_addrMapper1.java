@@ -40,5 +40,15 @@ public interface Base_addrMapper1 {
 
     void updateMerge(@Param("mergeId") String mergeId, @Param("basicsId") String basicsId);
 
-    List<Base_addr> selectBaseAddr();
+    List<Base_addr> selectBaseAddr(@Param("start") int start,@Param("batchcCount") int batchcCount);
+
+    void updatePhone(@Param(value = "list") List<Base_addr> list);
+
+    void insertDiscard(Base_addr baseAddr1);
+
+    void updateBasics(Base_addr base_addr);
+
+    void updateErrDate(Base_addr baseAddr);
+
+    void updateP5type(Base_addr base_addr);
 }

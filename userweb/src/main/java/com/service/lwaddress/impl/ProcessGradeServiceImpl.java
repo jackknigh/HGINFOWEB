@@ -252,6 +252,8 @@ public class ProcessGradeServiceImpl implements ProcessGradeService{
             sum1 = asum.divide(asummax, 4, BigDecimal.ROUND_HALF_UP);
             sum.put("integer", integerA1);
             sum.put("sum", sum1);
+            sum.put("asummax", asummax);
+            sum.put("asum", asum);
         }
         return sum;
     }
@@ -272,22 +274,22 @@ public class ProcessGradeServiceImpl implements ProcessGradeService{
         BigDecimal weight2;
 
         //基准值和合并值都不带数字
-        if (org.apache.commons.lang3.StringUtils.isBlank(nums[0]) && org.apache.commons.lang3.StringUtils.isBlank(nums1[0])) {
-            weight1 = new BigDecimal(0);
-        } else if(org.apache.commons.lang3.StringUtils.isBlank(strs[0]) && org.apache.commons.lang3.StringUtils.isBlank(strs1[0])){
-            //基准值和合并值都不带字符
-            weight1 = new BigDecimal(1);
-        }else if(org.apache.commons.lang3.StringUtils.isBlank(nums[0]) && !StringUtils.isBlank(nums1[0])){
-            //基准值不带数字，合并值带数字
-            weight1 = new BigDecimal(1);
-        }else {
+//        if (StringUtils.isBlank(nums[0]) && StringUtils.isBlank(nums1[0])) {
+//            weight1 = new BigDecimal(0);
+//        } else if(StringUtils.isBlank(strs[0]) && StringUtils.isBlank(strs1[0])){
+//            //基准值和合并值都不带字符
+//            weight1 = new BigDecimal(1);
+//        }else if(StringUtils.isBlank(nums[0]) && !StringUtils.isBlank(nums1[0])){
+//            //基准值不带数字，合并值带数字
+//            weight1 = new BigDecimal(1);
+//        }else {
             /*判断数字位数决定权重*/
             switch (nums.length - 1) {
                 case 1:
                     weight1 = new BigDecimal(0.4);
                     break;
                 case 2:
-                    weight1 = new BigDecimal(0.4);
+                    weight1 = new BigDecimal(0.5);
                     break;
                 case 3:
                     weight1 = new BigDecimal(0.5);
@@ -298,7 +300,7 @@ public class ProcessGradeServiceImpl implements ProcessGradeService{
                 default:
                     weight1 = new BigDecimal(0.7);
                     break;
-            }
+//            }
         }
 
         weight2 = BigDecimal.ONE.subtract(weight1);

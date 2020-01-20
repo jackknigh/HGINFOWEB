@@ -170,7 +170,7 @@
     <select id="selectByShortPhone" resultMap="BaseResultMap">
     SELECT  id,addr_sj,short_addr, name1,id_card, phone,province,pro_weight,
     city,city_weight,area,area_weight,street,stre_weight,mul_weight,
-   p3type,short_phone,old_name1,old_phone,row_id,table_name,count_id,create_time
+   p3type,short_phone,old_name1,old_phone,row_id,table_name,count_id,merge_num,earliest_time,latest_time,create_time
      FROM sec_addr
      <where>
         <if test="shortPhone == null">
@@ -191,7 +191,7 @@
             id,addr_sj,name1,phone,short_phone,row_id,table_name,
             count_id,id_card,alley,alley_num,plot,building_num,unit_num,
             floor_num,doorplate_num,merge_num,earliest_time,latest_time,create_time  FROM base_addr
-    where count_id > #{number1} limit #{number2}
+    order by  count_id limit #{number1},#{number2}
   </select>
 
     <insert id="insert3_2" parameterType="com.dao.entity.lwaddress.Base_addr">
@@ -679,5 +679,56 @@
 
     <select id="selectBaseAddr" resultMap="BaseResultMap">
         select * from sec_addr where short_addr is not null
+    </select>
+
+    <select id="selectDataByPhone" resultMap="BaseResultMap">
+        SELECT  id,addr_sj,short_addr,id_card,name1,id_card, phone,province,pro_weight,
+        city,city_weight,area,area_weight,street,stre_weight,mul_weight,merge_num,earliest_time,latest_time,
+        p3type,short_phone,old_name1,old_phone,row_id,table_name,count_id,create_time
+        FROM sec_addr
+        <where>
+            <if test="phone != null">
+                and phone = #{phone}
+            </if>
+            <if test="street != null">
+                and (city = #{street} or city is null)
+            </if>
+        </where>
+        order by mul_weight desc
+    </select>
+    <select id="selectData" resultMap="BaseResultMap">
+        SELECT
+            id,addr_sj,short_addr,id_card,name1,id_card, phone,province,pro_weight,
+            city,city_weight,area,area_weight,street,stre_weight,mul_weight,
+            p3type,short_phone,old_name1,old_phone,row_id,table_name,count_id,create_time
+        FROM
+            sec_addr
+        WHERE
+            p4type &lt;&gt; 100 and
+            phone not like concat('%','*','%') and phone &lt;&gt; ''
+        ORDER BY
+            mul_weight DESC
+        limit #{startCount},#{count}
+    </select>
+    <select id="getBaseAddrs" resultMap="BaseResultMap">
+        SELECT  id,short_addr,merge_num,earliest_time,latest_time,name1 FROM basics_addr where phone = #{phone} order by short_addr limit #{start},#{count}
+    </select>
+    <select id="getDate" resultMap="BaseResultMap">
+        select * from basics_addr where short_phone = #{shortPhone}
+        <if test="province != null and province != ''">
+            and province = #{province}
+        </if>
+        <if test="city != null and city != ''">
+            and city = #{city}
+        </if>
+        <if test="area != null and area != ''">
+            and area = #{area}
+        </if>
+        <if test="street != null and street != ''">
+            and street = #{street}
+        </if>
+    </select>
+    <select id="getInsertDate" resultMap="BaseResultMap">
+        select * from insert_addr where p5type &gt;= 0 and p5type &lt; 6
     </select>
 </mapper>

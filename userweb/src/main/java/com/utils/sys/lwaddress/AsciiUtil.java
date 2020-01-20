@@ -83,15 +83,27 @@ public class AsciiUtil {
         //全角转半角
         shortAddr = sbc2dbcCase(shortAddr);
 
-        //去除五位以上的连续数字
-        shortAddr =shortAddr.replaceAll(REGEX_NUMBER,"");
-
         //数字+一+数字，就把中文一改为-
         Pattern pattern  = Pattern.compile(REGEX_SHUZIYI);
         Matcher matcher = pattern.matcher(shortAddr);
         if (matcher.find()) {
-            if(shortAddr.split(REGEX_SHUZIYI).length>0){
-                shortAddr = shortAddr.split(REGEX_SHUZIYI)[0]+matcher.group(2)+"-"+matcher.group(3);
+            if(shortAddr.split(REGEX_SHUZIYI).length>1){
+                shortAddr = shortAddr.split(REGEX_SHUZIYI)[0]+"-"+matcher.group(2)+ shortAddr.split(REGEX_SHUZIYI)[1];
+            }else if (shortAddr.split(REGEX_SHUZIYI).length>0){
+                shortAddr = shortAddr.split(REGEX_SHUZIYI)[0]+"-"+matcher.group(2);
+            }
+        }
+
+        //数字+一+数字，就把中文一改为-
+        Pattern pattern10  = Pattern.compile(REGEX_KONG);
+        Matcher matcher10 = pattern10.matcher(shortAddr);
+        if (matcher10.find()) {
+            if(shortAddr.split(REGEX_KONG).length>1){
+                shortAddr = shortAddr.split(REGEX_KONG)[0]+matcher10.group(2)+"-"+matcher10.group(3)+ shortAddr.split(REGEX_KONG)[1];
+            }else if (shortAddr.split(REGEX_KONG).length>0){
+                shortAddr = shortAddr.split(REGEX_KONG)[0]+matcher10.group(2)+"-"+matcher10.group(3);
+            }else {
+                shortAddr = matcher10.group(2)+"-"+matcher10.group(3);
             }
         }
 
@@ -234,6 +246,9 @@ public class AsciiUtil {
                 str = str.replace(group,"");
             }
         }
+
+        //去除五位以上的连续数字
+        str =str.replaceAll(REGEX_NUMBER,"");
         return str;
     }
 

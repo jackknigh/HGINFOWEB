@@ -20,6 +20,16 @@
         <result column="street" property="street" jdbcType="VARCHAR"/>
         <result column="stre_weight" property="streWeight" jdbcType="VARCHAR"/>
         <result column="pc_weight" property="pcWeight" jdbcType="VARCHAR"/>
+        <result column="alley" property="alley" jdbcType="VARCHAR"/>
+        <result column="alley_num" property="alleyNum" jdbcType="VARCHAR"/>
+        <result column="plot" property="plot" jdbcType="VARCHAR"/>
+        <result column="building_num" property="buildingNum" jdbcType="VARCHAR"/>
+        <result column="unit_num" property="unitNum" jdbcType="VARCHAR"/>
+        <result column="floor_num" property="floorNum" jdbcType="VARCHAR"/>
+        <result column="doorplate_num" property="doorplateNum" jdbcType="VARCHAR"/>
+        <result column="merge_num" property="mergeNum" jdbcType="INTEGER"/>
+        <result column="earliest_time" property="earliestTime" jdbcType="VARCHAR"/>
+        <result column="latest_time" property="latestTime" jdbcType="VARCHAR"/>
         <result column="mul_weight" property="mulWeight" jdbcType="VARCHAR"/>
         <result column="str_score" property="strScore" jdbcType="VARCHAR"/>
         <result column="number_score" property="numberScore" jdbcType="VARCHAR"/>
@@ -58,6 +68,19 @@
   </sql>
     <update id="updateMerge">
         update merge_addr set contrast_id = #{basicsId} where contrast_id = #{mergeId}
+    </update>
+    <update id="updatePhone" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update sec_addr
+            <set>
+                phone=#{item.phone},
+                name1=#{item.name1}
+            </set>
+            where id = #{item.id}
+        </foreach>
+    </update>
+    <update id="updateBasics" parameterType="com.dao.entity.lwaddress.Base_addr">
+        update basics_addr set merge_num=#{mergeNum},latest_time=#{latestTime},earliest_time=#{earliestTime}  where id = #{id}
     </update>
     <select id="selectByShortPhone" resultMap="BaseResultMap">
     SELECT  id,addr_sj,short_addr, name1, phone,province,pro_weight,
@@ -125,11 +148,12 @@
 
         <!--<foreach collection="list" item="item" index="index" separator=";">-->
         insert   into merge_addr
-        (id,short_addr, name1, phone,short_phone,province,pro_weight,id_card,
+        (id,addr_sj,short_addr, name1, phone,short_phone,province,pro_weight,id_card,earliest_time,latest_time,
         city,city_weight,area,area_weight,street,stre_weight,mul_weight,addr_sign1,addr_sign2,
         contrast_score,contrast_id,p2type,str_score,number_score,old_name1,old_phone,row_id,table_name,count_id,create_time)
         values
         (#{id,jdbcType=VARCHAR},
+        #{addrSj,jdbcType=VARCHAR},
         #{shortAddr,jdbcType=VARCHAR},
         #{name1,jdbcType=VARCHAR},
         #{phone,jdbcType=VARCHAR},
@@ -137,6 +161,8 @@
         #{province,jdbcType=VARCHAR},
         '${proWeight}',
         #{idCard,jdbcType=VARCHAR},
+        #{earliestTime,jdbcType=VARCHAR},
+        #{latestTime,jdbcType=VARCHAR},
         #{city,jdbcType=VARCHAR},
         '${cityWeight}',
         #{area,jdbcType=VARCHAR},
@@ -164,7 +190,7 @@
 
     <insert id="insert3_2" parameterType="com.dao.entity.lwaddress.Base_addr">
         insert   into merge_addr
-        (id,addr_sj,short_addr, name1, phone,short_phone,province,pro_weight,id_card,
+        (id,addr_sj,short_addr, name1, phone,short_phone,province,pro_weight,id_card,earliest_time,latest_time,
         city,city_weight,area,area_weight,street,stre_weight,mul_weight,addr_sign1,addr_sign2,
         contrast_score,contrast_id,p2type,str_score,number_score,old_name1,old_phone,row_id,table_name,count_id,create_time)
         values
@@ -178,6 +204,8 @@
             #{item.province,jdbcType=VARCHAR},
             '${item.proWeight}',
             #{item.idCard,jdbcType=VARCHAR},
+            #{item.earliestTime,jdbcType=VARCHAR},
+            #{item.latestTime,jdbcType=VARCHAR},
             #{item.city,jdbcType=VARCHAR},
             '${item.cityWeight}',
             #{item.area,jdbcType=VARCHAR},
@@ -249,11 +277,12 @@
 
         <!--<foreach collection="list" item="item" index="index" separator=";">-->
         insert   into basics_addr
-        (id,short_addr, name1, phone,short_phone,province,pro_weight,id_card,
+        (id,addr_sj,short_addr, name1, phone,short_phone,province,pro_weight,id_card,merge_num,earliest_time,latest_time,
         city,city_weight,area,area_weight,street,stre_weight,mul_weight,
-        p2type,addr_sign1,addr_sign2,number_score,old_name1,old_phone,row_id,table_name,count_id,create_time)
+        p2type,p5type,addr_sign1,addr_sign2,number_score,old_name1,old_phone,row_id,table_name,count_id,create_time)
         values
         (#{id,jdbcType=VARCHAR},
+        #{addrSj,jdbcType=VARCHAR},
         #{shortAddr,jdbcType=VARCHAR},
         #{name1,jdbcType=VARCHAR},
         #{phone,jdbcType=VARCHAR},
@@ -261,6 +290,9 @@
         #{province,jdbcType=VARCHAR},
         '${proWeight}',
         #{idCard,jdbcType=VARCHAR},
+        #{mergeNum,jdbcType=INTEGER},
+        #{earliestTime,jdbcType=VARCHAR},
+        #{latestTime,jdbcType=VARCHAR},
         #{city,jdbcType=VARCHAR},
         '${cityWeight}',
         #{area,jdbcType=VARCHAR},
@@ -269,6 +301,7 @@
         '${streWeight}',
         '${mulWeight}',
         #{p2type,jdbcType=INTEGER},
+        #{p5type,jdbcType=INTEGER},
         #{addrSign1,jdbcType=VARCHAR},
         #{addrSign2,jdbcType=VARCHAR},
         #{numberScore,jdbcType=VARCHAR},
@@ -286,7 +319,7 @@
     <insert id="insert5_2" parameterType="com.dao.entity.lwaddress.Base_addr">
         insert   into basics_addr
         (id,addr_sj,short_addr, name1, phone,short_phone,province,pro_weight,
-        city,city_weight,area,area_weight,street,stre_weight,mul_weight,id_card,
+        city,city_weight,area,area_weight,street,stre_weight,mul_weight,id_card,merge_num,earliest_time,latest_time,
         p2type,addr_sign1,addr_sign2,number_score,old_name1,old_phone,row_id,table_name,count_id,create_time)
         values
         <foreach collection="list" item="item" index="index" separator=",">
@@ -306,6 +339,9 @@
             '${item.streWeight}',
             '${item.mulWeight}',
             #{item.idCard,jdbcType=VARCHAR},
+            #{item.mergeNum,jdbcType=INTEGER},
+            #{item.earliestTime,jdbcType=VARCHAR},
+            #{item.latestTime,jdbcType=VARCHAR},
             #{item.p2type,jdbcType=INTEGER},
             #{item.addrSign1,jdbcType=VARCHAR},
             #{item.addrSign2,jdbcType=VARCHAR},
@@ -434,7 +470,7 @@
         </where>
     </select>
     <select id="selectBaseAddr" resultMap="BaseResultMap">
-        select * from basics_addr where short_addr is not null
+        select * from basics_addr where short_addr is not null order by short_addr LIMIT #{start},#{batchcCount}
     </select>
 
     <insert id="insert4" parameterType="com.dao.entity.lwaddress.Base_addr">
@@ -447,10 +483,54 @@
         )
     </foreach>
     </insert>
+    <insert id="insertDiscard" parameterType="com.dao.entity.lwaddress.Base_addr">
+        insert   into discard_addr
+        (id,addr_sj,short_addr, name1, phone,short_phone,province,pro_weight,id_card,earliest_time,latest_time,
+        city,city_weight,area,area_weight,street,stre_weight,mul_weight,
+        p2type,addr_sign1,addr_sign2,number_score,str_score,old_name1,old_phone,row_id,table_name,count_id,create_time)
+        values
+        (#{id,jdbcType=VARCHAR},
+        #{addrSj,jdbcType=VARCHAR},
+        #{shortAddr,jdbcType=VARCHAR},
+        #{name1,jdbcType=VARCHAR},
+        #{phone,jdbcType=VARCHAR},
+        #{shortPhone,jdbcType=VARCHAR},
+        #{province,jdbcType=VARCHAR},
+        '${proWeight}',
+        #{idCard,jdbcType=VARCHAR},
+        #{earliestTime,jdbcType=VARCHAR},
+        #{latestTime,jdbcType=VARCHAR},
+        #{city,jdbcType=VARCHAR},
+        '${cityWeight}',
+        #{area,jdbcType=VARCHAR},
+        '${areaWeight}',
+        #{street,jdbcType=VARCHAR},
+        '${streWeight}',
+        '${mulWeight}',
+        #{p2type,jdbcType=INTEGER},
+        #{addrSign1,jdbcType=VARCHAR},
+        #{addrSign2,jdbcType=VARCHAR},
+        #{numberScore,jdbcType=VARCHAR},
+        #{strScore,jdbcType=VARCHAR},
+        #{oldName1,jdbcType=VARCHAR},
+        #{oldPhone,jdbcType=VARCHAR},
+        #{rowId,jdbcType=INTEGER},
+        #{tableName,jdbcType=VARCHAR},
+        #{countId,jdbcType=INTEGER},
+        #{createTime,jdbcType=VARCHAR}
+        )
+        <!--</foreach>-->
+    </insert>
+    <update id="updateErrDate" parameterType="com.dao.entity.lwaddress.Base_addr">
+         update insert_addr set p5type = #{p5type} where id = #{id}
+    </update>
+    <update id="updateP5type">
+         update insert_addr set p5type = 7 where id = #{id}
+    </update>
 
-<!--
-    and ifnull(phone,0)!=0 and ifnull(short_addr,"")!=""
--->
+    <!--
+        and ifnull(phone,0)!=0 and ifnull(short_addr,"")!=""
+    -->
 
 
 

@@ -30,6 +30,14 @@ public class HgApplicationProperty {
     @Value("${sysPropertys.splitListSize}")
     private int splitListSize;
 
+    //数字及格线
+    @Value("${sysPropertys.numPass}")
+    private int numPass;
+
+    //切割集合大小
+    @Value("${sysPropertys.strPass}")
+    private int strPass;
+
     @Value("${sysPropertys.weightOfNum1}")
     private String weightOfNum1;
 
@@ -80,6 +88,22 @@ public class HgApplicationProperty {
 
     public String getGrace() {
         return grace;
+    }
+
+    public int getNumPass() {
+        return numPass;
+    }
+
+    public void setNumPass(int numPass) {
+        this.numPass = numPass;
+    }
+
+    public int getStrPass() {
+        return strPass;
+    }
+
+    public void setStrPass(int strPass) {
+        this.strPass = strPass;
     }
 
     public void setGrace(String grace) {

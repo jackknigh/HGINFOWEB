@@ -91,9 +91,11 @@ public class MsgSearchServiceImpl implements MsgSearchService {
         allMessage.put("dec7", dec7);
         allMessage.put("dec8", dec8);
 
+        Base_addr baseAddr = new Base_addr();
+        baseAddr.setAddrSj(address);
 
         /*第一步处理*/
-        Base_addr base_addr = base_addrService.addrSet(address, allMessage);
+        Base_addr base_addr = base_addrService.addrSet(baseAddr, allMessage);
 
         /*合并处理，准备相似记录*/
         //如果姓名和或者电话不为空

@@ -6,8 +6,22 @@
     <result column="phone" property="phone" jdbcType="VARCHAR" />
     <result column="amount" property="amount" jdbcType="INTEGER" />
   </resultMap>
+    <insert id="groupInsert">
+        insert into address(count_id,latest_time,earliest_time,merge_num,addr_sj,name1,phone,table_name,row_id,id)
+        select max(count_id) as count_id,max(create_time) as latest_time,min(create_time) as earliest_time,count(count_id) as merge_num,
+        addr_sj,name1,phone,table_name,row_id,id from base_addr group by addr_sj,name1,phone
+    </insert>
+    <delete id="delete">
+        delete from base_addr where count_id in
+        <foreach collection="list" item="id" index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+    <select id="select" resultType="com.dao.entity.lwaddress.Base_addr">
+        select count_id as countId,table_name as tableName from base_addr where count_id &gt;= #{start} and count_id &lt; #{end}
+    </select>
 
-  <select id="selectAll" resultMap="BaseResultMap">
+    <select id="selectAll" resultMap="BaseResultMap">
         select row,phone,amount from  phone order by phone desc limit #{number1},#{number2}
   </select>
   <select id="selectAllAddress" resultType="com.dao.entity.lwaddress.Address">
@@ -16,5 +30,11 @@
   <select id="selectAllAddressPhone" resultType="com.dao.entity.lwaddress.Address">
         select `row`,street,amount from  address_phone where street is not null
   </select>
+    <select id="selectByPhone" resultType="com.dao.entity.lwaddress.Phone">
+        select  phone from sec_addr where phone not like concat('%','*','%') and phone &lt;&gt; '' group by phone
+    </select>
+    <select id="selectPhoneCount" resultType="java.lang.Integer">
+        select count(DISTINCT phone) from sec_addr where phone not like concat('%','*','%') and phone &lt;&gt; ''
+    </select>
 
 </mapper>

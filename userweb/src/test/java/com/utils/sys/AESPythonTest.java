@@ -952,14 +952,16 @@ public class AESPythonTest {
 
     @Test
     public void test33() {
-        String name1 = "十五路四楼一三八一七三五六八五四十";
-        String[] 十s = name1.split("十");
-
-        if(name1.indexOf("百")>name1.indexOf("十")){
-            System.out.println("报错");
-        }
-        String name2 = "章三";
+        String name1 = "凤凰家园19 19号3幢一12室";
         String s = AsciiUtil.RegProcess(name1,null);
         System.out.println(s);
+    }
+
+    @Test
+    public void test34() {
+        String phone = "1832";
+        String shortPhone = phone.substring(1, 3);
+        shortPhone = shortPhone + phone.substring(phone.length()-4);
+        System.out.println(shortPhone);
     }
 }

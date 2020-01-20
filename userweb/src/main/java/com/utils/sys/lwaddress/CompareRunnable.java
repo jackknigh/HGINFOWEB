@@ -2,6 +2,7 @@
  * All right reserved.*/
 package com.utils.sys.lwaddress;
 
+import com.config.HgApplicationProperty;
 import com.dao.entity.lwaddress.Base_addr;
 import com.service.lwaddress.impl.NameProcessServiceImpl;
 import com.service.lwaddress.impl.ProcessGradeServiceImpl;
@@ -10,6 +11,7 @@ import com.service.lwaddress.impl.StringPasringServiceImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -23,16 +25,17 @@ import java.util.concurrent.CountDownLatch;
 
 public class CompareRunnable implements Runnable {
 
+    @Autowired
+    private HgApplicationProperty applicationProperty = ApplicationContextProvider.getBean(HgApplicationProperty.class);
+
     private static final Logger log = LoggerFactory.getLogger(ProcessServiceImpl.class);
-    private int count;
     private int num;
     private int str;
     private List<Base_addr> baseAddrList;
     private List<Base_addr> addressMessage;
     private CountDownLatch countDownLatch;
 
-    public CompareRunnable(int count, int num, int str, List<Base_addr> baseAddrList, List<Base_addr> addressMessage, CountDownLatch countDownLatch) {
-        this.count = count;
+    public CompareRunnable(int num, int str, List<Base_addr> baseAddrList, List<Base_addr> addressMessage, CountDownLatch countDownLatch) {
         this.num = num;
         this.str = str;
         this.baseAddrList = baseAddrList;
@@ -50,7 +53,7 @@ public class CompareRunnable implements Runnable {
         long startTime1 = System.currentTimeMillis();
 
         for (Base_addr baseAddr : baseAddrList) {
-            long startTime = System.currentTimeMillis();
+//            long startTime = System.currentTimeMillis();
             //正则匹配去除某些关键字
 //            String name = RegProcess(baseAddr.getShortAddr(),baseAddr.getName1(),reg);
             //切将地址切割成字符串数组，装进map集合，strMapa是数字，strMapb是字符串
@@ -70,7 +73,7 @@ public class CompareRunnable implements Runnable {
             }
 
             /*用于判断的阈值*/
-            BigDecimal grace = new BigDecimal(0.76);
+            BigDecimal grace = new BigDecimal(applicationProperty.getGrace());
 
             for (int i = 0; i < addressMessage.size(); i++) {
                 //如果数据已经跟其他数据合并过了，就不需要再判断了
@@ -158,16 +161,14 @@ public class CompareRunnable implements Runnable {
                         }
                     }
                 }
-                if (i == addressMessage.size() - 1) {
-                    long endTime = System.currentTimeMillis();
-                    log.info("比较" + addressMessage.size() + "/" + (i+1) + "完成，用时{}毫秒", endTime - startTime);
-                }
             }
 
             countDownLatch.countDown();
-            log.info("比较第 {} 个集合组,countDownLatch剩余: {}", count, countDownLatch.getCount());
+            if(countDownLatch.getCount()%1000 == 0 || countDownLatch.getCount() == 0) {
+                log.info("countDownLatch剩余: {}",countDownLatch.getCount());
+            }
         }
         long endTime1 = System.currentTimeMillis();
-        log.info("比较第 {} 个集合组完成，用时{}毫秒,共 {} 个元素", count, endTime1 - startTime1, baseAddrList.size());
+        log.info("用时{}毫秒,共 {} 个元素", endTime1 - startTime1, baseAddrList.size());
     }
 }

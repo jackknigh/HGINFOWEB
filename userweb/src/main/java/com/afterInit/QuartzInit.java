@@ -71,13 +71,10 @@ public class QuartzInit implements ApplicationRunner {
             log.info("执行定时任务结束............................................");
         }
 
-//        //经纬度值
-//        log.debug("========================测试开始==========================");
-//        encodeStartWayService.startway(0, 2243099, 500);
-//        log.debug("========================测试结束==========================");
-
-/*        bs_utilService.startway( 0,30000,3000);
-          processInterfService.processInterf();log.info("start way start");*/
+        //基础(切割地址，算分，插入数据到clickhouse)
+        if(applicationProperty.getdelectTableIndex().compareTo("0")==0) {
+            bs_startWayService.startway(Integer.valueOf(applicationProperty.getStartCount()), Integer.valueOf(applicationProperty.getTotalCount()), Integer.valueOf(applicationProperty.getCount()));
+        }
 
         //合并(从clickhouse中取出数据进行合并操作)
         if(applicationProperty.getdelectTableIndex().compareTo("1")==0){
@@ -85,25 +82,26 @@ public class QuartzInit implements ApplicationRunner {
             log.info("startway start end" );
         }
 
-        //基础(切割地址，算分，插入数据到clickhouse)
-        if(applicationProperty.getdelectTableIndex().compareTo("0")==0) {
-         /*   int sum=base_addrMapper.selectSum();
-
-            int total=Math.max(Integer.valueOf(applicationProperty.getTotalCount()),sum);*/
-
-            bs_startWayService.startway(Integer.valueOf(applicationProperty.getStartCount()), Integer.valueOf(applicationProperty.getTotalCount()), Integer.valueOf(applicationProperty.getCount()));
-        }
-
         //对比两个集合数据
         if(applicationProperty.getdelectTableIndex().compareTo("2")==0){
             processStartService.compare();
         }
 
-/*
-        InsertEncodeService.startway(7851501,647000,1499);
-*/
+
+//        //经纬度值
+//        log.debug("========================测试开始==========================");
+//        encodeStartWayService.startway(0, 1077031, 500);
+//        log.debug("========================测试结束==========================");
 
 
+//        //增量(现在使用定时任务执行)
+//        if(applicationProperty.getdelectTableIndex().compareTo("4")==0) {
+//            bs_startWayService.increment();
+//        }
+
+//        if(applicationProperty.getdelectTableIndex().compareTo("5")==0){
+//            processStartService.delete();
+//        }
     }
 }
 

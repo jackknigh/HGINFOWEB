@@ -4,6 +4,7 @@ import com.config.HgApplicationProperty;
 import com.dao.db2.lwaddress.*;
 import com.dao.entity.lwaddress.*;
 import com.service.lwaddress.*;
+import com.utils.sys.lwaddress.AsciiUtil;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,10 +41,9 @@ public class Base_addrServiceImpl implements Base_addrService {
     Bs_provinceService bs_provinceService;
 
     @Override
-    public Base_addr addrSet(String address, Map<String, Object> allMessage) {
+    public Base_addr addrSet(Base_addr bs_addr, Map<String, Object> allMessage) {
         String name1 = "";
         String name2 = "";
-        Base_addr bs_addr = new Base_addr();
         bs_addr.setP1type(0);
         Map<String, Object> provinceMap;
         Map<String, Object> cityMap;
@@ -54,6 +54,9 @@ public class Base_addrServiceImpl implements Base_addrService {
         List<Bs_city> listCity = new ArrayList<>();
         List<Bs_area> listArea = new ArrayList<>();
         List<Bs_street> listStreet = new ArrayList<>();
+
+        //处理特殊字符串
+        String address = AsciiUtil.RegProcess(bs_addr.getAddrSj(),bs_addr.getName1());
 
         //对省的操作
         provinceMap = bs_provinceService.provinceJudge(address, (List<Bs_province>) allMessage.get("provinceMessage"));
@@ -188,20 +191,6 @@ public class Base_addrServiceImpl implements Base_addrService {
         //最终得分
         dec6 = ((BigDecimal) allMessage.get("dec5")).add(bs_addr.getAreaWeight().add(bs_addr.getCityWeight().add(bs_addr.getProWeight().add(bs_addr.getStreWeight()))));
 
-
-
-//        if (name1.startsWith("101") || name1.startsWith("011") || name1.startsWith("1101")) {
-//            //如果街道不为空，区为空
-//            if ((String) streetMap.get("streetCode") != null && (String) areaMap.get("areaCode") == null) {
-//                areaMap.put("areaCode", (((String) streetMap.get("areaCodeSec"))));
-//                //如果区不为空，城市为空
-//            } else if ((String) cityMap.get("cityCode") == null && (String) areaMap.get("areaCode") != null) {
-//                cityMap.put("cityCode", ((String) areaMap.get("cityCodeSec")));
-//                //如果城市不为空，省为空
-//            } else if ((String) cityMap.get("cityCode") != null && (String) provinceMap.get("provinceCode") == null) {
-//                provinceMap.put("provinceCode", ((String) cityMap.get("provinceCodeSec")));
-//            }
-//        } else {
         /*
          * 通过已知的信息反推未知的省市区街道信息
          */
@@ -300,10 +289,12 @@ public class Base_addrServiceImpl implements Base_addrService {
         bs_addr.setShortAddr((String) streetMap.get("address"));
 
 
-        if (((String) ((String) streetMap.get("address"))).length() < 5 || ((String) ((String) streetMap.get("address"))).length() > 30) {
+        //短地址长度异常的数据分数扣一半
+        if (bs_addr.getShortAddr().length() < 5 ||bs_addr.getShortAddr().length() > 30) {
             dec6 = dec6.multiply(new BigDecimal(0.5));
         }
 
+        //手机号或者姓名带*的各扣5分
         if(StringUtils.isBlank(bs_addr.getPhone()) || bs_addr.getPhone().contains("*")){
             dec6 = dec6.subtract(new BigDecimal(5));
         }
@@ -316,20 +307,28 @@ public class Base_addrServiceImpl implements Base_addrService {
             dec6 = dec6.subtract(new BigDecimal(5));
         }
 
-        if(!bs_addr.getShortAddr().endsWith("室") && !bs_addr.getShortAddr().endsWith("号")){
-            dec6 = dec6.subtract(new BigDecimal(5));
+        if(bs_addr.getShortAddr().contains("室")){
+            dec6 = dec6.add(new BigDecimal(5));
         }
 
-        if(bs_addr.getShortAddr().length()>15){
-            dec6 = dec6.subtract(new BigDecimal(10));
+        if(bs_addr.getShortAddr().contains("号")){
+            dec6 = dec6.add(new BigDecimal(5));
         }
 
-        if(bs_addr.getShortAddr().length()>20){
+        if(bs_addr.getShortAddr().contains("-")){
+            dec6 = dec6.add(new BigDecimal(20));
+        }
+
+        if(bs_addr.getShortAddr().contains("楼")){
+            dec6 = dec6.add(new BigDecimal(5));
+        }
+
+        if(bs_addr.getShortAddr().length()>25){
             dec6 = dec6.subtract(new BigDecimal(10));
         }
 
         if(bs_addr.getTableName() == null || !bs_addr.getTableName().startsWith("T")){
-            dec6 = dec6.add(new BigDecimal(20));
+            dec6 = dec6.add(new BigDecimal(10));
         }
 
         bs_addr.setMulWeight(dec6);
