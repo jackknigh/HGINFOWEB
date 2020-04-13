@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 
 @Service("encodeStartWayService")
@@ -27,38 +28,40 @@ public class EncodeStartWayServiceImpl implements EncodeStartWayService {
     * */
     @Override
     public void startway(int start, int total, int batchcCount) {
-        log.info("start susscces");
         int count = total / batchcCount + 1;
+        insertEncodeService.init();
+        CountDownLatch countDownLatch = new CountDownLatch(count);
+
         for (int j = 0; j < count; j++) {
-            insertEncodeService.init();
-            log.info("current j:" + j);
             if (batchcCount != 1) {
                 if (j == total / batchcCount) {
                     batchcCount = total - j * batchcCount;
                 }
                 if (batchcCount == 0) {
-                    log.info("success");
                     break;
                 }
-                insertEncodeService.insertLngLat(start, batchcCount);
+                insertEncodeService.insertLngLat(start, batchcCount,countDownLatch);
                 start = start + batchcCount;
-                log.info("finish susscces");
             } else {
                 if (total / batchcCount == 0) {
-                    log.info("success");
                     break;
                 }
-                insertEncodeService.insertLngLat(start, batchcCount);
+                insertEncodeService.insertLngLat(start, batchcCount,countDownLatch);
                 start = start + batchcCount;
-                log.info("finish susscces");
             }
         }
 
+        try {
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         //异常数据重试机制
+        log.error("************开始异常重试机制************");
         for (int i = 0; i < 10; i++) {
             insertEncodeService.errorProcess();
         }
-        log.error("异常重试机制结束。。。。。。。");
+        log.error("************异常重试机制结束************");
 
     }
 }

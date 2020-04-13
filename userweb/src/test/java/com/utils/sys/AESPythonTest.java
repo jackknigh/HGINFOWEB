@@ -132,7 +132,7 @@ public class AESPythonTest {
         String[] split = name.split("浙江省");
         name = split[split.length - 1];
         System.out.println(name);
-        String shortAddr = SpecialHandl(name);
+        String shortAddr = SpecialHandl(name,null);
         shortAddr = shortAddr.replace("张三", "");
         System.out.println(shortAddr);
     }
@@ -191,58 +191,25 @@ public class AESPythonTest {
 
     @Test
     public void changeByMsg() {
+        //正则规则
         String regex = "((\\{\"XM\":\").*(\"\\,\\n)(.*\".*\":\".*\"\\,\\n)(.*\".*\":\").*(\"\\,\\n)(.*\".*\":\".*\"\\n\\}))";
+        //替换内容
         String regex1 = "$2AAA$3$4$5BBB$6$7";
-
-
-        File file = new File("E:\\text\\bbb.txt");
+        //读取文件内容
+        File file = new File("E:\\text\\aaa.txt");
         String string = txt2String(file);
 
         long startTime = System.currentTimeMillis();
+
         string = string.replaceAll("\\r", "");
         string = string.replaceAll(regex, regex1);
         long endTime = System.currentTimeMillis();
         System.out.println(endTime - startTime);
-//        System.out.println(string);
-
-//        System.out.println("转换前:\n" + str);
-//
-//        str = str.replaceAll(regex,regex1);
-//        System.out.println(str);
-
-//        StringBuilder sb = new StringBuilder();
-//        int count = 0;
-//        while (true) {
-//            Pattern pattern = Pattern.compile(regex);
-//            Matcher matcher = pattern.matcher(str);
-//            boolean flag = matcher.find();
-//            if (!flag) {
-//                System.out.println("=================最终转换结果====================");
-//                System.out.println(sb);
-//                return;
-//            }
-//            if(count>0){
-//                sb.append(",");
-//            }
-////            System.out.println("转换后:");
-//            sb.append(matcher.group(2))
-//                    .append("*").append(matcher.group(3))
-//                    .append(matcher.group(4))
-//                    .append(matcher.group(5))
-//                    .append("*")
-//                    .append(matcher.group(6))
-//                    .append(matcher.group(7));
-//
-////            System.out.println(sb1);
-//
-//            str = str.replace(matcher.group(1), "");
-//            count++;
-//            System.out.println("剩余:");
-//            System.out.println(str1);
-//        }
+        saveAsFileWriter(string);
     }
 
-    public static String txt2String(File file) {
+    //读取txt的内容
+    public String txt2String(File file) {
         StringBuilder result = new StringBuilder();
         try {
             BufferedReader br = new BufferedReader(new FileReader(file));//构造一个BufferedReader类来读取文件
@@ -256,6 +223,40 @@ public class AESPythonTest {
         }
         return result.toString();
     }
+
+    //将字符串写进txt
+    private void saveAsFileWriter(String content) {
+        FileWriter fwriter = null;
+        try {
+            // true表示不覆盖原来的内容，而是加到文件的后面。若要覆盖原来的内容，直接省略这个参数就好
+            fwriter = new FileWriter("E:\\text\\ccc.txt");
+            fwriter.write(content);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        } finally {
+            try {
+                fwriter.flush();
+                fwriter.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     public void changeByXml(String str) {
@@ -364,7 +365,7 @@ public class AESPythonTest {
         String str = "爱仕达多(4件)325024000000  000000 (000000) （000000）";
         String b = str.substring(0, 1);
         boolean a = str.contains("爱");
-        str = SpecialHandl(str);
+        str = SpecialHandl(str,null);
         System.out.println(a);
         System.out.println(b);
     }
@@ -468,7 +469,7 @@ public class AESPythonTest {
     @Test
     public void test13() {
         String str = "状元符阿撒打发我发发发龙腾南路260号56-龙腾一期2-306室";
-        str = SpecialHandl(str);
+        str = SpecialHandl(str,null);
         System.out.println(str);
         int a = 8500;
         System.out.println(a);
@@ -525,7 +526,7 @@ public class AESPythonTest {
     @Test
     public void test18() {
         String str = " 电话号码 ：183468454";
-        str = SpecialHandl(str);
+        str = SpecialHandl(str,null);
         System.out.println(str);
     }
 
@@ -554,7 +555,7 @@ public class AESPythonTest {
     public void test21() {
         String str = "凤(awe)凰家园(weq)10281030-302室";
         //去除五位以上的连续数字
-        str = SpecialHandl(str);
+        str = SpecialHandl(str,null);
         System.out.println(str);
     }
 
@@ -562,7 +563,7 @@ public class AESPythonTest {
     public void test22() {
         String str = "凤凰家园3幢5楼502室";
         //去除五位以上的连续数字
-        str = AsciiUtil.RegProcess(str, null);
+        str = AsciiUtil.RegProcess(str);
         System.out.println(str);
     }
 
@@ -570,7 +571,7 @@ public class AESPythonTest {
     public void test23() {
         String shortAddr = "应素应素凡ad";
         String name = "应素凡";
-        shortAddr = AsciiUtil.RegProcess(shortAddr, name);
+        shortAddr = AsciiUtil.RegProcess(shortAddr);
         System.out.println(shortAddr);
     }
 
@@ -953,7 +954,7 @@ public class AESPythonTest {
     @Test
     public void test33() {
         String name1 = "凤凰家园19 19号3幢一12室";
-        String s = AsciiUtil.RegProcess(name1,null);
+        String s = AsciiUtil.RegProcess(name1);
         System.out.println(s);
     }
 
@@ -963,5 +964,18 @@ public class AESPythonTest {
         String shortPhone = phone.substring(1, 3);
         shortPhone = shortPhone + phone.substring(phone.length()-4);
         System.out.println(shortPhone);
+    }
+
+    @Test
+    public void test35() {
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DAY_OF_YEAR, 1);
+        // 改成这样就好了
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        long time = cal.getTimeInMillis() - System.currentTimeMillis()+1800;
+        System.out.println(time);
     }
 }

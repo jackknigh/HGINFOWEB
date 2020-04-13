@@ -148,9 +148,11 @@
 
         <!--<foreach collection="list" item="item" index="index" separator=";">-->
         insert   into merge_addr
-        (id,addr_sj,short_addr, name1, phone,short_phone,province,pro_weight,id_card,earliest_time,latest_time,
+        (id,addr_sj,short_addr, name1, phone,short_phone,province,pro_weight,id_card,
         city,city_weight,area,area_weight,street,stre_weight,mul_weight,addr_sign1,addr_sign2,
-        contrast_score,contrast_id,p2type,str_score,number_score,old_name1,old_phone,row_id,table_name,count_id,create_time)
+        contrast_score,contrast_id,p2type,str_score,number_score,old_name1,old_phone,row_id,table_name,
+        alley,alley_num,plot,building_num,unit_num,floor_num,doorplate_num,merge_num,
+        earliest_time,latest_time,create_time)
         values
         (#{id,jdbcType=VARCHAR},
         #{addrSj,jdbcType=VARCHAR},
@@ -161,8 +163,6 @@
         #{province,jdbcType=VARCHAR},
         '${proWeight}',
         #{idCard,jdbcType=VARCHAR},
-        #{earliestTime,jdbcType=VARCHAR},
-        #{latestTime,jdbcType=VARCHAR},
         #{city,jdbcType=VARCHAR},
         '${cityWeight}',
         #{area,jdbcType=VARCHAR},
@@ -181,7 +181,16 @@
         #{oldPhone,jdbcType=VARCHAR},
        #{rowId,jdbcType=INTEGER},
         #{tableName,jdbcType=VARCHAR},
-        #{countId,jdbcType=INTEGER},
+        #{alley,jdbcType=VARCHAR},
+        #{alleyNum,jdbcType=VARCHAR},
+        #{plot,jdbcType=VARCHAR},
+        #{buildingNum,jdbcType=VARCHAR},
+        #{unitNum,jdbcType=VARCHAR},
+        #{floorNum,jdbcType=VARCHAR},
+        #{doorplateNum,jdbcType=VARCHAR},
+        #{mergeNum,jdbcType=INTEGER},
+        #{earliestTime,jdbcType=VARCHAR},
+        #{latestTime,jdbcType=VARCHAR},
         #{createTime,jdbcType=VARCHAR}
         )
         <!--</foreach>-->
@@ -234,9 +243,11 @@
 
     <insert id="insert3_2_1" parameterType="com.dao.entity.lwaddress.Base_addr">
         insert   into merge_addr_normal
-        (id,addr_sj,short_addr, name1, phone,short_phone,province,pro_weight,id_card,
+        (id,addr_sj,short_addr, name1, phone,short_phone,province,pro_weight,id_card,addr_code,
         city,city_weight,area,area_weight,street,stre_weight,mul_weight,addr_sign1,addr_sign2,
-        contrast_score,contrast_id,p2type,str_score,number_score,old_name1,old_phone,row_id,table_name,count_id,create_time)
+        contrast_score,contrast_id,p2type,str_score,number_score,old_name1,old_phone,row_id,table_name,count_id,
+        alley,alley_num,plot,building_num,unit_num,floor_num,doorplate_num,merge_num,
+        earliest_time,latest_time,create_time)
         values
         <foreach collection="list" item="item" index="index" separator=",">
             (#{item.id,jdbcType=VARCHAR},
@@ -248,6 +259,7 @@
             #{item.province,jdbcType=VARCHAR},
             '${item.proWeight}',
             #{item.idCard,jdbcType=VARCHAR},
+            #{item.addrCode,jdbcType=VARCHAR},
             #{item.city,jdbcType=VARCHAR},
             '${item.cityWeight}',
             #{item.area,jdbcType=VARCHAR},
@@ -267,6 +279,16 @@
             #{item.rowId,jdbcType=INTEGER},
             #{item.tableName,jdbcType=VARCHAR},
             #{item.countId,jdbcType=INTEGER},
+            #{item.alley,jdbcType=VARCHAR},
+            #{item.alleyNum,jdbcType=VARCHAR},
+            #{item.plot,jdbcType=VARCHAR},
+            #{item.buildingNum,jdbcType=VARCHAR},
+            #{item.unitNum,jdbcType=VARCHAR},
+            #{item.floorNum,jdbcType=VARCHAR},
+            #{item.doorplateNum,jdbcType=VARCHAR},
+            #{item.mergeNum,jdbcType=INTEGER},
+            #{item.earliestTime,jdbcType=VARCHAR},
+            #{item.latestTime,jdbcType=VARCHAR},
             #{item.createTime,jdbcType=VARCHAR}
             )
         </foreach>
@@ -277,9 +299,11 @@
 
         <!--<foreach collection="list" item="item" index="index" separator=";">-->
         insert   into basics_addr
-        (id,addr_sj,short_addr, name1, phone,short_phone,province,pro_weight,id_card,merge_num,earliest_time,latest_time,
+        (id,addr_sj,short_addr, name1, phone,short_phone,province,pro_weight,id_card,
         city,city_weight,area,area_weight,street,stre_weight,mul_weight,
-        p2type,p5type,addr_sign1,addr_sign2,number_score,old_name1,old_phone,row_id,table_name,count_id,create_time)
+        p2type,p5type,addr_sign1,addr_sign2,number_score,old_name1,old_phone,row_id,table_name,
+        alley,alley_num,plot,building_num,unit_num,floor_num,doorplate_num,merge_num,
+        earliest_time,latest_time,create_time)
         values
         (#{id,jdbcType=VARCHAR},
         #{addrSj,jdbcType=VARCHAR},
@@ -290,9 +314,6 @@
         #{province,jdbcType=VARCHAR},
         '${proWeight}',
         #{idCard,jdbcType=VARCHAR},
-        #{mergeNum,jdbcType=INTEGER},
-        #{earliestTime,jdbcType=VARCHAR},
-        #{latestTime,jdbcType=VARCHAR},
         #{city,jdbcType=VARCHAR},
         '${cityWeight}',
         #{area,jdbcType=VARCHAR},
@@ -309,7 +330,16 @@
         #{oldPhone,jdbcType=VARCHAR},
        #{rowId,jdbcType=INTEGER},
         #{tableName,jdbcType=VARCHAR},
-        #{countId,jdbcType=INTEGER},
+        #{alley,jdbcType=VARCHAR},
+        #{alleyNum,jdbcType=VARCHAR},
+        #{plot,jdbcType=VARCHAR},
+        #{buildingNum,jdbcType=VARCHAR},
+        #{unitNum,jdbcType=VARCHAR},
+        #{floorNum,jdbcType=VARCHAR},
+        #{doorplateNum,jdbcType=VARCHAR},
+        #{mergeNum,jdbcType=INTEGER},
+        #{earliestTime,jdbcType=VARCHAR},
+        #{latestTime,jdbcType=VARCHAR},
         #{createTime,jdbcType=VARCHAR}
         )
         <!--</foreach>-->
@@ -362,7 +392,9 @@
         insert   into basics_addr_normal
         (id,addr_sj,short_addr, name1, phone,short_phone,province,pro_weight,
         city,city_weight,area,area_weight,street,stre_weight,mul_weight,id_card,
-        p2type,addr_sign1,addr_sign2,number_score,old_name1,old_phone,row_id,table_name,count_id,create_time)
+        p2type,addr_sign1,addr_sign2,number_score,old_name1,old_phone,row_id,table_name,count_id,
+        alley,alley_num,plot,building_num,unit_num,floor_num,doorplate_num,merge_num,
+        earliest_time,latest_time,create_time)
         values
         <foreach collection="list" item="item" index="index" separator=",">
             (#{item.id,jdbcType=VARCHAR},
@@ -390,6 +422,68 @@
             #{item.rowId,jdbcType=INTEGER},
             #{item.tableName,jdbcType=VARCHAR},
             #{item.countId,jdbcType=INTEGER},
+            #{item.alley,jdbcType=VARCHAR},
+            #{item.alleyNum,jdbcType=VARCHAR},
+            #{item.plot,jdbcType=VARCHAR},
+            #{item.buildingNum,jdbcType=VARCHAR},
+            #{item.unitNum,jdbcType=VARCHAR},
+            #{item.floorNum,jdbcType=VARCHAR},
+            #{item.doorplateNum,jdbcType=VARCHAR},
+            #{item.mergeNum,jdbcType=INTEGER},
+            #{item.earliestTime,jdbcType=VARCHAR},
+            #{item.latestTime,jdbcType=VARCHAR},
+            #{item.createTime,jdbcType=VARCHAR}
+            )
+        </foreach>
+
+    </insert>
+
+
+    <insert id="insert5_2_11" parameterType="com.dao.entity.lwaddress.Base_addr">
+        insert   into basics_addr_normal
+        (id,addr_sj,addr_code,short_addr, name1, phone,short_phone,province,pro_weight,
+        city,city_weight,area,area_weight,street,stre_weight,mul_weight,id_card,
+        p2type,addr_sign1,addr_sign2,number_score,old_name1,old_phone,row_id,table_name,count_id,
+        alley,alley_num,plot,building_num,unit_num,floor_num,doorplate_num,merge_num,
+        earliest_time,latest_time,create_time)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.id,jdbcType=VARCHAR},
+            #{item.addrSj,jdbcType=VARCHAR},
+            #{item.addrCode,jdbcType=VARCHAR},
+            #{item.shortAddr,jdbcType=VARCHAR},
+            #{item.name1,jdbcType=VARCHAR},
+            #{item.phone,jdbcType=VARCHAR},
+            #{item.shortPhone,jdbcType=VARCHAR},
+            #{item.province,jdbcType=VARCHAR},
+            '${item.proWeight}',
+            #{item.city,jdbcType=VARCHAR},
+            '${item.cityWeight}',
+            #{item.area,jdbcType=VARCHAR},
+            '${item.areaWeight}',
+            #{item.street,jdbcType=VARCHAR},
+            '${item.streWeight}',
+            '${item.mulWeight}',
+            #{item.idCard,jdbcType=VARCHAR},
+            #{item.p2type,jdbcType=INTEGER},
+            #{item.addrSign1,jdbcType=VARCHAR},
+            #{item.addrSign2,jdbcType=VARCHAR},
+            #{item.numberScore,jdbcType=VARCHAR},
+            #{item.oldName1,jdbcType=VARCHAR},
+            #{item.oldPhone,jdbcType=VARCHAR},
+            #{item.rowId,jdbcType=INTEGER},
+            #{item.tableName,jdbcType=VARCHAR},
+            #{item.countId,jdbcType=INTEGER},
+            #{item.alley,jdbcType=VARCHAR},
+            #{item.alleyNum,jdbcType=VARCHAR},
+            #{item.plot,jdbcType=VARCHAR},
+            #{item.buildingNum,jdbcType=VARCHAR},
+            #{item.unitNum,jdbcType=VARCHAR},
+            #{item.floorNum,jdbcType=VARCHAR},
+            #{item.doorplateNum,jdbcType=VARCHAR},
+            #{item.mergeNum,jdbcType=INTEGER},
+            #{item.earliestTime,jdbcType=VARCHAR},
+            #{item.latestTime,jdbcType=VARCHAR},
             #{item.createTime,jdbcType=VARCHAR}
             )
         </foreach>
@@ -470,7 +564,7 @@
         </where>
     </select>
     <select id="selectBaseAddr" resultMap="BaseResultMap">
-        select * from basics_addr where short_addr is not null order by short_addr LIMIT #{start},#{batchcCount}
+        select * from sec_addr where short_addr is not null order by count_id LIMIT #{start},#{batchcCount}
     </select>
 
     <insert id="insert4" parameterType="com.dao.entity.lwaddress.Base_addr">
@@ -487,7 +581,7 @@
         insert   into discard_addr
         (id,addr_sj,short_addr, name1, phone,short_phone,province,pro_weight,id_card,earliest_time,latest_time,
         city,city_weight,area,area_weight,street,stre_weight,mul_weight,
-        p2type,addr_sign1,addr_sign2,number_score,str_score,old_name1,old_phone,row_id,table_name,count_id,create_time)
+        p2type,addr_sign1,addr_sign2,number_score,str_score,old_name1,old_phone,row_id,table_name,create_time)
         values
         (#{id,jdbcType=VARCHAR},
         #{addrSj,jdbcType=VARCHAR},
@@ -516,7 +610,6 @@
         #{oldPhone,jdbcType=VARCHAR},
         #{rowId,jdbcType=INTEGER},
         #{tableName,jdbcType=VARCHAR},
-        #{countId,jdbcType=INTEGER},
         #{createTime,jdbcType=VARCHAR}
         )
         <!--</foreach>-->

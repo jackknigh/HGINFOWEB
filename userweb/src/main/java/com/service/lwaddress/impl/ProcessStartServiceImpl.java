@@ -81,7 +81,6 @@ public class ProcessStartServiceImpl implements ProcessStartService {
         }
         log.info("共有手机号：{} 个",total);
 
-        log.info("start susscces");
         BigDecimal n=new BigDecimal(applicationProperty.getInsertWeight());
         for (int j = 0; j < total / batchcCount+1; j++) {
             log.info("current j:" + j);
@@ -89,62 +88,48 @@ public class ProcessStartServiceImpl implements ProcessStartService {
                 if (j == total / batchcCount ) {
                     if(total%batchcCount==0 && total-start/batchcCount==1){
                         processInterfService.processInterf(start, batchcCount,n,executor,executor1,phoneList);
-                        log.info("finish susscces");
                         break;
                     }
                     batchcCount = total - j  * batchcCount;
                 }
                 if (batchcCount == 0 || start ==total) {
-                    log.info("success");
                     break;
                 }
                 processInterfService.processInterf(start, batchcCount,n,executor,executor1,phoneList);
                 start = start + batchcCount;
-                log.info("finish susscces");
             }
             else{
                 if(total-start / batchcCount==0){
-                    log.info("success");
                     break;
                 }
                 processInterfService.processInterf(start, batchcCount,n,executor,executor1,phoneList);
                 start = start + batchcCount;
-                log.info("finish susscces");
             }
         }
-        log.info("finish susscces");
     }
 
     @Override
     public void compare() {
         initExecutor();
-        log.info("start susscces");
         processInterfService.compare(executor);
     }
 
     @Override
-    public void delete() {
-//        int end = 1532989663;
-        int end = 417000001;
-        int count = 10000;
-        int start = 416990001;
-//        int start = 1532979663;
-//        int end = 986;
-//        int count = 10;
-//        int start = 976;
-        int num = end/count+1;
-        for (int i = 0; i < num; i++) {
-            processInterfService.function(start,end);
-            start = start-count;
-            end = end-count;
-        }
+    public void compareSelf() {
+        initExecutor();
+        processInterfService.compareSelf(executor);
     }
 
-//    @Override
-//    public void startwayPhone() {
-//        initExecutor();
-//        initExecutor1();
-//        log.info("start susscces");
-//        processInterfService.startwayPhone(executor,executor1);
-//    }
+    @Override
+    public void update() {
+        int end = 587477124;
+        int count = 150000;
+        int start = 0;
+
+        int num = end/count+1;
+        for (int i = 0; i < num; i++) {
+            processInterfService.function(start,start+count);
+            start = start+count;
+        }
+    }
 }

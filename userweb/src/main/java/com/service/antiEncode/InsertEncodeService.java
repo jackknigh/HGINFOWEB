@@ -1,5 +1,7 @@
 package com.service.antiEncode;
 
+import java.util.concurrent.CountDownLatch;
+
 /**
  *
  * @version version 1.0
@@ -14,7 +16,7 @@ public interface InsertEncodeService {
      *
      * @return
      */
-     void  insertLngLat(int start, int number);
+     void  insertLngLat(int start, int number, CountDownLatch countDownLatch);
 
     /**
      * 初始化配置信息

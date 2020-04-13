@@ -25,4 +25,8 @@ public interface PhoneMapper {
     void delete(List<String> ids);
 
     void groupInsert();
+
+    void insert(List<Base_addr> ids);
+
+    List<Base_addr> selectBase_addr(int start, int end);
 }

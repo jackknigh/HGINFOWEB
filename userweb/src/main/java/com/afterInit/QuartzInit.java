@@ -30,23 +30,16 @@ public class QuartzInit implements ApplicationRunner {
 
     @Autowired
     private HgApplicationProperty applicationProperty;
-
     @Autowired
     private EncodeStartWayService encodeStartWayService;
-
     @Autowired
     private SysQuartzConfigService sysQuartzConfigService;
-
     @Autowired
     private Scheduler scheduler;
     @Autowired
     private Bs_startWayService bs_startWayService;
     @Autowired
-    private InsertEncodeService insertEncodeService;
-    @Autowired
     private ProcessStartService processStartService;
-    @Autowired
-    private Base_addrMapper base_addrMapper;
 
     @Override
     public void run(ApplicationArguments applicationArguments) throws Exception {
@@ -71,37 +64,37 @@ public class QuartzInit implements ApplicationRunner {
             log.info("执行定时任务结束............................................");
         }
 
-        //基础(切割地址，算分，插入数据到clickhouse)
+        //基础(切割地址，算分)
         if(applicationProperty.getdelectTableIndex().compareTo("0")==0) {
             bs_startWayService.startway(Integer.valueOf(applicationProperty.getStartCount()), Integer.valueOf(applicationProperty.getTotalCount()), Integer.valueOf(applicationProperty.getCount()));
         }
 
-        //合并(从clickhouse中取出数据进行合并操作)
+        //合并(对数据进行合并操作)
         if(applicationProperty.getdelectTableIndex().compareTo("1")==0){
             processStartService.startway(Integer.valueOf(applicationProperty.getstartProcessCount()),Integer.valueOf(applicationProperty.gettotalProcessCount()) ,Integer.valueOf(applicationProperty.getprocessCount()));
-            log.info("startway start end" );
         }
 
-        //对比两个集合数据
+        //左右数据集合相似度碰撞
         if(applicationProperty.getdelectTableIndex().compareTo("2")==0){
             processStartService.compare();
         }
 
+        //数据自碰撞
+        if(applicationProperty.getdelectTableIndex().compareTo("3")==0){
+            processStartService.compareSelf();
+        }
 
-//        //经纬度值
-//        log.debug("========================测试开始==========================");
-//        encodeStartWayService.startway(0, 1077031, 500);
-//        log.debug("========================测试结束==========================");
+        //经纬度处理
+        if(applicationProperty.getdelectTableIndex().compareTo("4")==0){
+        log.debug("========================经纬度处理开始==========================");
+        encodeStartWayService.startway(Integer.valueOf(applicationProperty.getStartCount()), Integer.valueOf(applicationProperty.getTotalCount()), Integer.valueOf(applicationProperty.getCount()));
+        log.debug("========================经纬度处理结束==========================");
+        }
 
-
-//        //增量(现在使用定时任务执行)
-//        if(applicationProperty.getdelectTableIndex().compareTo("4")==0) {
-//            bs_startWayService.increment();
-//        }
-
-//        if(applicationProperty.getdelectTableIndex().compareTo("5")==0){
-//            processStartService.delete();
-//        }
+        //更新经纬度
+        if(applicationProperty.getdelectTableIndex().compareTo("5")==0){
+            processStartService.update();
+        }
     }
 }
 

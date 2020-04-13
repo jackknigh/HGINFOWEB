@@ -14,6 +14,9 @@ public class HgApplicationProperty {
     @Value("${sysPropertys.grace}")
     private String grace;
 
+    @Value("${sysPropertys.grace1}")
+    private String grace1;
+
     @Value("${sysPropertys.loginWithAutoCode}")
     private String loginWithAutoCode;
 
@@ -85,6 +88,13 @@ public class HgApplicationProperty {
     @Value("${sysPropertys.delectTableIndex}")
     private  String delectTableIndex;
 
+    public String getGrace1() {
+        return grace1;
+    }
+
+    public void setGrace1(String grace1) {
+        this.grace1 = grace1;
+    }
 
     public String getGrace() {
         return grace;

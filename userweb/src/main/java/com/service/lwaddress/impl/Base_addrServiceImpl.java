@@ -14,6 +14,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static com.dto.constants.Constants.REGEX_SYMBOL;
+import static com.dto.constants.Constants.REGEX_XMSJ;
+
 @Service
 public class Base_addrServiceImpl implements Base_addrService {
 
@@ -55,8 +58,12 @@ public class Base_addrServiceImpl implements Base_addrService {
         List<Bs_area> listArea = new ArrayList<>();
         List<Bs_street> listStreet = new ArrayList<>();
 
-        //处理特殊字符串
-        String address = AsciiUtil.RegProcess(bs_addr.getAddrSj(),bs_addr.getName1());
+        //去除姓名中的特殊字符
+        bs_addr.setName1(bs_addr.getName1().replaceAll(REGEX_XMSJ, ""));
+        //去除手机中的特殊字符
+        bs_addr.setPhone(bs_addr.getPhone().replaceAll(REGEX_XMSJ, ""));
+        //地址处理特殊字符串
+        String address = AsciiUtil.SpecialHandl(bs_addr.getAddrSj(),bs_addr.getName1());
 
         //对省的操作
         provinceMap = bs_provinceService.provinceJudge(address, (List<Bs_province>) allMessage.get("provinceMessage"));
@@ -271,7 +278,6 @@ public class Base_addrServiceImpl implements Base_addrService {
         if (((String) provinceMap.get("provinceName")) != null) {
             bs_addr.setProvince((String) provinceMap.get("provinceName"));
         } else {
-            //bs_addr.setProvince((String) provinceMap.get("provinceCode"));
             for (int i = 0; i < ((List<Bs_province>) allMessage.get("provinceMessage")).size(); i++) {
                 if (((List<Bs_province>) allMessage.get("provinceMessage")).get(i).getProvinceCode().equals((String) provinceMap.get("provinceCode"))) {
                     bs_addr.setProvince(((List<Bs_province>) allMessage.get("provinceMessage")).get(i).getProvinceName());
@@ -284,10 +290,17 @@ public class Base_addrServiceImpl implements Base_addrService {
         } else {
             bs_addr.setCity((String) cityMap.get("cityName"));
         }
+
         bs_addr.setArea((String) areaMap.get("areaName"));
         bs_addr.setStreet((String) streetMap.get("streetName"));
         bs_addr.setShortAddr((String) streetMap.get("address"));
 
+        //生成手机短号，前三后四
+        if(bs_addr.getPhone().length()>=7){
+            String startPhone = bs_addr.getPhone().substring(1, 3);
+            String endPhone = bs_addr.getPhone().substring(bs_addr.getPhone().length() - 4, bs_addr.getPhone().length());
+            bs_addr.setShortPhone(startPhone+endPhone);
+        }
 
         //短地址长度异常的数据分数扣一半
         if (bs_addr.getShortAddr().length() < 5 ||bs_addr.getShortAddr().length() > 30) {
@@ -298,15 +311,16 @@ public class Base_addrServiceImpl implements Base_addrService {
         if(StringUtils.isBlank(bs_addr.getPhone()) || bs_addr.getPhone().contains("*")){
             dec6 = dec6.subtract(new BigDecimal(5));
         }
-
         if(StringUtils.isBlank(bs_addr.getName1()) || bs_addr.getName1().contains("*")){
             dec6 = dec6.subtract(new BigDecimal(5));
         }
 
+        //短地址末尾是 - 结尾的扣5分
         if(bs_addr.getShortAddr().endsWith("-")){
             dec6 = dec6.subtract(new BigDecimal(5));
         }
 
+        //短地址中包含一些关键字的加分项
         if(bs_addr.getShortAddr().contains("室")){
             dec6 = dec6.add(new BigDecimal(5));
         }
@@ -323,19 +337,15 @@ public class Base_addrServiceImpl implements Base_addrService {
             dec6 = dec6.add(new BigDecimal(5));
         }
 
+        //短地址过长的扣分项
         if(bs_addr.getShortAddr().length()>25){
             dec6 = dec6.subtract(new BigDecimal(10));
         }
 
-        if(bs_addr.getTableName() == null || !bs_addr.getTableName().startsWith("T")){
-            dec6 = dec6.add(new BigDecimal(10));
-        }
-
         bs_addr.setMulWeight(dec6);
-
         bs_addr.setAddrSign1(name1);
         bs_addr.setAddrSign2(name2);
-//        bs_addr.setAddrSj(address);
+
         if (bs_addr.getAreaWeight() == null) {
             bs_addr.setAreaWeight(BigDecimal.ZERO);
         }

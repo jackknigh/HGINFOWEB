@@ -169,8 +169,8 @@
     <!-- 控制台输出日志级别 -->
     <root level="DEBUG">
         <appender-ref ref="STDOUT"/>
-        <appender-ref ref="FILE_All"/>
-        <appender-ref ref="FILE_DEBUG"/>
+<!--        <appender-ref ref="FILE_All"/>-->
+<!--        <appender-ref ref="FILE_DEBUG"/>-->
         <appender-ref ref="ASYNC_INFO"/>
         <appender-ref ref="FILE_ERROR"/>
         <!--<appender-ref ref="FILE_SELF"/>-->

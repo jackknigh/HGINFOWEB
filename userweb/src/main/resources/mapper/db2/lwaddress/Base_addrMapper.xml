@@ -5,6 +5,7 @@
         <id column="id" property="id" jdbcType="VARCHAR"/>
         <result column="addr_jj" property="addrJj" jdbcType="VARCHAR"/>
         <result column="addr_sj" property="addrSj" jdbcType="VARCHAR"/>
+        <result column="addr_code" property="addrCode" jdbcType="VARCHAR"/>
         <result column="short_addr" property="shortAddr" jdbcType="VARCHAR"/>
         <result column="name1" property="name1" jdbcType="VARCHAR"/>
         <result column="name2" property="name2" jdbcType="VARCHAR"/>
@@ -191,7 +192,7 @@
             id,addr_sj,name1,phone,short_phone,row_id,table_name,
             count_id,id_card,alley,alley_num,plot,building_num,unit_num,
             floor_num,doorplate_num,merge_num,earliest_time,latest_time,create_time  FROM base_addr
-    order by  count_id limit #{number1},#{number2}
+    WHERE count_id &gt;= #{number1} and count_id &lt; #{number2}
   </select>
 
     <insert id="insert3_2" parameterType="com.dao.entity.lwaddress.Base_addr">
@@ -414,6 +415,12 @@
     <update id="updateMergeTable">
     update merge_addr set merge_addr.contrast_id=${contrast_id} where merge_addr.contrast_id=${id}
 </update>
+
+
+    <update id="function">
+        UPDATE basics_addr AS ba,third_addr AS ta SET ba.longitude = ta.longitude,ba.latitude = ta.latitude
+        WHERE ba.id = ta.id AND ba.count_id &gt;= #{start} AND ba.count_id &lt; #{end}
+    </update>
 
     <delete id="deleteBasics" parameterType="com.dao.entity.lwaddress.Base_addr">
         DELETE FROM  basics_addr  WHERE basics_addr.id  in
@@ -678,7 +685,14 @@
     </select>
 
     <select id="selectBaseAddr" resultMap="BaseResultMap">
-        select * from sec_addr where short_addr is not null
+        select * from basics_addr where
+        <if test="streetName!=null">
+            street = #{streetName}
+        </if>
+        <if test="streetName==null">
+            street is null
+        </if>
+        and short_addr is not null
     </select>
 
     <select id="selectDataByPhone" resultMap="BaseResultMap">
@@ -711,7 +725,7 @@
         limit #{startCount},#{count}
     </select>
     <select id="getBaseAddrs" resultMap="BaseResultMap">
-        SELECT  id,short_addr,merge_num,earliest_time,latest_time,name1 FROM basics_addr where phone = #{phone} order by short_addr limit #{start},#{count}
+        SELECT  id,short_addr,merge_num,earliest_time,latest_time,name1 FROM basics_addr where phone = #{phone}
     </select>
     <select id="getDate" resultMap="BaseResultMap">
         select * from basics_addr where short_phone = #{shortPhone}
@@ -728,7 +742,76 @@
             and street = #{street}
         </if>
     </select>
+
+    <select id="getDate1" resultMap="BaseResultMap">
+        select * from basics_addr where short_phone = #{shortPhone}
+    </select>
     <select id="getInsertDate" resultMap="BaseResultMap">
         select * from insert_addr where p5type &gt;= 0 and p5type &lt; 6
     </select>
+    <select id="getAllProvince" resultType="com.dao.entity.lwaddress.Bs_province">
+        SELECT
+        PROVINCE_CODE AS provinceCode,
+        PROVINCE_NAME AS provinceName,
+        SHORT_NAME AS shortName
+        FROM
+        bs_province
+        WHERE
+        PROVINCE_CODE &lt;&gt; '330000'
+    </select>
+    <select id="selectBaseAddrByStreet" resultMap="BaseResultMap">
+        select * from basics_addr where
+        <if test="streetName != null">
+            street = #{streetName}
+        </if>
+        <if test="streetName == null">
+            street is null
+        </if>
+        and short_addr is not null
+    </select>
+    <select id="selectBaseAddr1" resultMap="BaseResultMap">
+        select * from sec_addr
+        <where>
+        <if test="streetName != null">
+            street = #{streetName}
+        </if>
+        and short_addr is not null
+        </where>
+         order by count_id LIMIT #{start},#{batchcCount}
+    </select>
+    <select id="selectBaseAddr2" resultMap="BaseResultMap">
+        select * from sec_addr
+        <where>
+            <if test="streetName != null">
+                street = #{streetName}
+            </if>
+            and short_addr is not null
+        </where>
+    </select>
+    <select id="selectCount" resultType="java.lang.Integer">
+        select count(1) from sec_addr where
+        <if test="streetName != null">
+            street = #{streetName}
+        </if>
+        <if test="streetName == null">
+            street is null
+        </if>
+        and short_addr is not null
+    </select>
+    <select id="selectBaseAddrByArea" resultMap="BaseResultMap">
+        select * from basics_addr where  area = #{areaName} and street is null
+    </select>
+    <select id="selectBaseAddrs" resultMap="BaseResultMap">
+        select * from basics_addr where
+        <if test="streetName!=null">
+            street = #{streetName}
+        </if>
+        <if test="streetName==null">
+            street is null
+        </if>
+        and short_addr is not null
+        limit #{start},#{count}
+    </select>
+
+
 </mapper>

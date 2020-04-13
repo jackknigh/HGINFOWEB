@@ -11,6 +11,9 @@
         select max(count_id) as count_id,max(create_time) as latest_time,min(create_time) as earliest_time,count(count_id) as merge_num,
         addr_sj,name1,phone,table_name,row_id,id from base_addr group by addr_sj,name1,phone
     </insert>
+    <insert id="insert" parameterType="com.dao.entity.lwaddress.Base_addr">
+
+    </insert>
     <delete id="delete">
         delete from base_addr where count_id in
         <foreach collection="list" item="id" index="index" open="(" close=")" separator=",">
@@ -22,7 +25,7 @@
     </select>
 
     <select id="selectAll" resultMap="BaseResultMap">
-        select row,phone,amount from  phone order by phone desc limit #{number1},#{number2}
+        select row,phone,amount from  phone where row &gt;= #{number1} and row &lt; #{number2}
   </select>
   <select id="selectAllAddress" resultType="com.dao.entity.lwaddress.Address">
         select `row`,street,amount from  address order by `row` desc limit #{number1},#{number2}
@@ -36,5 +39,7 @@
     <select id="selectPhoneCount" resultType="java.lang.Integer">
         select count(DISTINCT phone) from sec_addr where phone not like concat('%','*','%') and phone &lt;&gt; ''
     </select>
-
+    <select id="selectBase_addr" resultType="com.dao.entity.lwaddress.Base_addr">
+        select id,addr_sj as addrSj,name1,phone,table_name as tableName,create_time as createTime from base_addr where count_id &gt;= #{start} and count_id &lt; #{end}
+    </select>
 </mapper>

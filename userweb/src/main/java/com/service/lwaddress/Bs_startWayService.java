@@ -1,5 +1,7 @@
 package com.service.lwaddress;
 
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+
 import java.util.Map;
 
 public interface Bs_startWayService {
@@ -7,5 +9,5 @@ public interface Bs_startWayService {
 
     Map getThreadInfo();
 
-    void increment();
+    void increment(ThreadPoolTaskExecutor executor);
 }

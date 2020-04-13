@@ -6,6 +6,7 @@ import com.dao.entity.lwaddress.Sec_addr;
 import com.service.antiEncode.FindEncodeService;
 import com.service.antiEncode.InsertEncodeService;
 import com.utils.sys.DateUtil;
+import com.utils.sys.TextUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
 
 @Service("insertEncodeService")
 public class InsertEncodeServiceImpl implements InsertEncodeService {
@@ -34,45 +36,42 @@ public class InsertEncodeServiceImpl implements InsertEncodeService {
     @Value("${sysEncode.url}")
     private String urlValue;
 
-    private Map<String, Integer> keyMap = new Hashtable();
+    private volatile Map<String, Integer> keyMap = new Hashtable();
 
     private List<String> urlList = new ArrayList();
 
 
     @Async("asyncPromiseExecutor")
-    public void insertLngLat(int start, int number) {
+    public void insertLngLat(int start, int number, CountDownLatch countDownLatch) {
         log.info("==========================线程:{} 开始执行  start:{} ===========================", Thread.currentThread().getName(), start);
         //查询指定步进值的地址信息
-        List<Sec_addr> date = secAddrMapper.selectAddrsec(start, number);
+        List<Sec_addr> date = secAddrMapper.selectAddrsec(start, start+number);
+
+        List<Sec_addr> date1 = new ArrayList<>();
+
+//        List<Sec_addr> date = secAddrMapper.selectAddrsec(start, number);
 
         for (Sec_addr b1 : date) {
-            //如果不是当天了，就重置次数
-            if (!isToday()) {
-                log.info("开始重置key的使用次数。。。。。");
-                keyMap.clear();
-                String[] keys = keyValue.split(",");
-                for (String s : keys) {
-                    keyMap.put(s, 0);
-                }
-                log.info("重置完成。。。。。");
+            if(b1.getLongitude() != null || b1.getType() != null){
+                continue;
             }
             //调用高德地图查询经纬度
             Sec_addr secAddr = getSecAddr(b1);
-
-            if (secAddr == null) {
-                log.error("所有key调用次数上限了");
-                return;
-            }
             b1.setLatitude(secAddr.getLatitude());
             b1.setLongitude(secAddr.getLongitude());
             b1.setType(secAddr.getType());
+            date1.add(b1);
         }
 
         try {
-            secAddrMapper.insert2(date);
+            if(TextUtils.isEmpty(date1)){
+                return;
+            }
+            secAddrMapper.insert2(date1);
+            countDownLatch.countDown();
+            log.info("插入  start:{} number:{} 成功", start, number);
         } catch (Exception e) {
             e.printStackTrace();
-            log.error(JSONObject.toJSONString(date));
             log.error("插入  start:{} number:{} 失败", start, number);
         }
     }
@@ -114,8 +113,6 @@ public class InsertEncodeServiceImpl implements InsertEncodeService {
                 log.error(JSONObject.toJSONString(secAddrs));
             }
         }
-
-
     }
 
     //判断key的调用次数是否上限
@@ -132,34 +129,50 @@ public class InsertEncodeServiceImpl implements InsertEncodeService {
         int urlIndex = random.nextInt(urlList.size());
         String url = urlList.get(urlIndex);
 
-        //如果key调用次数小于200万
-        if (count <= 2000000) {
+        //如果key调用次数小于190万1900000
+        if (count <= 1900000) {
             secAddr1 = findEncodeService.getLngLatFromOneAddr(secAddr, key, url);
-            keyMap.put(key, count++);
+            count = count+1;
+            keyMap.put(key,count);
         } else {
+            log.error("主键为: {} 的账号到达上限",key);
             //如果到了一天的上限，就从集合中移除
             keyMap.remove(key);
             if (keyMap.size() <= 0) {
-                log.error("所有key到达上限");
-                return null;
+                log.error("所有账号到达日上限");
+                //睡眠到第二天
+                try {
+                    long today = isToday();
+                    log.info("线程开始睡眠 {} 毫秒",today);
+                    Thread.sleep(today);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                //如果不是当天了，就重置接口调用次数
+                log.info("***************开始重置key的使用次数***************");
+                keyMap.clear();
+                String[] keys1 = keyValue.split(",");
+                for (String s : keys1) {
+                    keyMap.put(s, 0);
+                }
+                log.info("***************重置完成***************");
             }
             secAddr1 = getSecAddr(secAddr);
         }
         return secAddr1;
     }
 
-    //判断是否是第二天，如果是第二天，重置接口调用次数
-    private boolean isToday() {
-        Date d = new Date();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String dateNowStr = sdf.format(d);
-        try {
-            d = sdf.parse(dateNowStr);
-        } catch (ParseException e) {
-            e.printStackTrace();
-            log.error("日期转换失败");
-        }
-        return DateUtil.isToday(d);
+    //当前时间到第二天凌晨的时间间隔
+    private long isToday() {
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DAY_OF_YEAR, 1);
+        // 改成这样就好了
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        long time = cal.getTimeInMillis() - System.currentTimeMillis() + 1800000;
+        return time;
     }
 }
 

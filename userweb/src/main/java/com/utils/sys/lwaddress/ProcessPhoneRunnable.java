@@ -40,10 +40,7 @@ public class ProcessPhoneRunnable implements Callable<List<Base_addr>> {
 
     @Override
     public List<Base_addr> call() {
-//        long startTime = System.currentTimeMillis();
         List<Base_addr> match = match(blockSizeByNum, blockSizeByStr,baseAddrs,executor,flag);
-//        long endTime = System.currentTimeMillis();
-//        log.info("线程"+Thread.currentThread().getName()+"执行了"+(endTime-startTime)+"毫秒");
         return match;
     }
 

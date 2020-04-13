@@ -8,6 +8,8 @@ import java.util.List;
 @Repository
 public interface SecAddrMapper {
 
+//    List<Sec_addr> selectAddrsec(@Param("number1") int number1, @Param("number2") int number2);
+
     List<Sec_addr> selectAddrsec(@Param("number1") int number1, @Param("number2") int number2);
 
     void insert2(List<Sec_addr> message);

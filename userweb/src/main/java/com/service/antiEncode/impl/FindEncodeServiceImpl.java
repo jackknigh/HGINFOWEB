@@ -34,17 +34,18 @@ public class FindEncodeServiceImpl implements FindEncodeService {
     @Override
     public Sec_addr getLngLatFromOneAddr(Sec_addr sec_addr, String key, String url) {
         Map<String, String> params = new HashMap<String, String>();
-        String address1 = sec_addr.getProvince() + sec_addr.getCity() + sec_addr.getArea() + sec_addr.getStreet() + sec_addr.getShortAddr();
+//        String address1 = sec_addr.getProvince() + sec_addr.getCity() + sec_addr.getArea() + sec_addr.getStreet() + sec_addr.getShortAddr();
+        String address = sec_addr.getAddrSj();
 
-        String[] address2 = address1.split("null");
-        String address = "";
-        for (String add : address2) {
-            address = address.concat(add);
-        }
-        if (address2.length > 2) {
-            /*地址中含有字符null*/
-            sec_addr.setType(Integer.valueOf(124));
-        }
+//        String[] address2 = address1.split("null");
+//        String address = "";
+//        for (String add : address2) {
+//            address = address.concat(add);
+//        }
+//        if (address2.length > 2) {
+//            /*地址中含有字符null*/
+//            sec_addr.setType(Integer.valueOf(124));
+//        }
         String[] address3 = address.split("%7C");
         if (address3.length > 1) {
             String address4 = "";

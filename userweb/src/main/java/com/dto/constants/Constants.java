@@ -16,6 +16,7 @@ public class Constants {
 
     //特殊字符相关
     public static final String REGEX_SYMBOL = "[\"丿–·③④⑤`~!@#$%^&*+=|{}':;',\\[\\]<>/?~！@#� \uE009\uF8F5￥%……& _;*+|{}【】‘；：”“’。，、？.。]";     //完成
+    public static final String REGEX_XMSJ = "[\"丿–·③④⑤`~!@#$%^&+=|{}':;',\\[\\]<>/?~！@#� \uE009\uF8F5￥%……& _;+|{}【】‘；：”“’。，、？.。]";     //完成
     public static final String REGEX_POSTCADE = "000000|325024|325000";
     public static final String REGEX_CHANGHAO = "\\d+号.*\\d+-\\d+";
     public static final String REGEX_CCHANGHAO = "\\d+号.*[a-zA-Z\\d一二三四五六七八九十零壹贰叁肆伍陆柒捌玖拾]+";
@@ -37,6 +38,7 @@ public class Constants {
     public static final String REGEX_QUDANYUAN = "((\\d+)-((\\d+)-)+(\\d+))";
     public static final String REGEX_DANYUAN = "幢|栋|弄|单元|棟|—|～|橦";
     public static final String REGEX_LOU = "((\\d+)楼(\\d+))";
+    public static final String REGEX_CENG = "((\\d+)层(\\d+))";
     public static final String REGEX_PHONE = "\\d{2}-1\\d{10}|1\\d{10}|\\d{3,4}-\\d{7,8}";
     public static final String REGEX_IDCARD = "\\d{17}[\\d|x|X]|\\d{15}";
 

@@ -28,6 +28,8 @@ public interface Base_addrMapper1 {
 
     int insert5_2_1(List<Base_addr> base_addr);
 
+    int insert5_2_11(List<Base_addr> base_addr);
+
     int insert6(List<Base_addr> message);
 
     List<Base_addr> selectAddr_sj(int number1, int number2);

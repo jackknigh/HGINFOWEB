@@ -10,6 +10,8 @@ public class Base_addr implements Serializable {
 
     private String addrSj;
 
+    private String addrCode;
+
     private String shortAddr;
 
     private String name1;
@@ -131,6 +133,14 @@ public class Base_addr implements Serializable {
 
     public void setAlleyNum(String alleyNum) {
         this.alleyNum = alleyNum;
+    }
+
+    public String getAddrCode() {
+        return addrCode;
+    }
+
+    public void setAddrCode(String addrCode) {
+        this.addrCode = addrCode;
     }
 
     public String getPlot() {

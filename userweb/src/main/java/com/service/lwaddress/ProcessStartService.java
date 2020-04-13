@@ -5,7 +5,7 @@ public interface ProcessStartService {
 
     void compare();
 
-    void delete();
+    void compareSelf();
 
-//    void startwayPhone();
+    void update();
 }

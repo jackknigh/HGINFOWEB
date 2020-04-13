@@ -2,14 +2,11 @@ package com.service.lwaddress.impl;
 
 import com.dao.entity.lwaddress.Base_addr;
 import com.service.lwaddress.ProcessService;
-import com.service.lwaddress.StringParsingService;
-import com.utils.sys.lwaddress.AsciiUtil;
 import com.utils.sys.lwaddress.DateUtil;
 import com.utils.sys.lwaddress.MatchRunnable;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
@@ -23,9 +20,6 @@ import java.util.concurrent.Future;
 
 @Service
 public class ProcessServiceImpl implements ProcessService {
-    @Autowired
-    private StringParsingService stringParsingService;
-
     @Value("${sysExecutor.StepValue}")
     private Integer stepValue;
 
@@ -34,37 +28,22 @@ public class ProcessServiceImpl implements ProcessService {
     @Override
     //获取每个短号组(按标准分从大到小排)的第一位置为标准值，然后相似度匹配，匹配到的置为合并值，重复循环此操作，直至短号组所有元素被标记
     public Map<String, List<Base_addr>> processService(List<Base_addr> addressMessage, List<Base_addr> insertMessage, int str, int num,ThreadPoolTaskExecutor executor,boolean flag) {
-
-        Map<String, String[]> strMapa = new HashMap<>();
-        Map<String, String[]> strMapb = new HashMap<>();
-
         Map<String, List<Base_addr>> map1 = new HashMap<>();
 
         int kk = -1;
-//        log.info("*******************开始寻找基准值操作");
-        long startTime = System.currentTimeMillis();
+
         for (int i = 0; i < addressMessage.size(); i++) {
+            //如果是已经被标记的数据
             if (addressMessage.get(i).getP2type() == 222 || addressMessage.get(i).getP2type() == 223 || addressMessage.get(i).getP2type() == 224) {
                 continue;
             } else {
                 //如果短地址和姓名不为空就把这次的基准值取出
                 if (!StringUtils.isBlank(addressMessage.get(i).getShortAddr())) {
-                    //特殊字符处理,第一步已经处理过了
-//                    String shortAddr = AsciiUtil.SpecialHandl(addressMessage.get(i).getShortAddr());
-//                    if(!StringUtils.isBlank(addressMessage.get(i).getName1())) {
-//                        shortAddr = shortAddr.replace(addressMessage.get(i).getName1(), "");
-//                    }
-//                    addressMessage.get(i).setShortAddr(shortAddr);
-
-                    //数字
-                    strMapa.put("stra", (String[]) stringParsingService.stringParse(addressMessage.get(i).getShortAddr()).get("strb1"));
-                    //字符,先正则去除关键字，匹配前正则匹配去除省市区
-                    strMapb.put("stra", (String[]) stringParsingService.stringParse(addressMessage.get(i).getShortAddr()).get("strb2"));
-
                     //标记为基准值
                     addressMessage.get(i).setP2type(223);
                     addressMessage.get(i).setCreateTime(DateUtil.getCurrDateTimeStr());
 
+                    //记录基准值下标
                     kk = i;
                     insertMessage.add(addressMessage.get(i));
                     if (i == addressMessage.size()-1) {
@@ -82,11 +61,9 @@ public class ProcessServiceImpl implements ProcessService {
             int total = addressMessage.size();
             //步进值
             int count = stepValue;
-//          CountDownLatch countDownLatch = new CountDownLatch(total);
 
             if(total/executor.getCorePoolSize() > count){
                 count = total/executor.getCorePoolSize()+1;
-//                log.info("修改步进值为"+count);
             }
 
             //起始值
@@ -138,48 +115,9 @@ public class ProcessServiceImpl implements ProcessService {
             } catch (ExecutionException e) {
                 log.error("错误信息：{}",e);
             }
-
-//            for (int i = 0; i < total; i++) {
-//                //被比较值
-//                Base_addr baseAddr = addressMessage.get(i);
-//                try {
-//                    Future<HashMap<String,Base_addr>> result = executor.submit(new MatchRunnable(baseAddrBasics, num, sum, reg, baseAddr, countDownLatch));
-//                    HashMap<String, Base_addr> map = result.get();
-//                    if(map == null){
-//                        continue;
-//                    }
-//                    //被比较的值
-//                    Base_addr addressMessage1 =  map.get("addressMessage");
-//                    //需要插入的值
-//                    Base_addr bsAddr =  map.get("bs_addr");
-//                    if (bsAddr != null) {
-//                        insertMessage.add(bsAddr);
-//                    }
-//                    baseAddr.setP2type(addressMessage1.getP2type());
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                } catch (ExecutionException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-
-//            try {
-//                //所有线程是否执行完毕
-//                countDownLatch.await();
-//            log.info("基准值" + baseAddrBasics.getId() + "执行完成");
-//            } catch (InterruptedException e) {
-//                log.error(e.getMessage());
-//            }
-
-            long endTime = System.currentTimeMillis();
-            long time = endTime - startTime;
-            log.info("*************************处理 {} 条数据相似度匹配用了 {} 毫秒:",addressMessage.size(),time);
         }
         map1.put("addressMessage", addressMessage);
         map1.put("insertMessage", insertMessage);
-        long endTime = System.currentTimeMillis();
-        long time = endTime - startTime;
-        log.info("*************************处理一次循环共用了:" + time + "毫秒");
         return map1;
     }
 

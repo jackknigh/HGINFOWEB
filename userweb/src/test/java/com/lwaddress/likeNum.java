@@ -80,7 +80,7 @@ public class likeNum {
         //幢、栋、弄、单元 改为-
         shortAddr = shortAddr.replaceAll(REGEX_DANYUAN,"-");
         //特殊字符处理
-        shortAddr = AsciiUtil.SpecialHandl(shortAddr);
+        shortAddr = AsciiUtil.SpecialHandl(shortAddr,null);
         return shortAddr;
     }
 

@@ -103,7 +103,7 @@ public interface Base_addrMapper {
 
     List<AcceptDeliveryPeoperVo> searchBaiscAcceptDelivery(@Param("id") String id, @Param("time") String time, @Param("year") String year);
 
-    List<Base_addr> selectBaseAddr();
+    List<Base_addr> selectBaseAddr(@Param("streetName") String streetName);
 
     long getTotal(SearchContentForm searchContentForm);
 
@@ -119,9 +119,28 @@ public interface Base_addrMapper {
 
     List<Base_addr> selectData(@Param("startCount") int startCount,@Param("count") int count);
 
-    List<Base_addr> getBaseAddrs(@Param("start")int start, @Param("count")int count, @Param("phone")String phone);
+//    List<Base_addr> getBaseAddrs(@Param("start")int start, @Param("count")int count, @Param("phone")String phone);
+
+    List<Base_addr> getBaseAddrs(@Param("phone")String phone);
 
     List<Base_addr> getDate(@Param("shortPhone")String shortPhone,@Param("province")String province,@Param("city")String city,@Param("area")String area,@Param("street")String street);
 
+    List<Base_addr> getDate1(@Param("shortPhone")String shortPhone);
+
     List<Base_addr> getInsertDate();
+
+    List<Bs_province> getAllProvince();
+
+    List<Base_addr> selectBaseAddrByStreet(@Param("streetName") String streetName);
+
+    List<Base_addr> selectBaseAddr1(@Param("start") int start, @Param("batchcCount") int batchcCount,@Param("streetName") String streetName);
+    List<Base_addr> selectBaseAddr2(@Param("streetName") String streetName);
+
+    int selectCount(@Param("streetName") String streetName);
+
+    List<Base_addr> selectBaseAddrByArea(@Param("areaName")String areaName);
+
+    List<Base_addr> selectBaseAddrs(@Param("streetName")String streetName, @Param("start")int start, @Param("count")int count);
+
+    void function(@Param("start")int start, @Param("end")int end);
 }

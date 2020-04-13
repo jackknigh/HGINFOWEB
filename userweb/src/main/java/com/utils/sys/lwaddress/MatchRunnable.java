@@ -36,7 +36,6 @@ public class MatchRunnable implements Callable<HashMap<String, Object>> {
     private int num;
     private int str;
     private Base_addr baseAddrBasics;
-    //    private CountDownLatch countDownLatch;
     private List<Base_addr> addressMessage;
     private int start;
     private int end;
@@ -46,7 +45,6 @@ public class MatchRunnable implements Callable<HashMap<String, Object>> {
         this.num = num;
         this.str = str;
         this.baseAddrBasics = baseAddrBasics;
-//        this.countDownLatch = countDownLatch;
         this.addressMessage = addressMessage;
         this.start = start;
         this.end = end;
@@ -55,15 +53,13 @@ public class MatchRunnable implements Callable<HashMap<String, Object>> {
 
     @Override
     public HashMap<String, Object> call() {
-//        long startTime = System.currentTimeMillis();
         HashMap<String, Object> match = match(num, str, baseAddrBasics, addressMessage, start, end, flag);
-//        long endTime = System.currentTimeMillis();
-//        log.info("线程"+Thread.currentThread().getName()+"执行了"+(endTime-startTime)+"毫秒");
         return match;
     }
 
     public HashMap<String, Object> match(int num, int str, Base_addr baseAddrBasics, List<Base_addr> addressMessage, int start, int end, boolean flag) {
 
+        //初始化对象
         HashMap<String, Object> map = new HashMap<>();
         List<Base_addr> insertMessage = new ArrayList<>();
         Map<String, String[]> strMapa = new HashMap<>();
@@ -80,10 +76,12 @@ public class MatchRunnable implements Callable<HashMap<String, Object>> {
         if (!StringUtils.isBlank(baseAddrBasics.getName1())) {
             name1a = baseAddrBasics.getName1().split("");
         }
-        //正则匹配去除某些关键字，第一步已经做过了
-//        String name = RegProcess(baseAddrBasics.getShortAddr(),baseAddrBasics.getName1(),reg);
+
+        //数字字母处理
+        String shortAddr = AsciiUtil.RegProcess(baseAddrBasics.getShortAddr());
+
         //切将地址切割成字符串数组，装进map集合，strMapa是数字，strMapb是字符串
-        Map stringMap = stringParsingService.stringParse(baseAddrBasics.getShortAddr());
+        Map stringMap = stringParsingService.stringParse(shortAddr);
         strMapa.put("stra", (String[]) stringMap.get("strb1"));
         strMapb.put("stra", (String[]) stringMap.get("strb2"));
 
@@ -106,10 +104,10 @@ public class MatchRunnable implements Callable<HashMap<String, Object>> {
                     }
                 }
 
-                //正则匹配去除某些关键字,第一步做过了
-//                String name1 = RegProcess(addressMessage.get(i).getShortAddr(),addressMessage.get(i).getName1(),reg);
+                //数字字母处理
+                String shortAddr1 = AsciiUtil.RegProcess(addressMessage.get(i).getShortAddr());
                 //切将地址切割成字符串数组，装进map集合，strMapa是数字，strMapb是字符串,key=strb是合并值，key=stra是基准值
-                Map stringMap1 = stringParsingService.stringParse(addressMessage.get(i).getShortAddr());
+                Map stringMap1 = stringParsingService.stringParse(shortAddr1);
                 strMapa.put("strb", (String[]) stringMap1.get("strb1"));
                 strMapb.put("strb", (String[]) stringMap1.get("strb2"));
 
@@ -122,10 +120,8 @@ public class MatchRunnable implements Callable<HashMap<String, Object>> {
 
                 BigDecimal sum = new BigDecimal(0);
 
-                /*返回一个map出来，其中包括计算用的Double的sum,String的integerer[]*/
                 //数字和字符相似度匹配
                 Map<String, Object> processresult1 = processGradeService.processDemo(strMapa, num);
-
 
                 //理论最大值
                 BigDecimal asummax = (BigDecimal)processresult1.get("asummax");
@@ -139,20 +135,34 @@ public class MatchRunnable implements Callable<HashMap<String, Object>> {
                 //实际得分
                 BigDecimal asum1 = (BigDecimal)processresult2.get("asum");
 
-
+                //数字字符实际得分与最大分值占比
                 BigDecimal suma = (BigDecimal) processresult1.get("sum");
                 BigDecimal sumb = (BigDecimal) processresult2.get("sum");
 
-                if(!baseAddrBasics.getShortAddr().contains(addressMessage.get(i).getShortAddr())){
-                    BigDecimal divide = bsum.divide(asummax,4, BigDecimal.ROUND_HALF_UP).multiply(asum).divide(numPass,4, BigDecimal.ROUND_HALF_UP);
+                //如果标准短地址包含匹配数据的短地址，就直接算满分
+                if(!shortAddr.contains(shortAddr1)){
+                    BigDecimal divide = new BigDecimal(0);
+                    if(asummax != null && asum != null){
+                        divide = bsum.divide(asummax,4, BigDecimal.ROUND_HALF_UP).multiply(asum).divide(numPass,4, BigDecimal.ROUND_HALF_UP);
+                    }
 
                     //如果数字没到及格线
                     if(divide.compareTo(new BigDecimal(1))<0){
                         continue;
                     }
 
+                    //如果数字基本满分，那么字符得分就能低一点
+                    if(divide.compareTo(new BigDecimal(1.8))>=0){
+                        strPass = new BigDecimal(15);
+                    }
+
                     //如果字符没到及格线
-                    if(bsum.divide(asummax1,4, BigDecimal.ROUND_HALF_UP).multiply(asum1).divide(strPass,4, BigDecimal.ROUND_HALF_UP).compareTo(new BigDecimal(1))<=0){
+                    BigDecimal value = new BigDecimal(0);
+                    if(asummax1 != null && asum1 != null) {
+                        value = bsum.divide(asummax1, 4, BigDecimal.ROUND_HALF_UP).multiply(asum1).divide(strPass, 4, BigDecimal.ROUND_HALF_UP);
+                    }
+
+                    if (value.compareTo(new BigDecimal(1))<0) {
                         continue;
                     }
 
@@ -166,15 +176,12 @@ public class MatchRunnable implements Callable<HashMap<String, Object>> {
                     bs_addr.setStrScore((String) processresult2.get("integer")+"(包含关系)");
                 }
 
-                //带姓名分占比的
-//                BigDecimal sum = processGradeService.getSum(suma,sumb,baseAddrBasics.getName1(),addressMessage.get(i).getName1(),(String[]) stringMap1.get("strb1"),(String[]) stringMap.get("strb1"),(String[]) stringMap1.get("strb2"),(String[]) stringMap.get("strb2"));
-
                 //如果相似度大于阈值或者基准短地址包含比较短地址
                 if (sum.compareTo(grace) > 0) {
 
                     //如果是分割集合操作就需要修改原先合并值和基准值的关联id
                     if (flag) {
-//                        log.info("是分割操作，需要修改关联id");
+                        log.info("是分割操作，需要修改关联id");
                         baseAddrMapper1.updateMerge(addressMessage.get(i).getId(), baseAddrBasics.getId());
                     }
                     bs_addr.setId(addressMessage.get(i).getId());
@@ -191,6 +198,7 @@ public class MatchRunnable implements Callable<HashMap<String, Object>> {
                     bs_addr.setProWeight(addressMessage.get(i).getProWeight());
                     bs_addr.setCity(addressMessage.get(i).getCity());
                     bs_addr.setCityWeight(addressMessage.get(i).getCityWeight());
+                    bs_addr.setArea(addressMessage.get(i).getArea());
                     bs_addr.setAreaWeight(addressMessage.get(i).getAreaWeight());
                     bs_addr.setStreet(addressMessage.get(i).getStreet());
                     bs_addr.setStreWeight(addressMessage.get(i).getStreWeight());
@@ -222,7 +230,7 @@ public class MatchRunnable implements Callable<HashMap<String, Object>> {
                     }
                     addressMessage.get(i).setP2type(222);
 
-
+                    boolean result = false;
                     //如果是根据手机号清洗就需要反写
                     if ("0".equals(applicationProperty.getStandardAddress()) || "2".equals(applicationProperty.getStandardAddress())) {
                         if (phone1 != null) {
@@ -230,13 +238,15 @@ public class MatchRunnable implements Callable<HashMap<String, Object>> {
                             if (addressMessage.get(i).getPhone() != null) {
                                 if (baseAddrBasics.getPhone().contains("*") && nameProcessService.phoneLikedProcess(phone1, addressMessage.get(i).getPhone().split(""))) {
                                     baseAddrBasics.setPhone(addressMessage.get(i).getPhone());
+                                    result = true;
                                 }
-                                //*当匹配到手机后，复写回insertmessage*//*
-                                /*用修改的基准值手机号反写合并值手机号*/
+
+                                //用修改的基准值手机号反写合并值手机号
                                 if (addressMessage.get(i).getPhone().contains("*")
                                         && nameProcessService.a2nameLikedProcess(phone1, addressMessage.get(i).getPhone().split(""))) {
                                     addressMessage.get(i).setPhone(baseAddrBasics.getPhone());
                                     bs_addr.setPhone(baseAddrBasics.getPhone());
+                                    result = true;
                                 }
                                 phone1 = addressMessage.get(i).getPhone().split("");
                             }
@@ -247,6 +257,7 @@ public class MatchRunnable implements Callable<HashMap<String, Object>> {
                             if (baseAddrBasics.getName1().contains("*")
                                     && nameProcessService.nameLikedProcess(name1a, addressMessage.get(i).getName1().split(""))) {
                                 baseAddrBasics.setName1(addressMessage.get(i).getName1());
+                                result = true;
                             }
 
                             //基准值反写合并值，不带别名
@@ -254,6 +265,7 @@ public class MatchRunnable implements Callable<HashMap<String, Object>> {
                                     && nameProcessService.nameLikedProcess(addressMessage.get(i).getName1().split(""), name1a)) {
                                 addressMessage.get(i).setName1(baseAddrBasics.getName1());
                                 bs_addr.setName1(baseAddrBasics.getName1());
+                                result = true;
                             }
 
                             //带别名反写
@@ -264,16 +276,26 @@ public class MatchRunnable implements Callable<HashMap<String, Object>> {
                                 if(nameProcessService.isContainChinese(addressMessage.get(i).getName1())){
                                     addressMessage.get(i).setName1(baseAddrBasics.getName1());
                                     bs_addr.setName1(baseAddrBasics.getName1());
+                                    result = true;
                                 }
                                 //如果基准值带别名
                                 if(nameProcessService.isContainChinese(baseAddrBasics.getName1())){
                                     baseAddrBasics.setName1(addressMessage.get(i).getName1());
+                                    result = true;
                                 }
                             }
                             name1a = baseAddrBasics.getName1().split("");
                         }
                     }
-                    insertMessage.add(bs_addr);
+
+                    //如果是只反写操作，只有被反写的数据才需要修改
+                    if( "2".equals(applicationProperty.getStandardAddress())){
+                        if(result){
+                            insertMessage.add(bs_addr);
+                        }
+                    }else {
+                        insertMessage.add(bs_addr);
+                    }
                 }
             }
         }

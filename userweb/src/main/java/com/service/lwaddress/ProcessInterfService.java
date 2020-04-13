@@ -14,5 +14,7 @@ public interface ProcessInterfService {
 
     void startwayPhone(ThreadPoolTaskExecutor executor, ThreadPoolTaskExecutor executor1);
 
+    void compareSelf(ThreadPoolTaskExecutor executor);
+
     void function(int start, int end);
 }

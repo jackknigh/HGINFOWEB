@@ -41,8 +41,13 @@
       id = #{id,jdbcType=VARCHAR}
   </update>
   <!--type=3-->
-  <select id="selectAddrsec" resultMap="BaseResultMap">
-    SELECT * FROM basics_addr limit #{number1},#{number2}
+<!--  <select id="selectAddrsec" resultMap="BaseResultMap">-->
+<!--    SELECT * FROM basics_addr limit #{number1},#{number2}-->
+<!--  </select>-->
+
+    <select id="selectAddrsec" resultMap="BaseResultMap">
+        SELECT ba.id,ba.addr_sj,ta.longitude,ta.type FROM basics_addr AS ba LEFT JOIN third_addr AS ta ON ba.id = ta.id
+        WHERE ba.count_id &gt;= #{number1} AND ba.count_id &lt; #{number2}
   </select>
 
   <select id="searchError" resultType="com.dao.entity.lwaddress.Sec_addr">
