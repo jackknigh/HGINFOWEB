@@ -26,20 +26,33 @@ public class ProcessGradeServiceImpl implements ProcessGradeService{
 
             /*对比的块刚好被全部包住的情况,首字母+正常值+最后N位加额外分*/
             if(i+n==a1){
-                maxsum=1+n+maxsum;
+                maxsum=1;
+                int a = 1;
+                for (int i1 = 0; i1 < n; i1++) {
+                    maxsum=maxsum+a;
+                    a = a+1;
+                }
                 max[i]=new Integer(maxsum);
                 continue;
             }
 
             /*对比的块可以被全部包住的情况*/
             if(i+n<a1){
+                int a = 1;
                 if(i<a1-n){
-                    maxsum = n+maxsum;
+                    for (int i1 = 0; i1 < n; i1++) {
+                        maxsum = maxsum+a;
+                        a = a+1;
+                    }
                     max[i] = new Integer(maxsum);
                     continue;
                 }else if(a1 > 2 && i>=a1-n){
-                //如果是最后N为就需要额外加1分
-                    maxsum = 1+n+maxsum;
+                    //如果是最后N为就需要额外加1分
+                    int b = 1;
+                    for (int i1 = 0; i1 < n; i1++) {
+                        maxsum=maxsum+b;
+                        b = b+1;
+                    }
                     max[i] = new Integer(maxsum);
                     continue;
                 }
@@ -47,7 +60,12 @@ public class ProcessGradeServiceImpl implements ProcessGradeService{
 
             /*对比的块不能被全部包住的情况*/
             if(i+n>a1){
-                maxsum=1+a1-i+maxsum;
+                maxsum=maxsum+1;
+                int b = 1;
+                for (int i1 = 0; i1 < a1-i; i1++) {
+                    maxsum=maxsum+b;
+                    b = b+1;
+                }
                 max[i]=new Integer(maxsum);
             }
         }
@@ -55,8 +73,13 @@ public class ProcessGradeServiceImpl implements ProcessGradeService{
     }
 
     @Override
-    public Integer[] processSum(String[] a2, String[] a1, int n) {
-        Integer[] max=new Integer[a1.length];
+    public Integer[] processSum(String[] a2, String[] a1, int n,boolean flag) {
+        Integer[] max;
+        if(flag) {
+            max = new Integer[a1.length + 1];
+        }else {
+            max = new Integer[a1.length];
+        }
         for(int a=0;a<a1.length;a++){
             max[a]=new Integer(0);
         }
@@ -83,6 +106,8 @@ public class ProcessGradeServiceImpl implements ProcessGradeService{
                     a1_index=i;
                     a2_index=j;
 
+                    int fraction = 2;
+
                     for (int k = n-1; k > 0; k--) {
                         //第一位加1分
                         if (a1_index == 0 ) {
@@ -102,10 +127,11 @@ public class ProcessGradeServiceImpl implements ProcessGradeService{
                             /*否则即为可以进行下一级计算*/
                             a1_index=a1_index+1;
                             a2_index=a2_index+1;
-                            grace=grace+1;
+                            grace=grace+fraction;
+                            fraction = fraction+1;
                             continue;
                         }
-                            break;
+                        break;
                     }
 
                     if (grace > max[i]) {
@@ -114,11 +140,14 @@ public class ProcessGradeServiceImpl implements ProcessGradeService{
                 }
             }
         }
+        if(flag) {
+            max[a1.length] = 2;
+        }
         return max;
     }
 
     @Override
-    public Map<String,Object> processDemo(Map<String, String[]> strMap,int n) {
+    public Map<String,Object> processDemo(Map<String, String[]> strMap,int n,boolean flag) {
         Map<String,Object> sum=new HashMap<>();
         /*对比值*/
         String[] a1=strMap.get("strb");
@@ -127,7 +156,7 @@ public class ProcessGradeServiceImpl implements ProcessGradeService{
         Map<String,Object> map=new HashMap<>();
         /*map中的"sum"总和，"integer"为integer数组的String形式*/
         /*传入 基准值字符串stra 匹配值字符串stab 滑块数n进行计算*/
-        sum=processCount(a1,b1,n);
+        sum=processCount(a1,b1,n,flag);
 
         /*根据上面两个加上权重算总分*/
         return sum;
@@ -150,7 +179,7 @@ public class ProcessGradeServiceImpl implements ProcessGradeService{
     }
 
     @Override
-    public Map<String,Object> processCount(String[] a1, String[] a2, int n) {
+    public Map<String,Object> processCount(String[] a1, String[] a2, int n,boolean flag) {
 
         Map<String,Object> sum=new HashMap<>();
         BigDecimal sum1=new BigDecimal(0);
@@ -169,7 +198,7 @@ public class ProcessGradeServiceImpl implements ProcessGradeService{
         /*processMaxSum最大值计算 aSumMax为当前传入两个字符串理论最大值*/
         Integer[] aSumMax=processMaxSum(a.length,b.length,n);
         /*sSum为实际值*/
-        Integer[] aSum=processSum(a,b,n);
+        Integer[] aSum=processSum(a,b,n,flag);
 
         /*integerA为各个字符得分*/
         StringBuffer integerA=new StringBuffer();

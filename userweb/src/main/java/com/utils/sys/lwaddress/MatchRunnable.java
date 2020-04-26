@@ -39,25 +39,23 @@ public class MatchRunnable implements Callable<HashMap<String, Object>> {
     private List<Base_addr> addressMessage;
     private int start;
     private int end;
-    private boolean flag;
 
-    public MatchRunnable(int num, int str, Base_addr baseAddrBasics, List<Base_addr> addressMessage, int start, int end, boolean flag) {
+    public MatchRunnable(int num, int str, Base_addr baseAddrBasics, List<Base_addr> addressMessage, int start, int end) {
         this.num = num;
         this.str = str;
         this.baseAddrBasics = baseAddrBasics;
         this.addressMessage = addressMessage;
         this.start = start;
         this.end = end;
-        this.flag = flag;
     }
 
     @Override
     public HashMap<String, Object> call() {
-        HashMap<String, Object> match = match(num, str, baseAddrBasics, addressMessage, start, end, flag);
+        HashMap<String, Object> match = match(num, str, baseAddrBasics, addressMessage, start, end);
         return match;
     }
 
-    public HashMap<String, Object> match(int num, int str, Base_addr baseAddrBasics, List<Base_addr> addressMessage, int start, int end, boolean flag) {
+    public HashMap<String, Object> match(int num, int str, Base_addr baseAddrBasics, List<Base_addr> addressMessage, int start, int end) {
 
         //初始化对象
         HashMap<String, Object> map = new HashMap<>();
@@ -121,14 +119,14 @@ public class MatchRunnable implements Callable<HashMap<String, Object>> {
                 BigDecimal sum = new BigDecimal(0);
 
                 //数字和字符相似度匹配
-                Map<String, Object> processresult1 = processGradeService.processDemo(strMapa, num);
+                Map<String, Object> processresult1 = processGradeService.processDemo(strMapa, num,false);
 
                 //理论最大值
                 BigDecimal asummax = (BigDecimal)processresult1.get("asummax");
                 //实际得分
                 BigDecimal asum = (BigDecimal)processresult1.get("asum");
 
-                Map<String, Object> processresult2 = processGradeService.processDemo(strMapb, str);
+                Map<String, Object> processresult2 = processGradeService.processDemo(strMapb, str,false);
 
                 //理论最大值
                 BigDecimal asummax1 = (BigDecimal)processresult2.get("asummax");
@@ -143,6 +141,7 @@ public class MatchRunnable implements Callable<HashMap<String, Object>> {
                 if(!shortAddr.contains(shortAddr1)){
                     BigDecimal divide = new BigDecimal(0);
                     if(asummax != null && asum != null){
+                        //数字得分=100/理论最大分值*实际分值/数字及格线
                         divide = bsum.divide(asummax,4, BigDecimal.ROUND_HALF_UP).multiply(asum).divide(numPass,4, BigDecimal.ROUND_HALF_UP);
                     }
 
@@ -156,17 +155,18 @@ public class MatchRunnable implements Callable<HashMap<String, Object>> {
                         strPass = new BigDecimal(15);
                     }
 
-                    //如果字符没到及格线
+                    //字符得分
                     BigDecimal value = new BigDecimal(0);
                     if(asummax1 != null && asum1 != null) {
                         value = bsum.divide(asummax1, 4, BigDecimal.ROUND_HALF_UP).multiply(asum1).divide(strPass, 4, BigDecimal.ROUND_HALF_UP);
                     }
 
+                    //如果字符没到及格线
                     if (value.compareTo(new BigDecimal(1))<0) {
                         continue;
                     }
 
-                    //计算相似度
+                    //相似度=(数字实际得分/数字总分)*数字分值占比+(文字实际得分/文字总分)*文字分值占比
                     sum = processGradeService.getSum(suma, sumb, (String[]) stringMap1.get("strb1"),(String[]) stringMap.get("strb1"),(String[]) stringMap1.get("strb2"),(String[]) stringMap.get("strb2"));
                     bs_addr.setNumberScore((String) processresult1.get("integer"));
                     bs_addr.setStrScore((String) processresult2.get("integer"));
@@ -178,50 +178,9 @@ public class MatchRunnable implements Callable<HashMap<String, Object>> {
 
                 //如果相似度大于阈值或者基准短地址包含比较短地址
                 if (sum.compareTo(grace) > 0) {
-
-                    //如果是分割集合操作就需要修改原先合并值和基准值的关联id
-                    if (flag) {
-                        log.info("是分割操作，需要修改关联id");
-                        baseAddrMapper1.updateMerge(addressMessage.get(i).getId(), baseAddrBasics.getId());
-                    }
-                    bs_addr.setId(addressMessage.get(i).getId());
-                    bs_addr.setName1(addressMessage.get(i).getName1());
-                    bs_addr.setPhone(addressMessage.get(i).getPhone());
-                    bs_addr.setAddrSj(addressMessage.get(i).getAddrSj());
+                    bs_addr = addressMessage.get(i);
                     bs_addr.setContrastScore(sum);
                     bs_addr.setContrastId(baseAddrBasics.getId());
-                    bs_addr.setShortAddr(addressMessage.get(i).getShortAddr());
-                    bs_addr.setOldPhone(addressMessage.get(i).getOldPhone());
-                    bs_addr.setOldName1(addressMessage.get(i).getOldName1());
-                    bs_addr.setShortPhone(addressMessage.get(i).getShortPhone());
-                    bs_addr.setProvince(addressMessage.get(i).getProvince());
-                    bs_addr.setProWeight(addressMessage.get(i).getProWeight());
-                    bs_addr.setCity(addressMessage.get(i).getCity());
-                    bs_addr.setCityWeight(addressMessage.get(i).getCityWeight());
-                    bs_addr.setArea(addressMessage.get(i).getArea());
-                    bs_addr.setAreaWeight(addressMessage.get(i).getAreaWeight());
-                    bs_addr.setStreet(addressMessage.get(i).getStreet());
-                    bs_addr.setStreWeight(addressMessage.get(i).getStreWeight());
-                    bs_addr.setAlley(addressMessage.get(i).getAlley());
-                    bs_addr.setAlleyNum(addressMessage.get(i).getAlleyNum());
-                    bs_addr.setPlot(addressMessage.get(i).getPlot());
-                    bs_addr.setBuildingNum(addressMessage.get(i).getBuildingNum());
-                    bs_addr.setFloorNum(addressMessage.get(i).getFloorNum());
-                    bs_addr.setUnitNum(addressMessage.get(i).getUnitNum());
-                    bs_addr.setDoorplateNum(addressMessage.get(i).getDoorplateNum());
-                    bs_addr.setMergeNum(addressMessage.get(i).getMergeNum());
-                    bs_addr.setEarliestTime(addressMessage.get(i).getEarliestTime());
-                    bs_addr.setLatestTime(addressMessage.get(i).getLatestTime());
-                    bs_addr.setMulWeight(addressMessage.get(i).getMulWeight());
-                    bs_addr.setAddrSign1(addressMessage.get(i).getAddrSign1());
-                    bs_addr.setAddrSign2(addressMessage.get(i).getAddrSign2());
-                    bs_addr.setRowId(addressMessage.get(i).getRowId());
-                    bs_addr.setTableName(addressMessage.get(i).getTableName());
-                    bs_addr.setCountId(addressMessage.get(i).getCountId());
-                    bs_addr.setCreateTime(DateUtil.getCurrDateTimeStr());
-                    bs_addr.setIdCard(addressMessage.get(i).getIdCard());
-                    bs_addr.setLatestTime(addressMessage.get(i).getLatestTime());
-                    bs_addr.setEarliestTime(addressMessage.get(i).getEarliestTime());
                     bs_addr.setP2type(222);
                     if (addressMessage.get(i).getP3type() != null) {
                         bs_addr.setP3type(223);

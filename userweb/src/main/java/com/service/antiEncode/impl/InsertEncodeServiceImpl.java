@@ -49,14 +49,13 @@ public class InsertEncodeServiceImpl implements InsertEncodeService {
 
         List<Sec_addr> date1 = new ArrayList<>();
 
-//        List<Sec_addr> date = secAddrMapper.selectAddrsec(start, number);
-
         for (Sec_addr b1 : date) {
             if(b1.getLongitude() != null || b1.getType() != null){
                 continue;
             }
             //调用高德地图查询经纬度
             Sec_addr secAddr = getSecAddr(b1);
+
             b1.setLatitude(secAddr.getLatitude());
             b1.setLongitude(secAddr.getLongitude());
             b1.setType(secAddr.getType());
@@ -119,7 +118,7 @@ public class InsertEncodeServiceImpl implements InsertEncodeService {
     private Sec_addr getSecAddr(Sec_addr secAddr) {
         Sec_addr secAddr1;
         Random random = new Random();
-        //随机的key
+        //通过set集合打乱元素顺序，再转为list集合，生成随机的key
         Set<String> set = keyMap.keySet();
         List<String> keys = new ArrayList(set);
         int keyIndex = random.nextInt(keys.size());

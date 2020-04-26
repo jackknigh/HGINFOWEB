@@ -53,4 +53,6 @@ public interface Base_addrMapper1 {
     void updateErrDate(Base_addr baseAddr);
 
     void updateP5type(Base_addr base_addr);
+
+    List<Base_addr> selectBaseAddr2(@Param("streetName") String streetName);
 }

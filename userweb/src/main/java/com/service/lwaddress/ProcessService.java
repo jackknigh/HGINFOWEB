@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface ProcessService {
-    Map<String,List<Base_addr>> processService(List<Base_addr> addressMessage, List<Base_addr> insertMessage, int str, int num, ThreadPoolTaskExecutor executor, boolean flag);//List<Base_addr> addressMessage
+    Map<String,List<Base_addr>> processService(List<Base_addr> addressMessage, List<Base_addr> insertMessage, int str, int num, ThreadPoolTaskExecutor executor);
 
 
 

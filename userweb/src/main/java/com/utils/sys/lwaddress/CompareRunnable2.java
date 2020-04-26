@@ -100,10 +100,10 @@ public class CompareRunnable2 implements Runnable {
 
                     /*返回一个map出来，其中包括计算用的Double的sum,String的integerer[]*/
                     //数字和字符相似度匹配
-                    Map<String, Object> processresult1 = processGradeService.processDemo(strMapa, num);
+                    Map<String, Object> processresult1 = processGradeService.processDemo(strMapa, num,false);
                     BigDecimal suma = (BigDecimal) processresult1.get("sum");
 
-                    Map<String, Object> processresult2 = processGradeService.processDemo(strMapb, str);
+                    Map<String, Object> processresult2 = processGradeService.processDemo(strMapb, str,false);
                     BigDecimal sumb = (BigDecimal) processresult2.get("sum");
 
                     //计算相似度

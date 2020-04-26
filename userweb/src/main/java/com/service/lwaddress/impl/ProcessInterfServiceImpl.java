@@ -97,15 +97,15 @@ public class ProcessInterfServiceImpl implements ProcessInterfService {
 
                 //获取指定短号码数据
                 List list = base_addrMapper.selectByShortPhone(shortPhone, null);
-                if (list.size() == 0) {
+                if (TextUtils.isEmpty(list)) {
                     continue;
                 }
 
-                log.info("*********手机号为: {},共 {} 条数据*********",shortPhone,list.size());
+                log.info("*********手机短号为: {},共 {} 条数据*********",shortPhone,list.size());
                 //多线程相似度方法
                 list = processThread(list, blockSizeByNum, blockSizeByStr,executor, executor1);
                 //短地址为空可能会导致集合为空
-                if (list.size() == 0) {
+                if (TextUtils.isEmpty(list)) {
                     continue;
                 }
                 //只反写不合并操作
@@ -129,8 +129,6 @@ public class ProcessInterfServiceImpl implements ProcessInterfService {
             //获取指定手机号组的每个元素
             for (int i = 0; i < listPhone.size(); i++) {
                 String phone = listPhone.get(i).getPhone();
-
-                //循环遍历街道，根据街道和短号查询数据
                 List list = base_addrMapper.selectDataByPhone(phone, null);
                 if (list.size() == 0) {
                     continue;
@@ -144,7 +142,6 @@ public class ProcessInterfServiceImpl implements ProcessInterfService {
             }
             log.info("*********已处理至：  {} -》 {} *********",start,start+batchcCount);
         }
-        log.info("***************结束***************");
     }
 
     /**
@@ -177,11 +174,11 @@ public class ProcessInterfServiceImpl implements ProcessInterfService {
 
                 log.info("*********街道 ：{}  有 {} 条比较值数据*********",streetName.getStreetName(),baseAddrs1.size());
 
-                //标准数据
+                //标准数据,如果需碰撞数据街道为null,就与所有标准数据进行碰撞
                 List<Base_addr> volList = base_addrMapper.selectBaseAddr2(streetName.getStreetName());
 
                 log.info("*********有 {} 条被比较值数据*********",volList.size());
-                executor.execute(new CompareRunnable3(blockSizeByNum,blockSizeByStr,volList,baseAddrs1));
+                executor.execute(new CompareRunnable4(blockSizeByNum,blockSizeByStr,volList,baseAddrs1));
                 start = start + count;
             }
         }
@@ -300,9 +297,7 @@ public class ProcessInterfServiceImpl implements ProcessInterfService {
     public List<Base_addr> insertMsgByMerge(List<Base_addr> list) {
         /*插入数据库阶段*/
         List<Base_addr> baseAddrs = new ArrayList<>();
-        List<Base_addr> baseAddrs1 = new ArrayList<>();
-        List<Base_addr> baseAddrs2 = new ArrayList<>();
-        List<Base_addr> baseAddrs3 = new ArrayList<>();
+
         for (int k = 0; k < list.size(); k++) {
             if (list.get(k) == null) {
                 list.remove(k);
@@ -315,11 +310,11 @@ public class ProcessInterfServiceImpl implements ProcessInterfService {
                 int count = list.get(k).getMergeNum();
                 for (Base_addr baseAddr : list) {
                     if(list.get(k).getId().equals(baseAddr.getContrastId())){
+                        //设置基准值的地址合并数值和最早最晚收件时间
                         count = count +1 + baseAddr.getMergeNum();
                         if(baseAddr.getLatestTime().compareTo(list.get(k).getLatestTime())>0){
                             list.get(k).setLatestTime(baseAddr.getLatestTime());
                         }
-
                         if(baseAddr.getEarliestTime().compareTo(list.get(k).getEarliestTime())<0){
                             list.get(k).setEarliestTime(baseAddr.getEarliestTime());
                         }
@@ -327,23 +322,11 @@ public class ProcessInterfServiceImpl implements ProcessInterfService {
                 }
 
                 list.get(k).setMergeNum(count);
-                if (k % 3 == 0) {
-                    baseAddrs1.add(list.get(k));
-                }
-                if (k % 3 == 1) {
-                    baseAddrs2.add(list.get(k));
-                }
-                if (k % 3 == 2) {
-                    baseAddrs3.add(list.get(k));
-                }
+                baseAddrs.add(list.get(k));
                 list.remove(k);
                 k = k - 1;
             }
         }
-
-        baseAddrs.addAll(baseAddrs1);
-        baseAddrs.addAll(baseAddrs2);
-        baseAddrs.addAll(baseAddrs3);
 
         try {
             if (list != null && list.size() > 0) {
@@ -356,7 +339,7 @@ public class ProcessInterfServiceImpl implements ProcessInterfService {
     }
 
     /**
-     * 大集合切割相似度匹配方法
+     * 相似度匹配方法
      *
      * @param baseAddrs 需要处理的数据
      * @param blockSizeByNum 数字阈值
@@ -366,18 +349,12 @@ public class ProcessInterfServiceImpl implements ProcessInterfService {
      * @return
      */
     public List<Base_addr> processThread(List<Base_addr> baseAddrs, int blockSizeByNum, int blockSizeByStr,ThreadPoolTaskExecutor executor, ThreadPoolTaskExecutor executor1) {
-        //用来标记是否是集合切割操作，是的话需要修改合并表的关联id
-        boolean flag = false;
-
-        long startTime = System.currentTimeMillis();
-
         //相似度碰撞方法
-        Future<List<Base_addr>> submit = executor1.submit(new ProcessPhoneRunnable(blockSizeByNum, blockSizeByStr,executor, baseAddrs, flag));
+        Future<List<Base_addr>> submit = executor1.submit(new ProcessPhoneRunnable(blockSizeByNum, blockSizeByStr,executor, baseAddrs));
 
         try {
+            //该方法会阻塞，在线程执行完后才执行
             baseAddrs = submit.get();
-            long endTime = System.currentTimeMillis();
-            log.info("处理 {} 条数据用时 {}毫秒",baseAddrs.size(),endTime-startTime);
         } catch (InterruptedException e) {
             log.error(e.getMessage());
         } catch (ExecutionException e) {

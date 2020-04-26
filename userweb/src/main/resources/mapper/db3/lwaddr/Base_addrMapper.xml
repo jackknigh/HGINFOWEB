@@ -5,6 +5,7 @@
         <id column="id" property="id" jdbcType="VARCHAR"/>
         <result column="addr_jj" property="addrJj" jdbcType="VARCHAR"/>
         <result column="addr_sj" property="addrSj" jdbcType="VARCHAR"/>
+        <result column="addr_code" property="addrCode" jdbcType="VARCHAR"/>
         <result column="short_addr" property="shortAddr" jdbcType="VARCHAR"/>
         <result column="name1" property="name1" jdbcType="VARCHAR"/>
         <result column="name2" property="name2" jdbcType="VARCHAR"/>
@@ -565,6 +566,15 @@
     </select>
     <select id="selectBaseAddr" resultMap="BaseResultMap">
         select * from sec_addr where short_addr is not null order by count_id LIMIT #{start},#{batchcCount}
+    </select>
+    <select id="selectBaseAddr2" resultMap="BaseResultMap">
+        select * from sec_addr
+        <where>
+            <if test="streetName != null">
+                street = #{streetName}
+            </if>
+            and short_addr is not null
+        </where>
     </select>
 
     <insert id="insert4" parameterType="com.dao.entity.lwaddress.Base_addr">

@@ -29,6 +29,8 @@ public class EncodeStartWayServiceImpl implements EncodeStartWayService {
     @Override
     public void startway(int start, int total, int batchcCount) {
         int count = total / batchcCount + 1;
+
+        //初始化高德key和url
         insertEncodeService.init();
         CountDownLatch countDownLatch = new CountDownLatch(count);
 

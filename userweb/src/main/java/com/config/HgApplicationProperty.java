@@ -17,6 +17,10 @@ public class HgApplicationProperty {
     @Value("${sysPropertys.grace1}")
     private String grace1;
 
+    @Value("${sysPropertys.grace2}")
+    private String grace2;
+
+
     @Value("${sysPropertys.loginWithAutoCode}")
     private String loginWithAutoCode;
 
@@ -94,6 +98,14 @@ public class HgApplicationProperty {
 
     public void setGrace1(String grace1) {
         this.grace1 = grace1;
+    }
+
+    public String getGrace2() {
+        return grace2;
+    }
+
+    public void setGrace2(String grace2) {
+        this.grace2 = grace2;
     }
 
     public String getGrace() {

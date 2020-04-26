@@ -57,14 +57,16 @@ public class CompareRunnable3 implements Runnable {
             for (int j = 0; j < baseAddrList.size(); j++) {
             //数字字母处理
             String shortAddr = AsciiUtil.RegProcess(baseAddrList.get(j).getShortAddr());
+            if(shortAddr.endsWith("号") || shortAddr.endsWith("室")){
+                shortAddr = shortAddr.substring(0,shortAddr.length()-1);
+            }
             //切将地址切割成字符串数组，装进map集合，strMapa是数字，strMapb是字符串
             Map stringMap = stringParsingService.stringParse(shortAddr);
             strMapb.put("stra", (String[]) stringMap.get("strb2"));
             strMapa.put("stra", (String[]) stringMap.get("strb1"));
 
             /*用于判断的阈值*/
-            BigDecimal grace = new BigDecimal(applicationProperty.getGrace());
-            BigDecimal grace1 = new BigDecimal(0.93);
+            BigDecimal grace = new BigDecimal(applicationProperty.getGrace2());
 
             for (int i = 0; i < addressMessage.size(); i++) {
                 //如果数据已经跟其他数据合并过了，就不需要再判断了
@@ -75,31 +77,23 @@ public class CompareRunnable3 implements Runnable {
                 if (!StringUtils.isEmpty(addressMessage.get(i).getShortAddr())) {
                     //数字字母处理
                     String shortAddr1 = AsciiUtil.RegProcess(addressMessage.get(i).getShortAddr());
+                    if(shortAddr1.endsWith("号") || shortAddr1.endsWith("室")){
+                        shortAddr1 = shortAddr1.substring(0,shortAddr1.length()-1);
+                    }
                     //切将地址切割成字符串数组，装进map集合，strMapa是数字，strMapb是字符串
                     Map stringMap1 = stringParsingService.stringParse(shortAddr1);
                     strMapa.put("strb", (String[]) stringMap1.get("strb1"));
                     strMapb.put("strb", (String[]) stringMap1.get("strb2"));
 
                     //数字和字符相似度匹配
-                    Map<String, Object> processresult1 = processGradeService.processDemo(strMapa, num);
-                    Map<String, Object> processresult2 = processGradeService.processDemo(strMapb, str);
+                    Map<String, Object> processresult1 = processGradeService.processDemo(strMapa, num,false);
+                    Map<String, Object> processresult2 = processGradeService.processDemo(strMapb, str,false);
                     BigDecimal suma = (BigDecimal) processresult1.get("sum");
                     BigDecimal sumb = (BigDecimal) processresult2.get("sum");
 
                     //计算相似度
                     BigDecimal sum = processGradeService.getSum(suma, sumb, (String[]) stringMap1.get("strb1"),(String[]) stringMap.get("strb1"),(String[]) stringMap1.get("strb2"),(String[]) stringMap.get("strb2"));
 
-                    //如果标准数据末尾是号结尾，调高阈值
-                    if(baseAddrList.get(j).getShortAddr().endsWith("号")){
-                        //如果相似度大于阈值
-                        if (sum.compareTo(grace1) > 0) {
-                            //绑定数据关联关系
-                            addressMessage.get(i).setContrastId(baseAddrList.get(j).getId());
-                            addressMessage.get(i).setContrastScore(sum);
-                            addressMessage.get(i).setAddrCode(baseAddrList.get(j).getAddrCode());
-                        }
-                            continue;
-                    }
                     //如果相似度大于阈值
                     if (sum.compareTo(grace) > 0) {
                         //绑定数据关联关系

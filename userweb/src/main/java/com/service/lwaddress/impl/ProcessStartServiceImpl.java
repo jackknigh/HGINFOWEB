@@ -75,6 +75,7 @@ public class ProcessStartServiceImpl implements ProcessStartService {
         initExecutor1();
         List<Phone> phoneList = new ArrayList<>();
 
+        //获取phone表的手机号总数和手机号信息
         if("3".equals(applicationProperty.getStandardAddress())){
             total = phoneMapper.selectPhoneCount();
             phoneList = phoneMapper.selectByPhone();

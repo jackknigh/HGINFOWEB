@@ -134,8 +134,8 @@ public class MsgSearchServiceImpl implements MsgSearchService {
             strMapa.put("strb", (String[]) (stringParsingService.stringParse(msgList.get(i).getShortAddr()).get("strb1")));
             strMapb.put("strb", (String[]) (stringParsingService.stringParse(msgList.get(i).getShortAddr()).get("strb2")));
             /*返回一个map出来，其中包括计算用的Double的sum,String的integerer[]*/
-            processresult1 = processGradeService.processDemo(strMapa, 3);
-            processresult2 = processGradeService.processDemo(strMapb, 3);
+            processresult1 = processGradeService.processDemo(strMapa, 3,false);
+            processresult2 = processGradeService.processDemo(strMapb, 3,false);
 
             BigDecimal suma = (BigDecimal) processresult1.get("sum");
             BigDecimal sumb = (BigDecimal) processresult2.get("sum");

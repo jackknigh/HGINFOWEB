@@ -42,8 +42,8 @@ public class likeNum {
 
                     /*返回一个map出来，其中包括计算用的Double的sum,String的integerer[]*/
                     //数字和字符相似度匹配
-                    Map<String, Object> processresult1 = processGradeService.processDemo(strMapa, 7);
-                    Map<String, Object> processresult2 = processGradeService.processDemo(strMapb, 3);
+                    Map<String, Object> processresult1 = processGradeService.processDemo(strMapa, 7,false);
+                    Map<String, Object> processresult2 = processGradeService.processDemo(strMapb, 3,false);
 
                     BigDecimal suma = (BigDecimal) processresult1.get("sum");
                     BigDecimal sumb = (BigDecimal) processresult2.get("sum");

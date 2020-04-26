@@ -34,27 +34,14 @@ public class FindEncodeServiceImpl implements FindEncodeService {
     @Override
     public Sec_addr getLngLatFromOneAddr(Sec_addr sec_addr, String key, String url) {
         Map<String, String> params = new HashMap<String, String>();
-//        String address1 = sec_addr.getProvince() + sec_addr.getCity() + sec_addr.getArea() + sec_addr.getStreet() + sec_addr.getShortAddr();
         String address = sec_addr.getAddrSj();
-
-//        String[] address2 = address1.split("null");
-//        String address = "";
-//        for (String add : address2) {
-//            address = address.concat(add);
-//        }
-//        if (address2.length > 2) {
-//            /*地址中含有字符null*/
-//            sec_addr.setType(Integer.valueOf(124));
-//        }
         String[] address3 = address.split("%7C");
         if (address3.length > 1) {
             String address4 = "";
             for (String add : address3) {
                 address4 = address4.concat(add);
-
             }
             params.put("address", address4);
-
         } else {
             params.put("address", address);
         }
@@ -66,10 +53,8 @@ public class FindEncodeServiceImpl implements FindEncodeService {
 
         // 解析返回的xml格式的字符串result，从中拿到经纬度
         // 调用高德API，拿到json格式的字符串结果
-//        JSONObject jsonObject = JSONObject.fromObject(result);
         JSONObject jsonObject = JSON.parseObject(result);
 
-//        System.out.println(result);
         // 拿到返回报文的status值，高德的该接口返回值有两个：0-请求失败，1-请求成功；
         int status = Integer.valueOf(jsonObject.getString("status"));
 
@@ -91,10 +76,8 @@ public class FindEncodeServiceImpl implements FindEncodeService {
             }
             // 经度
             BigDecimal longitude = new BigDecimal(lngLatArr[0]);
-            // System.out.println("经度" + longitude);
             // 纬度
             BigDecimal latitude = new BigDecimal(lngLatArr[1]);
-            // System.out.println("纬度" + latitude);
             list.add(longitude);
             list.add(latitude);
             sec_addr.setLongitude(list.get(0));

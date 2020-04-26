@@ -28,23 +28,22 @@ public class ProcessPhoneRunnable implements Callable<List<Base_addr>> {
     private int blockSizeByStr;
     private ThreadPoolTaskExecutor executor;
     private List<Base_addr> baseAddrs;
-    private boolean flag;
 
-    public ProcessPhoneRunnable(int blockSizeByNum, int blockSizeByStr,ThreadPoolTaskExecutor executor, List<Base_addr> baseAddrs, boolean flag) {
+
+    public ProcessPhoneRunnable(int blockSizeByNum, int blockSizeByStr,ThreadPoolTaskExecutor executor, List<Base_addr> baseAddrs) {
         this.blockSizeByNum = blockSizeByNum;
         this.blockSizeByStr = blockSizeByStr;
         this.executor = executor;
         this.baseAddrs = baseAddrs;
-        this.flag = flag;
     }
 
     @Override
     public List<Base_addr> call() {
-        List<Base_addr> match = match(blockSizeByNum, blockSizeByStr,baseAddrs,executor,flag);
+        List<Base_addr> match = match(blockSizeByNum, blockSizeByStr,baseAddrs,executor);
         return match;
     }
 
-    public List<Base_addr>  match(int blockSizeByNum,int blockSizeByStr,List<Base_addr> baseAddrs,  ThreadPoolTaskExecutor executor, boolean flag) {
+    public List<Base_addr>  match(int blockSizeByNum,int blockSizeByStr,List<Base_addr> baseAddrs,  ThreadPoolTaskExecutor executor) {
         List<Base_addr> list = new ArrayList<>();
         //重置P2为0，因为原先的数据分222和223
         for (int j = 0; j < baseAddrs.size(); j++) {
@@ -55,7 +54,7 @@ public class ProcessPhoneRunnable implements Callable<List<Base_addr>> {
 
         for (int j = 0; j < baseAddrs.size(); j++) {
             //对数据进行处理，参数是所有数据，一个空的集合，滑块值
-            Map<String, List<Base_addr>> map = processService.processService(baseAddrs, list, blockSizeByStr, blockSizeByNum,executor, flag);
+            Map<String, List<Base_addr>> map = processService.processService(baseAddrs, list, blockSizeByStr, blockSizeByNum,executor);
             if ((map.get("insertMessage")).size() != s) {
                 baseAddrs = map.get("addressMessage");
                 s = (map.get("insertMessage")).size();

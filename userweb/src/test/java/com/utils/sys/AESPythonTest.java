@@ -777,7 +777,7 @@ public class AESPythonTest {
         }
         /*map中的"sum"总和，"integer"为integer数组的String形式*/
         /*传入 基准值字符串stra 匹配值字符串stab 滑块数n进行计算*/
-        Map<String, Object> processresult1 = processGradeService.processCount(b1, a1, 3);
+        Map<String, Object> processresult1 = processGradeService.processCount(b1, a1, 3,false);
         BigDecimal suma = (BigDecimal) processresult1.get("sum");
         System.out.println(suma);
     }
@@ -953,9 +953,13 @@ public class AESPythonTest {
 
     @Test
     public void test33() {
-        String name1 = "凤凰家园19 19号3幢一12室";
-        String s = AsciiUtil.RegProcess(name1);
-        System.out.println(s);
+//        //如果姓相同就继续，不相同就判定为不是同一个人
+//        if(!StringUtils.isBlank("张三") && !StringUtils.isBlank("张三")){
+//            if(!baseAddrBasics.getName1().split("")[0].equals(addressMessage.get(i).getName1().split("")[0])
+//                    && !addressMessage.get(i).getName1().startsWith("*") && !baseAddrBasics.getName1().startsWith("*")){
+//                continue;
+//            }
+//        }
     }
 
     @Test
@@ -977,5 +981,220 @@ public class AESPythonTest {
         cal.set(Calendar.MILLISECOND, 0);
         long time = cal.getTimeInMillis() - System.currentTimeMillis()+1800;
         System.out.println(time);
+    }
+
+    @Test
+    public void test37() {
+
+        String f = "振,中,街,罗,东,花,园,3,-,3,0,4,室";
+        String e = "振,中,街,滨,河,花,园,3,-,3,0,4,室";
+        String[] a3 = f.split(",");
+        String[] a2 = e.split(",");
+        int n = 3;
+        int a1 = a3.length;
+
+
+        Integer[] max=new Integer[a1];
+        for(int i=0;i<a1;i++){
+            int maxsum=0;
+            //首字母得1分
+            if(i==0){
+                maxsum=1;
+            }
+
+            /*对比的块刚好被全部包住的情况,首字母+正常值+最后N位加额外分*/
+            if(i+n==a1){
+                maxsum=1;
+                int a = 1;
+                for (int i1 = 0; i1 < n; i1++) {
+                    maxsum=maxsum+a;
+                    a = a+1;
+                }
+                max[i]=new Integer(maxsum);
+                continue;
+            }
+
+            /*对比的块可以被全部包住的情况*/
+            if(i+n<a1){
+                int a = 1;
+                if(i<a1-n){
+                    for (int i1 = 0; i1 < n; i1++) {
+                        maxsum = maxsum+a;
+                        a = a+1;
+                    }
+                    max[i] = new Integer(maxsum);
+                    continue;
+                }else if(a1 > 2 && i>=a1-n){
+                    //如果是最后N为就需要额外加1分
+                    int b = 1;
+                    for (int i1 = 0; i1 < n; i1++) {
+                        maxsum=maxsum+b;
+                        b = b+1;
+                    }
+                    max[i] = new Integer(maxsum);
+                    continue;
+                }
+            }
+
+            /*对比的块不能被全部包住的情况*/
+            if(i+n>a1){
+                maxsum=1;
+                int b = 1;
+                for (int i1 = 0; i1 < a1-i; i1++) {
+                    maxsum=maxsum+b;
+                    b = b+1;
+                }
+                max[i]=new Integer(maxsum);
+            }
+        }
+        for (Integer integer : max) {
+            System.out.println(integer);
+        }
+    }
+
+
+    @Test
+    public void test36() {
+        String f = "振,中,街,罗,东,花,园,3,-,3,0,4,室";
+        String e = "振,中,街,滨,河,花,园,3,-,3,0,4,室";
+        String[] a1 = f.split(",");
+        String[] a2 = e.split(",");
+        int n = 3;
+
+
+
+        int a3 = a1.length;
+
+        Integer[] max=new Integer[a3];
+        for(int i=0;i<a3;i++){
+            int maxsum=0;
+            //首字母得1分
+            if(i==0){
+                maxsum=1;
+            }
+
+            /*对比的块刚好被全部包住的情况,首字母+正常值+最后N位加额外分*/
+            if(i+n==a3){
+                maxsum=1;
+                int a = 1;
+                for (int i1 = 0; i1 < n; i1++) {
+                    maxsum=maxsum+a;
+                    a = a+1;
+                }
+                max[i]=new Integer(maxsum);
+                continue;
+            }
+
+            /*对比的块可以被全部包住的情况*/
+            if(i+n<a3){
+                int a = 1;
+                if(i<a3-n){
+                    for (int i1 = 0; i1 < n; i1++) {
+                        maxsum = maxsum+a;
+                        a = a+1;
+                    }
+                    max[i] = new Integer(maxsum);
+                    continue;
+                }else if(a3 > 2 && i>=a3-n){
+                    //如果是最后N为就需要额外加1分
+                    int b = 1;
+                    for (int i1 = 0; i1 < n; i1++) {
+                        maxsum=maxsum+b;
+                        b = b+1;
+                    }
+                    max[i] = new Integer(maxsum);
+                    continue;
+                }
+            }
+
+            /*对比的块不能被全部包住的情况*/
+            if(i+n>a3){
+                maxsum=maxsum+1;
+                int b = 1;
+                for (int i1 = 0; i1 < a3-i; i1++) {
+                    maxsum=maxsum+b;
+                    b = b+1;
+                }
+                max[i]=new Integer(maxsum);
+            }
+        }
+        int value1 = 0;
+        for (Integer integer : max) {
+            System.out.println(integer);
+            value1 = value1 + integer;
+        }
+        System.out.println("理论最大值："+value1);
+
+
+
+
+
+        Integer[] max1=new Integer[a1.length];
+        for(int a=0;a<a1.length;a++){
+            max1[a]=new Integer(0);
+        }
+        /*记录单次匹配的分数,若匹配上直接得一分所以初始值为1*/
+        int a1_index=0;
+        int a2_index=0;
+        for (int i=0;i<a1.length;i++){
+            for (int j=0;j<a2.length;j++){
+                if(a1[i].equals(a2[j])){
+                    //匹配到初始分1
+                    int grace=1;
+
+                    //如果是最后N位,对应下标相同就加1
+                    if(a1.length-n<=i ){
+                        int index = a1.length-1-i;
+                        int index2 = a2.length-1-index;
+                        if(a2.length-1>=index) {
+                            if (a1[i].equals(a2[index2])) {
+                                grace = grace + 1;
+                            }
+                        }
+                    }
+
+                    a1_index=i;
+                    a2_index=j;
+
+                    int fraction = 2;
+
+                    for (int k = n-1; k > 0; k--) {
+                        //第一位加1分
+                        if (a1_index == 0 ) {
+                            grace = grace + 1;
+                        }
+
+                        if (a2_index + 1 == a2.length) {
+                            break;
+                        }
+
+                        if(a1_index + 1 == a1.length){
+                            break;
+                        }
+
+                        //如果下一位匹配到加1
+                        if(a1[a1_index+1].equals(a2[a2_index+1])){
+                            /*否则即为可以进行下一级计算*/
+                            a1_index=a1_index+1;
+                            a2_index=a2_index+1;
+                            grace=grace+fraction;
+                            fraction = fraction+1;
+                            continue;
+                        }
+                        break;
+                    }
+
+                    if (grace > max1[i]) {
+                        max1[i] =  new Integer(grace);
+                    }
+                }
+            }
+        }
+        int value2 = 0;
+        for (Integer integer : max1) {
+            System.out.println(integer);
+            value2 = value2 + integer;
+        }
+        System.out.println("理论最大值："+value2);
     }
 }

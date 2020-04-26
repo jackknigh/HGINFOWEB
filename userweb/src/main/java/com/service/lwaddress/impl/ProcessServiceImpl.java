@@ -26,8 +26,8 @@ public class ProcessServiceImpl implements ProcessService {
     private static final Logger log = LoggerFactory.getLogger(ProcessStartServiceImpl.class);
 
     @Override
-    //获取每个短号组(按标准分从大到小排)的第一位置为标准值，然后相似度匹配，匹配到的置为合并值，重复循环此操作，直至短号组所有元素被标记
-    public Map<String, List<Base_addr>> processService(List<Base_addr> addressMessage, List<Base_addr> insertMessage, int str, int num,ThreadPoolTaskExecutor executor,boolean flag) {
+    //获取每个短号组(按标准分从大到小排)的第一位置为标准值，然后相似度匹配，匹配到的值为合并值，重复循环此操作，直至短号组所有元素被标记
+    public Map<String, List<Base_addr>> processService(List<Base_addr> addressMessage, List<Base_addr> insertMessage, int str, int num,ThreadPoolTaskExecutor executor) {
         Map<String, List<Base_addr>> map1 = new HashMap<>();
 
         int kk = -1;
@@ -72,7 +72,7 @@ public class ProcessServiceImpl implements ProcessService {
             int value = total / count;
             Future<HashMap<String, Object>>[] future = new Future[value+1];
 
-            //总数是否大于步进值
+            //总数是否大于步进值，如果总数大于步进值就切割成多个集合多线程执行
             if (value != 0) {
                 for (int i = 0; i < future.length; i++) {
                     //刚好凑整，没有余数
@@ -83,16 +83,16 @@ public class ProcessServiceImpl implements ProcessService {
                     if (i == value) {
                         //处理最后的余数
                         int remainder = total - (value * count);
-                        future[i] = executor.submit(new MatchRunnable(num, str,baseAddrBasics, addressMessage, start, remainder + start,flag));
+                        future[i] = executor.submit(new MatchRunnable(num, str,baseAddrBasics, addressMessage, start, remainder + start));
                         continue;
                     }
                     //不是最后一次，相似度匹配
-                    future[i] = executor.submit(new MatchRunnable(num, str,baseAddrBasics, addressMessage, start, count + start,flag));
+                    future[i] = executor.submit(new MatchRunnable(num, str,baseAddrBasics, addressMessage, start, count + start));
                     start = start + count;
                 }
             } else {
                 //总数小于步进值
-                future[0] = executor.submit(new MatchRunnable(num, str,baseAddrBasics,addressMessage, start, total,flag));
+                future[0] = executor.submit(new MatchRunnable(num, str,baseAddrBasics,addressMessage, start, total));
             }
             try {
                 //获取多线程的处理结果

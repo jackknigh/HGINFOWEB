@@ -69,12 +69,11 @@ public class Bs_utilServiceImpl implements Bs_utilService {
         }
 
         try {
-            if (updateMessage == null || updateMessage.size() == 0) {
-                return;
+            if (!TextUtils.isEmpty(updateMessage)) {
+                //将处理完的值存进sec_addr表
+                base_addrMapper1.insert1(updateMessage);
+                log.info("***********开始处理的数据编号:{} 步进值:{}***********", number1, number2);
             }
-            //将处理完的值存进sec_addr表
-            base_addrMapper1.insert1(updateMessage);
-            log.info("***********开始处理的数据编号:{} 步进值:{}***********", number1, number2);
         } catch (Exception e) {
             e.printStackTrace();
             log.error("***********开始数据编号:"+number1+" 步进值:"+number2+"  发生异常"+e.getMessage()+"***********");
@@ -96,7 +95,6 @@ public class Bs_utilServiceImpl implements Bs_utilService {
         if (StringUtils.isBlank(base_addr.getAddrSj())) {
             return null;
         }
-
         //省市区切割操作
         base_addr = base_addrService.addrSet(base_addr, allMessage);
 
@@ -110,14 +108,15 @@ public class Bs_utilServiceImpl implements Bs_utilService {
         base_addr.setShortAddr(shortAddr.replaceAll(reg, ""));
 
         //初始化最早收件时间和最晚收件时间
+        if (base_addr.getCreateTime() == null) {
+            base_addr.setLatestTime(DateUtil.getCurrDateTimeStr());
+        }
         if (base_addr.getEarliestTime() == null) {
             base_addr.setEarliestTime(base_addr.getCreateTime());
         }
         if (base_addr.getLatestTime() == null) {
             base_addr.setLatestTime(base_addr.getCreateTime());
         }
-
-        base_addr.setCreateTime(DateUtil.getCurrDateTimeStr());
         return base_addr;
     }
 
@@ -136,8 +135,8 @@ public class Bs_utilServiceImpl implements Bs_utilService {
 
             if (base_addr == null || StringUtils.isBlank(base_addr.getShortAddr())) {
                 //扔进垃圾表
-                base_addrMapper1.insertDiscard(baseAddr);
-                base_addrMapper1.updateP5type(baseAddr);
+                bs_addrMapper.insertDiscard(baseAddr);
+                bs_addrMapper.updateP5type(baseAddr);
                 return;
             }
 
@@ -151,12 +150,12 @@ public class Bs_utilServiceImpl implements Bs_utilService {
                 String endPhone = phone.substring(phone.length() - 4);
                 String shortPhone = startPhone + endPhone;
 
-                List<Base_addr> addressMessage = bs_addrMapper.getDate1(shortPhone);
+                List<Base_addr> addressMessage = bs_addrMapper.getDate1(base_addr.getArea(), base_addr.getStreet(),shortPhone);
                 Base_addr baseAddr1 = getProcess(blockSizeByNum, blockSizeByStr, base_addr, addressMessage, false);
                 if (baseAddr1.getPhone().contains("*")) {
                     //扔进垃圾表
-                    base_addrMapper1.insertDiscard(baseAddr1);
-                    base_addrMapper1.updateP5type(base_addr);
+                    bs_addrMapper.insertDiscard(baseAddr1);
+                    bs_addrMapper.updateP5type(base_addr);
                     return;
                 }
             }
@@ -168,8 +167,8 @@ public class Bs_utilServiceImpl implements Bs_utilService {
             //如果被合并了就结束
             if (baseAddr1.getP2type() == 222) {
                 baseAddr1.setP5type(1);
-                base_addrMapper1.insert3(baseAddr1);
-                base_addrMapper1.updateP5type(base_addr);
+                bs_addrMapper.insert3(baseAddr1);
+                bs_addrMapper.updateP5type(base_addr);
                 return;
             }
 
@@ -179,15 +178,15 @@ public class Bs_utilServiceImpl implements Bs_utilService {
             base_addr.setP5type(1);
             base_addr.setEarliestTime(base_addr.getCreateTime());
             base_addr.setLatestTime(base_addr.getCreateTime());
-            base_addrMapper1.insert5(base_addr);
-            base_addrMapper1.updateP5type(base_addr);
+            bs_addrMapper.insert5(base_addr);
+            bs_addrMapper.updateP5type(base_addr);
 
             //如果插入基准表，就需要再与房屋地址碰撞
             List<Base_addr> baseAddrs = new ArrayList<>();
             baseAddrs.add(base_addr);
 
             //标准数据
-            List<Base_addr> volList = base_addrMapper.selectBaseAddr2(base_addr.getStreet());
+            List<Base_addr> volList = base_addrMapper1.selectBaseAddr2(base_addr.getStreet());
 
             log.info("*********有 {} 条被比较值数据*********",volList.size());
             executor.execute(new CompareRunnable3(blockSizeByNum,blockSizeByStr,volList,baseAddrs));
@@ -251,7 +250,7 @@ public class Bs_utilServiceImpl implements Bs_utilService {
 
                 /*返回一个map出来，其中包括计算用的Double的sum,String的integerer[]*/
                 //数字和字符相似度匹配
-                Map<String, Object> processresult1 = processGradeService.processDemo(strMapa, num);
+                Map<String, Object> processresult1 = processGradeService.processDemo(strMapa, num,false);
 
 
                 //理论最大值
@@ -259,7 +258,7 @@ public class Bs_utilServiceImpl implements Bs_utilService {
                 //实际得分
                 BigDecimal asum = (BigDecimal) processresult1.get("asum");
 
-                Map<String, Object> processresult2 = processGradeService.processDemo(strMapb, str);
+                Map<String, Object> processresult2 = processGradeService.processDemo(strMapb, str,false);
 
                 //理论最大值
                 BigDecimal asummax1 = (BigDecimal) processresult2.get("asummax");

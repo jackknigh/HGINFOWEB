@@ -41,8 +41,6 @@ public class Bs_startWayServiceImpl implements Bs_startWayService {
     public void startway(int start, int total, int batchcCount) {
         log.info("开始执行短地址切割。。。。。。。。。。。。");
         Map<String, Object> allMessage = getMap();
-
-        BigDecimal n = new BigDecimal(applicationProperty.getInsertWeight());
         String reg = getReg();
         int startCount = (total - start) / batchcCount + 1;
         int startValue = start;
@@ -121,8 +119,10 @@ public class Bs_startWayServiceImpl implements Bs_startWayService {
         for (Base_addr base_addr : baseAddrList) {
             if (StringUtils.isBlank(base_addr.getPhone()) || base_addr.getPhone().length() < 5) {
                 //插入废弃表
-                base_addrMapper1.insertDiscard(base_addr);
-                base_addrMapper1.updateP5type(base_addr);
+//                base_addrMapper1.insertDiscard(base_addr);
+//                base_addrMapper1.updateP5type(base_addr);
+                bs_addrMapper.insertDiscard(base_addr);
+                bs_addrMapper.updateP5type(base_addr);
                 continue;
             }
             //增量碰撞处理

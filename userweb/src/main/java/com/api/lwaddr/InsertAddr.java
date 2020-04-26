@@ -47,7 +47,7 @@ public class InsertAddr implements Job {
      */
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-        log.info("================================开始增量操作。。。。。。。。。。 {}", DateUtil.getCurrDateTimeStr());
+        log.info("================================开始增量操作。。。。。。。。。。 开始时间:{}", DateUtil.getCurrDateTimeStr());
         initExecutor();
         bs_startWayService.increment(executor);
     }

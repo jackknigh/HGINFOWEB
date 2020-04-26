@@ -39,7 +39,7 @@ public interface Base_addrMapper {
 
     List<Base_addr> selectByPhone(int number1, int number2);
 
-    List<Base_addr> selectByShortPhone(@Param("shortPhone") String shortPhone, @Param("street") String street);
+    List<Base_addr> selectByShortPhone(@Param("shortPhone") String shortPhone, @Param("city") String city);
 
     int truncateTable(String table);
 
@@ -125,7 +125,7 @@ public interface Base_addrMapper {
 
     List<Base_addr> getDate(@Param("shortPhone")String shortPhone,@Param("province")String province,@Param("city")String city,@Param("area")String area,@Param("street")String street);
 
-    List<Base_addr> getDate1(@Param("shortPhone")String shortPhone);
+    List<Base_addr> getDate1(@Param("area") String area, @Param("street") String street,@Param("shortPhone")String shortPhone);
 
     List<Base_addr> getInsertDate();
 
@@ -143,4 +143,8 @@ public interface Base_addrMapper {
     List<Base_addr> selectBaseAddrs(@Param("streetName")String streetName, @Param("start")int start, @Param("count")int count);
 
     void function(@Param("start")int start, @Param("end")int end);
+
+    void insertDiscard(Base_addr base_addr);
+
+    void updateP5type(Base_addr base_addr);
 }

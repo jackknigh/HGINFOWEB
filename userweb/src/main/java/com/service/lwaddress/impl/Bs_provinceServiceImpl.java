@@ -50,15 +50,6 @@ public class Bs_provinceServiceImpl implements Bs_provinceService {
             pattern = Pattern.compile(provinceAllName.get(i).getProvinceName());
             matcher = pattern.matcher(addressUse);
             if (matcher.find()) {
-//                String[] split = Address.split(provinceAllName.get(i).getProvinceName());
-//                provinceName = matcher.group();
-//                if(split.length>0){
-//                    Address = split[split.length-1];
-//                }else {
-//                    Address = Address.replace(provinceName,"");
-//                }
-//                provinceCode = provinceAllName.get(i).getProvinceCode();
-////                Address = Address.replace(provinceName,"");
                 provinceName = matcher.group();
                 provinceCode = provinceAllName.get(i).getProvinceCode();
                 address = address.replace(provinceName,"");
@@ -77,9 +68,6 @@ public class Bs_provinceServiceImpl implements Bs_provinceService {
                 }
             }
         }
-       /* log.info("provinceName"+provinceName);
-        log.info("provinceCode"+provinceCode);
-        log.info("provinceAddress"+Address);*/
        //地址名
         provinceMap.put("firstAddress",firstAddress);
         //省名
@@ -91,46 +79,5 @@ public class Bs_provinceServiceImpl implements Bs_provinceService {
         //标准省集合
         provinceMap.put("provinceAllName",provinceAllName);
         return provinceMap;
-    }
-
-
-
-    @Override
-    public boolean provinceAllJudge( String address,List<Bs_city> provinceAllName) {
-
-
-        String addressUse;
-        boolean flag = false;
-        Pattern pattern = null;
-        Matcher matcher = null;
-
-        //如果全地址大于9，就取前9位
-        if (address.length() <= 13) {
-            addressUse = address;
-        } else {
-            addressUse = address.substring(0,9);
-        }
-
-        //遍历存了省名称的集合
-        for (int i = 0; i < provinceAllName.size(); i++) {
-            //将地址和标准地址进行比较
-            pattern = Pattern.compile(provinceAllName.get(i).getCityName());
-            matcher = pattern.matcher(addressUse);
-            if (matcher.find()) {
-                flag = true;
-                break;
-            } else {
-                //如果比较不成功就比较短地址
-                pattern = Pattern.compile(provinceAllName.get(i).getShortName());
-                matcher = pattern.matcher(addressUse);
-                if (matcher.find()) {
-                    flag = true;
-                    break;
-                } else {
-                    continue;
-                }
-            }
-        }
-        return flag;
     }
 }
