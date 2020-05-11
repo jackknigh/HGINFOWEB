@@ -145,6 +145,7 @@ public class CompareRunnable1 implements Runnable {
 
         long endTime1 = System.currentTimeMillis();
         log.info("用时{}毫秒,共 {} 个元素", endTime1 - startTime1, baseAddrList.size());
+        baseAddrList = null;
         countDownLatch.countDown();
     }
 

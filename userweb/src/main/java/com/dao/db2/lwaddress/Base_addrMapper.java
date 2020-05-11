@@ -147,4 +147,18 @@ public interface Base_addrMapper {
     void insertDiscard(Base_addr base_addr);
 
     void updateP5type(Base_addr base_addr);
+
+    List<BaseAddrVo> selectMsg2(@Param("area") String area, @Param("street") String street,@Param("shortPhone") String shortPhone);
+
+    void insertBaseAddr(Base_addr baseAddr);
+
+    BaseAddrVo queryInfoById(@Param("id") String id);
+
+    List<BaseAddrByPhone> queryMergeInfoById(String id);
+
+    List<BaseAddrByPhone> queryBasicsMsgByPhone(@Param("phone") String phone);
+
+    void updateBasics(Base_addr base_addr);
+
+    List<BaseAddrByPhone> queryMsgByPhone(String phone);
 }

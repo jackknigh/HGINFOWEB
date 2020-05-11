@@ -37,6 +37,12 @@ public class Bs_startWayServiceImpl implements Bs_startWayService {
 
     private static final Logger log = LoggerFactory.getLogger(Bs_startWayServiceImpl.class);
 
+    /**
+     * 将数据处理扔给多线程异步处理
+     * @param start
+     * @param total
+     * @param batchcCount
+     */
     @Override
     public void startway(int start, int total, int batchcCount) {
         log.info("开始执行短地址切割。。。。。。。。。。。。");

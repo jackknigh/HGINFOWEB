@@ -127,6 +127,7 @@ public class CompareRunnable4 implements Runnable {
 
         //数据切割,如果需要插入的数据的结果大于20w就切割成20W一份
         List<List<Base_addr>> lists = ListUtil.splitList(baseAddrList, 200000);
+        baseAddrList = null;
         if(TextUtils.isEmpty(lists)){
             return;
         }
@@ -141,11 +142,13 @@ public class CompareRunnable4 implements Runnable {
                     //插入基准值
                     log.info("**********准备插入数据：{} 条 **********",baseAddrs1.size());
                     base_addrMapper1.insert5_2_1(baseAddrs1);
+                    baseAddrs1 = null;
                 }
             } catch (Exception e) {
                 log.error(e.getMessage());
             }
         }
+        lists = null;
         long endTime1 = System.currentTimeMillis();
         log.info("**********用时{}毫秒,共 {} 个元素**********", endTime1 - startTime1, addressMessage.size());
     }
@@ -175,6 +178,7 @@ public class CompareRunnable4 implements Runnable {
             if (mergeAddrs != null && mergeAddrs.size() > 0) {
                 log.info("准备插入数据：{} 条 ",mergeAddrs.size());
                 base_addrMapper1.insert3_2_1(mergeAddrs);
+                mergeAddrs = null;
             }
         } catch (Exception e) {
             log.error(e.getMessage());

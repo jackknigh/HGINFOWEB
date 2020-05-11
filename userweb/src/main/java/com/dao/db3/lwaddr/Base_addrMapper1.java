@@ -40,6 +40,10 @@ public interface Base_addrMapper1 {
 
     int insert4(List<Base_addr> message);
 
+    List<BaseAddrVo> queryMsgByCode(String code);
+
+    BaseAddrVo queryMsgById(String id);
+
     void updateMerge(@Param("mergeId") String mergeId, @Param("basicsId") String basicsId);
 
     List<Base_addr> selectBaseAddr(@Param("start") int start,@Param("batchcCount") int batchcCount);

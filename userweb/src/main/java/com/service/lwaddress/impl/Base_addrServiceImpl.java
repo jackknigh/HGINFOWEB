@@ -58,9 +58,13 @@ public class Base_addrServiceImpl implements Base_addrService {
         List<Bs_street> listStreet = new ArrayList<>();
 
         //去除姓名中的特殊字符
-        bs_addr.setName1(bs_addr.getName1().replaceAll(REGEX_XMSJ, ""));
+        if(!StringUtils.isBlank(bs_addr.getName1())) {
+            bs_addr.setName1(bs_addr.getName1().replaceAll(REGEX_XMSJ, ""));
+        }
         //去除手机中的特殊字符
-        bs_addr.setPhone(bs_addr.getPhone().replaceAll(REGEX_XMSJ, ""));
+        if(!StringUtils.isBlank(bs_addr.getPhone())) {
+            bs_addr.setPhone(bs_addr.getPhone().replaceAll(REGEX_XMSJ, ""));
+        }
         //地址处理特殊字符串
         String address = AsciiUtil.SpecialHandl(bs_addr.getAddrSj(), bs_addr.getName1());
 
@@ -293,10 +297,12 @@ public class Base_addrServiceImpl implements Base_addrService {
         bs_addr.setShortAddr((String) streetMap.get("address"));
 
         //生成手机短号，前三后四
-        if (bs_addr.getPhone().length() >= 7) {
-            String startPhone = bs_addr.getPhone().substring(1, 3);
-            String endPhone = bs_addr.getPhone().substring(bs_addr.getPhone().length() - 4);
-            bs_addr.setShortPhone(startPhone + endPhone);
+        if(!StringUtils.isBlank(bs_addr.getPhone())) {
+            if (bs_addr.getPhone().length() >= 7) {
+                String startPhone = bs_addr.getPhone().substring(1, 3);
+                String endPhone = bs_addr.getPhone().substring(bs_addr.getPhone().length() - 4);
+                bs_addr.setShortPhone(startPhone + endPhone);
+            }
         }
 
         //短地址长度异常的数据分数扣一半
@@ -359,6 +365,116 @@ public class Base_addrServiceImpl implements Base_addrService {
             bs_addr.setMulWeight(BigDecimal.ZERO);
         }
 
+        return bs_addr;
+    }
+
+    @Override
+    public Base_addr addrSet(String address, Map<String, Object> allMessage) {
+        Base_addr bs_addr = new Base_addr();
+        bs_addr.setP1type(0);
+        Map<String, Object> provinceMap;
+        Map<String, Object> cityMap;
+        Map<String, Object> areaMap;
+        Map<String, Object> streetMap;
+
+        List<Bs_city> listCity = new ArrayList<>();
+        List<Bs_area> listArea = new ArrayList<>();
+        List<Bs_street> listStreet = new ArrayList<>();
+
+        //对省的操作
+        provinceMap = bs_provinceService.provinceJudge(address, (List<Bs_province>) allMessage.get("provinceMessage"));
+        //如果有匹配到省
+        if ((String) provinceMap.get("provinceCode") != null) {
+            //遍历所有城市
+            for (int i = 0; i < ((List<Bs_city>) allMessage.get("cityMessage")).size(); i++) {
+                //如果城市的省编码等于匹配到的省编码
+                if (((List<Bs_city>) allMessage.get("cityMessage")).get(i).getProvinceCode().equals((String) provinceMap.get("provinceCode"))) {
+                    //将该城市存进城市集合
+                    listCity.add(((List<Bs_city>) allMessage.get("cityMessage")).get(i));
+                }
+            }
+        } else {
+            //没有匹配到省就将所有城市存进城市集合
+            listCity = (List<Bs_city>) allMessage.get("cityMessage");
+        }
+        //对城市的操作
+        cityMap = bs_cityService.cityJudge((String) provinceMap.get("address"), listCity);
+        //如果有匹配到城市
+        if ((String) cityMap.get("cityCode") != null) {
+            //遍历所有区域
+            for (int i = 0; i < ((List<Bs_area>) allMessage.get("areaMessage")).size(); i++) {
+                //找到区域的城市编码等于匹配到的城市编码的数据存进区域集合
+                if (((List<Bs_area>) allMessage.get("areaMessage")).get(i).getCityCode().equals((String) cityMap.get("cityCode"))) {
+                    listArea.add(((List<Bs_area>) allMessage.get("areaMessage")).get(i));
+                }
+            }
+        } else if ((String) cityMap.get("cityCode") == null && (String) provinceMap.get("provinceCode") != null) {
+            //如果城市编码为空和省编码不为空
+            for (int i = 0; i < ((List<Bs_area>) allMessage.get("areaMessage")).size(); i++) {
+                if (((List<Bs_area>) allMessage.get("areaMessage")).get(i).getProvinceCode().equals((String) provinceMap.get("provinceCode"))) {
+                    listArea.add(((List<Bs_area>) allMessage.get("areaMessage")).get(i));
+                }
+            }
+        } else if ((String) cityMap.get("cityCode") == null && (String) provinceMap.get("provinceCode") == null) {
+            //如果省市的编码都为空就将标准的区域集合存进区域集合
+            listArea = (List<Bs_area>) allMessage.get("areaMessage");
+        }
+        //对区域的操作(这里的listArea可能是前面赋值的区域)
+        areaMap = bs_areaService.areaJudge((String) cityMap.get("address"), listArea);
+        //如果没匹配到区域
+        if ((String) areaMap.get("areaCode") == null) {
+            //如果城市和省都不为空
+            if ((String) cityMap.get("cityCode") != null || (String) provinceMap.get("provinceCode") != null) {
+                listArea = (List<Bs_area>) allMessage.get("areaMessage");
+                //就与标准区域重新匹配一次
+                areaMap = bs_areaService.areaJudge((String) cityMap.get("address"), listArea);
+            }
+        }
+
+        //如果匹配到了区域
+        if ((String) areaMap.get("areaCode") != null) {
+            for (int i = 0; i < ((List<Bs_street>) allMessage.get("streetMessage")).size(); i++) {
+                //如果有街道的区域编号等于匹配到的区域编号，就将街道信息存进街道集合
+                if (((List<Bs_street>) allMessage.get("streetMessage")).get(i).getAreaCode().equals((String) areaMap.get("areaCode"))) {
+                    listStreet.add(((List<Bs_street>) allMessage.get("streetMessage")).get(i));
+                }
+            }
+        } else if ((String) areaMap.get("areaCode") == null && (String) cityMap.get("cityCode") != null) {
+            //如果区域为空，城市不为空
+            for (int i = 0; i < ((List<Bs_street>) allMessage.get("streetMessage")).size(); i++) {
+                if (((List<Bs_street>) allMessage.get("streetMessage")).get(i).getCityCode().equals((String) cityMap.get("cityCode"))) {
+                    listStreet.add(((List<Bs_street>) allMessage.get("streetMessage")).get(i));
+                }
+            }
+        } else if ((String) areaMap.get("areaCode") == null && (String) cityMap.get("cityCode") == null) {
+            //如果区域编码和城市编码都为空
+            for (int i = 0; i < ((List<Bs_street>) allMessage.get("streetMessage")).size(); i++) {
+                if (((List<Bs_street>) allMessage.get("streetMessage")).get(i).getAreaCode().substring(0,4).equals("3303")) {
+                    listStreet.add(((List<Bs_street>) allMessage.get("streetMessage")).get(i));
+                }
+            }
+        }
+        streetMap = bs_streetService.streetJudge((String) areaMap.get("address"), listStreet);
+
+        if (StringUtils.isBlank((String) streetMap.get("streeCode"))) {
+            for (Bs_street streetMessage : ((List<Bs_street>) allMessage.get("streetMessage"))) {
+                listStreet.add(streetMessage);
+            }
+            streetMap = bs_streetService.streetJudge((String) areaMap.get("address"), listStreet);
+        }
+
+        //如果城市区域街道都为空就标记为-100
+        if ((String) streetMap.get("streetCode") == null && (String) areaMap.get("areaCode") == null && (String) cityMap.get("cityCode") == null) {
+            if (applicationProperty.getOpenOrNot().equals("1")) {
+                listStreet = (List<Bs_street>) allMessage.get("streetMessage");
+                streetMap = bs_streetService.streetJudge((String) areaMap.get("address"), listStreet);
+            }
+            bs_addr.setP1type(-100);
+        }
+
+        bs_addr.setShortAddr((String) streetMap.get("address"));
+        bs_addr.setArea((String) areaMap.get("areaName"));
+        bs_addr.setStreet((String) streetMap.get("streetName"));
         return bs_addr;
     }
 }

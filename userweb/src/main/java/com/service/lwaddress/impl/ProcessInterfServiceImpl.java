@@ -13,7 +13,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
@@ -26,7 +25,6 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.ThreadPoolExecutor;
 
 @Service
 public class ProcessInterfServiceImpl implements ProcessInterfService {
@@ -80,10 +78,10 @@ public class ProcessInterfServiceImpl implements ProcessInterfService {
             }
         }
 
-        //根据手机号短号清洗数据
+        //根据手机号短号清洗数据,只反写不合并操作
         if ("0".equals(applicationProperty.getStandardAddress()) || "2".equals(applicationProperty.getStandardAddress())) {
             log.info("*********开始手机号处理*********");
-            //查询phone表,phone的号码都短号，前三后四
+            //查询phone表,phone的号码都是短号，前二至三+后四
             List<Phone> listPhone = phoneMapper.selectAll(start, start+batchcCount);
 
             log.info("*********开始处理进度为：{} --》 {} 的数据*********",start,start+batchcCount);
@@ -95,7 +93,7 @@ public class ProcessInterfServiceImpl implements ProcessInterfService {
                     continue;
                 }
 
-                //获取指定短号码数据
+                //获取指定短号码的数据
                 List list = base_addrMapper.selectByShortPhone(shortPhone, null);
                 if (TextUtils.isEmpty(list)) {
                     continue;
@@ -175,7 +173,7 @@ public class ProcessInterfServiceImpl implements ProcessInterfService {
                 log.info("*********街道 ：{}  有 {} 条比较值数据*********",streetName.getStreetName(),baseAddrs1.size());
 
                 //标准数据,如果需碰撞数据街道为null,就与所有标准数据进行碰撞
-                List<Base_addr> volList = base_addrMapper.selectBaseAddr2(streetName.getStreetName());
+                List<Base_addr> volList = base_addrMapper1.selectBaseAddr2(streetName.getStreetName());
 
                 log.info("*********有 {} 条被比较值数据*********",volList.size());
                 executor.execute(new CompareRunnable4(blockSizeByNum,blockSizeByStr,volList,baseAddrs1));

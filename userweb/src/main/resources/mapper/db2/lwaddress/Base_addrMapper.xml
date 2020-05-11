@@ -203,8 +203,7 @@
     <select id="selectAddr_sj" resultMap="BaseResultMap">
     SELECT
             id,addr_sj,name1,phone,short_phone,row_id,table_name,
-            count_id,id_card,alley,alley_num,plot,building_num,unit_num,
-            floor_num,doorplate_num,merge_num,earliest_time,latest_time,create_time  FROM base_addr
+            count_id,id_card,merge_num,earliest_time,latest_time,create_time  FROM base_addr
     WHERE count_id &gt;= #{number1} and count_id &lt; #{number2}
   </select>
 
@@ -457,6 +456,19 @@
         )
         <!--</foreach>-->
     </insert>
+    <insert id="insertBaseAddr" parameterType="com.dao.entity.lwaddress.Base_addr" useGeneratedKeys="true" keyProperty="countId">
+        insert   into base_addr
+        (id,addr_sj, name1, phone,create_time,count_id,table_name)
+        values
+            (#{id,jdbcType=VARCHAR},
+            #{addrSj,jdbcType=VARCHAR},
+            #{name1,jdbcType=VARCHAR},
+            #{phone,jdbcType=VARCHAR},
+            #{createTime,jdbcType=VARCHAR},
+            #{countId,jdbcType=VARCHAR},
+            #{tableName,jdbcType=VARCHAR}
+            )
+    </insert>
 
     <select id="selectSum"  parameterType="java.lang.Integer" resultType="java.lang.Integer">
     select count(*) from base_addr
@@ -485,6 +497,9 @@
     </update>
     <update id="updateP5type">
          update insert_addr set p5type = 7 where id = #{id}
+    </update>
+    <update id="updateBasics" parameterType="com.dao.entity.lwaddress.Base_addr">
+        update basics_addr set merge_num=#{mergeNum},latest_time=#{latestTime},earliest_time=#{earliestTime}  where id = #{id}
     </update>
 
     <delete id="deleteBasics" parameterType="com.dao.entity.lwaddress.Base_addr">
@@ -790,7 +805,7 @@
         limit #{startCount},#{count}
     </select>
     <select id="getBaseAddrs" resultMap="BaseResultMap">
-        SELECT  id,short_addr,merge_num,earliest_time,latest_time,name1 FROM basics_addr where phone = #{phone}
+        SELECT  id,short_addr,phone,merge_num,earliest_time,latest_time,name1 FROM basics_addr where phone = #{phone}
     </select>
     <select id="getDate" resultMap="BaseResultMap">
         select * from basics_addr where short_phone = #{shortPhone}
@@ -843,7 +858,7 @@
         <if test="streetName == null">
             street is null
         </if>
-        and short_addr is not null
+        and short_addr is not null order by mul_weight desc
     </select>
     <select id="selectBaseAddr1" resultMap="BaseResultMap">
         select * from sec_addr
@@ -855,6 +870,11 @@
         </where>
          order by count_id LIMIT #{start},#{batchcCount}
     </select>
+
+
+
+    <!--  此处是左右碰撞的右表数据(房屋标准表)，
+    如需更改需碰撞的数据，只需切换表名就行 -->
     <select id="selectBaseAddr2" resultMap="BaseResultMap">
         select * from sec_addr
         <where>
@@ -875,10 +895,14 @@
         and short_addr is not null
     </select>
     <select id="selectBaseAddrByArea" resultMap="BaseResultMap">
-        select * from basics_addr where  area = #{areaName} and street is null
+        select * from basics_addr where  area = #{areaName} and street is null order by mul_weight desc
     </select>
+
+
+    <!-- 此处是左右碰撞的左表数据(需碰撞的数据)，
+    如需更改需碰撞的数据，只需切换表名就行 -->
     <select id="selectBaseAddrs" resultMap="BaseResultMap">
-        select * from basics_addr where
+        select * from sec_addr where
         <if test="streetName!=null">
             street = #{streetName}
         </if>
@@ -887,6 +911,79 @@
         </if>
         and short_addr is not null
         limit #{start},#{count}
+    </select>
+    <select id="selectMsg2" resultType="com.dto.vo.BaseAddrVo">
+        SELECT
+        id,
+        name1,
+        addr_sj as addrSj,
+        phone,
+        province,
+        city,
+        area,
+        street,
+        short_addr as shortAddr
+        FROM
+        basics_addr
+        <where>
+            <if test="area != null and area != ''" >
+                and area = #{area}
+            </if>
+            <if test="street != null and street != ''" >
+                and (street = #{street} or street is null)
+            </if>
+            <if test="shortPhone != null and shortPhone != ''" >
+                and short_phone = #{shortPhone}
+            </if>
+        </where>
+    </select>
+    <select id="queryInfoById" resultType="com.dto.vo.BaseAddrVo">
+        SELECT
+          b.id,
+          b.name1,
+          b.addr_sj AS addrSj,
+          b.phone,
+          b.province,
+          b.city,
+          b.area,
+          b.street,
+          b.short_addr AS shortAddr,
+          a.name1 AS oldName1,
+          a.phone AS oldPhone
+        FROM
+          basics_addr AS b
+        LEFT JOIN base_addr AS a
+            ON b.id = a.id
+        WHERE b.id = #{id}
+    </select>
+    <select id="queryMergeInfoById" resultType="com.dao.entity.lwaddress.BaseAddrByPhone" >
+        select id,addr_sj AS addrSj,short_addr AS shortAddr,name1,id_card AS idCard,
+               phone,province,city,AREA,street,merge_num AS mergeNum,earliest_time AS earliestTime,
+               latest_time AS latestTime,longitude,latitude,contrast_id AS contrastId,old_phone AS oldPhone,
+               old_name1 AS oldName1,create_time as createTime,
+               CONCAT(IFNULL(`province`,''),IFNULL(`city`,''),IFNULL(`area`,''),IFNULL(`street`,''),IFNULL(`short_addr`,'')) AS address
+               from merge_addr where  contrast_id = #{id} order by create_time DESC
+    </select>
+    <select id="queryBasicsMsgByPhone" resultType="com.dao.entity.lwaddress.BaseAddrByPhone">
+        SELECT id,addr_sj AS addrSj,short_addr AS shortAddr,name1,id_card AS idCard,
+       phone,province,city,AREA,street,merge_num AS mergeNum,earliest_time AS earliestTime,
+       latest_time AS latestTime,longitude,latitude,contrast_id AS contrastId,old_phone AS oldPhone,
+       old_name1 AS oldName1
+        FROM basics_addr WHERE phone = #{phone}
+    </select>
+    <select id="queryMsgByPhone" resultType="com.dao.entity.lwaddress.BaseAddrByPhone" parameterType="java.lang.String">
+        SELECT id,addr_sj AS addrSj,short_addr AS shortAddr,name1,id_card AS idCard,
+               phone,province,city,AREA,street,merge_num AS mergeNum,earliest_time AS earliestTime,
+               latest_time AS latestTime,longitude,latitude,contrast_id AS contrastId,old_phone AS oldPhone,
+               old_name1 AS oldName1
+        FROM basics_addr WHERE phone = #{phone}
+        UNION
+	(SELECT id,addr_sj AS addrSj,short_addr AS shortAddr,name1,id_card AS idCard,
+       phone,province,city,AREA,street,merge_num AS mergeNum,earliest_time AS earliestTime,
+       latest_time AS latestTime,longitude,latitude,contrast_id AS contrastId,old_phone AS oldPhone,
+       old_name1 AS oldName1
+        FROM merge_addr WHERE phone = #{phone})
+        ORDER BY latestTime DESC
     </select>
 
 

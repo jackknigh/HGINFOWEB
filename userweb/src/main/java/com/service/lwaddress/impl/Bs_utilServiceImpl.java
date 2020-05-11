@@ -61,7 +61,7 @@ public class Bs_utilServiceImpl implements Bs_utilService {
 
         //将查到的数据加入集合中
         for (int i = 0; i < list.size(); i++) {
-            //进行短地址切割处理
+            //调用短地址切割和地址打分处理方法
             Base_addr baseAddr = getBaseAddr(list.get(i), reg, allMessage);
             if (baseAddr != null) {
                 updateMessage.add(baseAddr);
@@ -95,9 +95,10 @@ public class Bs_utilServiceImpl implements Bs_utilService {
         if (StringUtils.isBlank(base_addr.getAddrSj())) {
             return null;
         }
-        //省市区切割操作
+        //调用省市区切割操作方法
         base_addr = base_addrService.addrSet(base_addr, allMessage);
 
+        //如果切割完后的短地址为空，就退出
         String shortAddr = base_addr.getShortAddr();
         if (StringUtils.isBlank(shortAddr)) {
             return null;
@@ -109,7 +110,7 @@ public class Bs_utilServiceImpl implements Bs_utilService {
 
         //初始化最早收件时间和最晚收件时间
         if (base_addr.getCreateTime() == null) {
-            base_addr.setLatestTime(DateUtil.getCurrDateTimeStr());
+            base_addr.setCreateTime(DateUtil.getCurrDateTimeStr());
         }
         if (base_addr.getEarliestTime() == null) {
             base_addr.setEarliestTime(base_addr.getCreateTime());

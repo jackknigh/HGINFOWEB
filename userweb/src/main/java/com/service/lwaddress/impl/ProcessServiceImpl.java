@@ -41,7 +41,6 @@ public class ProcessServiceImpl implements ProcessService {
                 if (!StringUtils.isBlank(addressMessage.get(i).getShortAddr())) {
                     //标记为基准值
                     addressMessage.get(i).setP2type(223);
-                    addressMessage.get(i).setCreateTime(DateUtil.getCurrDateTimeStr());
 
                     //记录基准值下标
                     kk = i;

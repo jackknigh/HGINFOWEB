@@ -525,9 +525,7 @@ public class AESPythonTest {
 
     @Test
     public void test18() {
-        String str = " 电话号码 ：183468454";
-        str = SpecialHandl(str,null);
-        System.out.println(str);
+        System.out.println(new ArrayList<String>());
     }
 
     @Test
@@ -953,13 +951,19 @@ public class AESPythonTest {
 
     @Test
     public void test33() {
-//        //如果姓相同就继续，不相同就判定为不是同一个人
-//        if(!StringUtils.isBlank("张三") && !StringUtils.isBlank("张三")){
-//            if(!baseAddrBasics.getName1().split("")[0].equals(addressMessage.get(i).getName1().split("")[0])
-//                    && !addressMessage.get(i).getName1().startsWith("*") && !baseAddrBasics.getName1().startsWith("*")){
-//                continue;
-//            }
-//        }
+        List<String> list = new ArrayList<>();
+        list.add("王五");
+        //更新下发记录
+        String sendInfos = DateUtil.getCurrDateTimeStr() + "  下发张三、李四";
+        System.out.println(sendInfos);
+        System.out.println();
+        System.out.println();
+        System.out.println();
+        //拼接下发人和时间
+        //拼接下发人和时间
+        String examiner = DateUtil.getCurrDateTimeStr()+"  下发"+ org.apache.commons.lang.StringUtils.join(list.toArray(), "、");
+        sendInfos = sendInfos+"\n\n"+ examiner;
+        System.out.println(sendInfos);
     }
 
     @Test

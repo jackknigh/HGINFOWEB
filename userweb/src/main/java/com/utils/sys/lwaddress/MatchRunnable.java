@@ -111,27 +111,27 @@ public class MatchRunnable implements Callable<HashMap<String, Object>> {
 
                 //满分
                 BigDecimal bsum = new BigDecimal(100);
-                //数字及格线
-                BigDecimal numPass = new BigDecimal(applicationProperty.getNumPass());
                 //字符及格线
                 BigDecimal strPass = new BigDecimal(applicationProperty.getStrPass());
+                //数字及格线
+                BigDecimal numPass = new BigDecimal(applicationProperty.getNumPass());
 
                 BigDecimal sum = new BigDecimal(0);
 
                 //数字和字符相似度匹配
                 Map<String, Object> processresult1 = processGradeService.processDemo(strMapa, num,false);
 
-                //理论最大值
-                BigDecimal asummax = (BigDecimal)processresult1.get("asummax");
                 //实际得分
                 BigDecimal asum = (BigDecimal)processresult1.get("asum");
+                //理论最大值
+                BigDecimal asummax = (BigDecimal)processresult1.get("asummax");
 
                 Map<String, Object> processresult2 = processGradeService.processDemo(strMapb, str,false);
 
-                //理论最大值
-                BigDecimal asummax1 = (BigDecimal)processresult2.get("asummax");
                 //实际得分
                 BigDecimal asum1 = (BigDecimal)processresult2.get("asum");
+                //理论最大值
+                BigDecimal asummax1 = (BigDecimal)processresult2.get("asummax");
 
                 //数字字符实际得分与最大分值占比
                 BigDecimal suma = (BigDecimal) processresult1.get("sum");

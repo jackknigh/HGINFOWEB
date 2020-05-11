@@ -60,6 +60,23 @@
         <result column="count_id" property="countId" jdbcType="INTEGER"/>
 
     </resultMap>
+    <resultMap id="BaseResultMap1" type="com.dto.vo.BaseAddrVo">
+        <id column="id" property="id" jdbcType="VARCHAR"/>
+        <result column="addr_sj" property="addrSj" jdbcType="VARCHAR"/>
+        <result column="addr_code" property="addrCode" jdbcType="VARCHAR"/>
+        <result column="address" property="address" jdbcType="VARCHAR"/>
+        <result column="short_addr" property="shortAddr" jdbcType="VARCHAR"/>
+        <result column="name1" property="name1" jdbcType="VARCHAR"/>
+        <result column="phone" property="phone" jdbcType="VARCHAR"/>
+        <result column="province" property="province" jdbcType="VARCHAR"/>
+        <result column="city" property="city" jdbcType="VARCHAR"/>
+        <result column="area" property="area" jdbcType="VARCHAR"/>
+        <result column="street" property="street" jdbcType="VARCHAR"/>
+        <result column="contrast_score" property="contrastScore" jdbcType="VARCHAR"/>
+        <result column="merge_num" property="mergeNum" jdbcType="INTEGER"/>
+        <result column="earliest_time" property="earliestTime" jdbcType="VARCHAR"/>
+        <result column="latest_time" property="latestTime" jdbcType="VARCHAR"/>
+    </resultMap>
     <sql id="Base_Column_List">
     id, addr_jj, addr_sj, short_addr, name1, name2, name3, phone, province, pro_weight, 
     city, city_weight, area, area_weight, street, stre_weight, pc_weight, mul_weight, 
@@ -242,6 +259,8 @@
     </insert>
 
 
+    <!--  左右碰撞需插入碰撞到的数据的合并表，
+    如需修改插入的数据表，修改表名即可  -->
     <insert id="insert3_2_1" parameterType="com.dao.entity.lwaddress.Base_addr">
         insert   into merge_addr_normal
         (id,addr_sj,short_addr, name1, phone,short_phone,province,pro_weight,id_card,addr_code,
@@ -389,6 +408,8 @@
     </insert>
 
 
+    <!--  左右碰撞需插入碰撞不到的数据的合并表，
+    如需修改插入的数据表，修改表名即可  -->
     <insert id="insert5_2_1" parameterType="com.dao.entity.lwaddress.Base_addr">
         insert   into basics_addr_normal
         (id,addr_sj,short_addr, name1, phone,short_phone,province,pro_weight,
@@ -575,6 +596,14 @@
             </if>
             and short_addr is not null
         </where>
+    </select>
+    <select id="queryMsgByCode" resultMap="BaseResultMap1">
+        SELECT *,CONCAT(IFNULL(`province`,''),IFNULL(`city`,''),IFNULL(`area`,''),IFNULL(`street`,''),IFNULL(`short_addr`,'')) AS address
+        FROM merge_addr_normal
+        WHERE addr_code = #{code} ORDER BY merge_num DESC
+    </select>
+    <select id="queryMsgById" resultMap="BaseResultMap1">
+        SELECT *,CONCAT(IFNULL(`province`,''),IFNULL(`city`,''),IFNULL(`area`,''),IFNULL(`street`,''),IFNULL(`short_addr`,'')) AS address FROM merge_addr_normal WHERE id = #{id}
     </select>
 
     <insert id="insert4" parameterType="com.dao.entity.lwaddress.Base_addr">

@@ -64,7 +64,7 @@ public class ProcessStartServiceImpl implements ProcessStartService {
     }
 
     /**
-     *
+     * 将数据扔给线程池异步处理
      * @param start 开始下标
      * @param total 处理量
      * @param batchcCount 步进值
