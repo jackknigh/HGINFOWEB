@@ -8,6 +8,7 @@ import com.dto.vo.*;
 import com.github.pagehelper.PageInfo;
 
 import java.util.List;
+import java.util.Map;
 
 public interface MsgSearchService {
 //    List<BaseAddrVo> queryMsg(String name, String phone, String address);
@@ -37,6 +38,8 @@ public interface MsgSearchService {
     BaseAddrVo queryMsgById(String id);
 
     BaseAddrVo  insertMsgProcess(BaseAddrVo baseAddrVo);
+
+    void insertMsgProcess1(Base_addr baseAddr, String reg, Map<String, Object> map);
 
     BaseAddrVo queryInfoById(String id);
 

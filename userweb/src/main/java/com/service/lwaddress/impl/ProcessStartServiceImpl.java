@@ -98,8 +98,7 @@ public class ProcessStartServiceImpl implements ProcessStartService {
                 }
                 processInterfService.processInterf(start, batchcCount,n,executor,executor1,phoneList);
                 start = start + batchcCount;
-            }
-            else{
+            } else{
                 if(total-start / batchcCount==0){
                     break;
                 }
@@ -123,13 +122,13 @@ public class ProcessStartServiceImpl implements ProcessStartService {
 
     @Override
     public void update() {
-        int end = 587477124;
-        int count = 150000;
-        int start = 0;
+        int end = Integer.valueOf(applicationProperty.getTotalCount());
+        int count = Integer.valueOf(applicationProperty.getCount());
+        int start = Integer.valueOf(applicationProperty.getStartCount());
 
         int num = end/count+1;
         for (int i = 0; i < num; i++) {
-            processInterfService.function(start,start+count);
+            processInterfService.function1(start,start+count);
             start = start+count;
         }
     }

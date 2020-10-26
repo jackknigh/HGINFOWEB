@@ -42,6 +42,8 @@ public class Base_addr implements Serializable {
 
     private String pcWeight;
 
+    private String community;
+
     private String alley;
 
     private String alleyNum;
@@ -118,6 +120,24 @@ public class Base_addr implements Serializable {
     private Integer countId;
 
     private String createTime;
+
+    private String responsibilityArea;
+
+    public String getResponsibilityArea() {
+        return responsibilityArea;
+    }
+
+    public void setResponsibilityArea(String responsibilityArea) {
+        this.responsibilityArea = responsibilityArea;
+    }
+
+    public String getCommunity() {
+        return community;
+    }
+
+    public void setCommunity(String community) {
+        this.community = community;
+    }
 
     public String getAlley() {
         return alley;
@@ -215,12 +235,27 @@ public class Base_addr implements Serializable {
         this.idCard = idCard;
     }
 
-    public String getLongitude() {
-        return longitude;
+    public BigDecimal getLongitude() {
+        if(longitude == null){
+            return new BigDecimal(0);
+        }
+        return new BigDecimal(longitude);
     }
 
-    public void setLongitude(String longitude) {
-        this.longitude = longitude;
+    public void setLongitude(BigDecimal longitude) {
+        this.longitude = longitude.toString();
+    }
+
+    public BigDecimal getLatitude() {
+        if(latitude == null){
+            return new BigDecimal(0);
+        }
+        return new BigDecimal(latitude);
+
+    }
+
+    public void setLatitude(BigDecimal latitude) {
+        this.latitude = latitude.toString();
     }
 
     public Integer getCountId() {
@@ -451,19 +486,6 @@ public class Base_addr implements Serializable {
 
     public void setPhoneScore(BigDecimal phoneScore) {
         this.phoneScore = phoneScore.toString();
-    }
-
-
-    public BigDecimal getLatitude() {
-        if(latitude == null){
-            return new BigDecimal(0);
-        }
-        return new BigDecimal(latitude);
-
-    }
-
-    public void setLatitude(BigDecimal latitude) {
-        this.latitude = latitude.toString();
     }
 
     public String getAddrSign1() {

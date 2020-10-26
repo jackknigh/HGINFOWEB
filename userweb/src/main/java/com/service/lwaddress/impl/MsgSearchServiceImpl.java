@@ -1,5 +1,6 @@
 package com.service.lwaddress.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.config.HgApplicationProperty;
 import com.dao.db2.lwaddress.Base_addrMapper;
 import com.dao.db3.lwaddr.Base_addrMapper1;
@@ -16,12 +17,11 @@ import com.spinfosec.system.TMCException;
 import com.utils.sys.TextUtils;
 import com.utils.sys.ValidatorUtils;
 import com.utils.sys.lwaddress.AsciiUtil;
-import com.utils.sys.lwaddress.DateUtil;
-import com.utils.sys.lwaddress.ListUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -277,7 +277,7 @@ public class MsgSearchServiceImpl implements MsgSearchService {
         baseAddr.setAddrSj(bsAddrVo.getAddress());
         baseAddr.setName1(bsAddrVo.getName1());
         baseAddr.setId(TextUtils.getUUID());
-        baseAddr.setTableName("insert_"+bsAddrVo.getTableName());
+        baseAddr.setTableName("insert_" + bsAddrVo.getTableName());
         baseAddr.setCreateTime(bsAddrVo.getCreateTime());
 
         //获取省市区街道
@@ -306,14 +306,20 @@ public class MsgSearchServiceImpl implements MsgSearchService {
         int blockSizeByStr = Integer.valueOf(applicationProperty.getBlockSizeByStr());
         int blockSizeByNum = Integer.valueOf(applicationProperty.getBlockSizeByNum());
 
-        String phone = baseAddr.getPhone();
+        String phone = base_addr.getPhone();
+        String name = base_addr.getName1();
         //手机号包含*,手机号反写，反写失败就扔进垃圾表
         if (!StringUtils.isBlank(phone) && phone.length() >= 7 && phone.contains("*")) {
-            String startPhone = phone.substring(1, 3);
-            String endPhone = phone.substring(phone.length() - 4);
-            String shortPhone = startPhone + endPhone;
+//            String startPhone = phone.substring(1, 3);
+//            String endPhone = phone.substring(phone.length() - 4);
+//            String shortPhone = startPhone + endPhone;
+            String name1 = null;
+            if(!StringUtils.isBlank(name) && name.length() >= 1 && !"*".equals(name.split("")[0])){
+                name1 = name;
+            }
+
             //获取比较数据
-            List<Base_addr> addressMessage = bs_addrMapper.getDate1(base_addr.getArea(), base_addr.getStreet(), shortPhone);
+            List<Base_addr> addressMessage = bs_addrMapper.getDate1(base_addr.getArea(), base_addr.getStreet(), base_addr.getShortPhone(),name1);
 
             Base_addr baseAddr1 = getProcess(blockSizeByNum, blockSizeByStr, base_addr, addressMessage, false);
             if (baseAddr1 == null || baseAddr1.getPhone().contains("*")) {
@@ -328,8 +334,9 @@ public class MsgSearchServiceImpl implements MsgSearchService {
         Base_addr baseAddr1 = getProcess(blockSizeByNum, blockSizeByStr, base_addr, addressMessage, true);
         //如果被合并
         if (!TextUtils.isEmpty(baseAddr1)) {
-            //获取编码，返回值(相似度)
+            //根据基准数据的id去碰撞后的编码数据表获取编码，返回值(相似度)
             BaseAddrVo baseAddrVo = bs_addrMapper1.queryMsgById(baseAddr1.getId());
+            //如果找不到，就说明该基准数据没有与之匹配的房屋数据
             if (TextUtils.isEmpty(baseAddrVo)) {
                 BaseAddrVo baseAddrVo1 = new BaseAddrVo();
                 baseAddrVo1.setName1(baseAddr1.getName1());
@@ -357,7 +364,7 @@ public class MsgSearchServiceImpl implements MsgSearchService {
             return baseAddrVo;
         }
 
-        //判断是基准值还是合并值入对应库
+        //该数据是基准值数据
         base_addr.setP2type(223);
         base_addr.setMergeNum(0);
         base_addr.setP5type(1);
@@ -366,9 +373,28 @@ public class MsgSearchServiceImpl implements MsgSearchService {
         log.info("插入基准表");
         bs_addrMapper.insert5(base_addr);
 
-        //标准数据
+        if(!"温州市".equals(base_addr.getCity())){
+            return bsAddrVo;
+        }
+        //todo 对比常住、暂住人口表
+        String data = applicationProperty.getDiscrepancy();
+        List<Discrepancy> discrepancyList = JSON.parseArray(data, Discrepancy.class);
+
+        //todo 常暂口表处理
+        for (Discrepancy discrepancy : discrepancyList) {
+            //根据手机号从表中获取数据
+            List<Base_addr> obtainData = bs_addrMapper.getData(discrepancy.getObtain(), base_addr.getPhone());
+            log.info("*********有 {} 条被比较值数据*********", obtainData.size());
+            Base_addr baseAddr2 = CompareRunnable5(blockSizeByNum, blockSizeByStr, obtainData, base_addr, discrepancy);
+            //如果为null，就说明撞到了
+            if (TextUtils.isEmpty(baseAddr2)) {
+                break;
+            }
+        }
+
+        //根据街道查询标准数据(房屋数据)表
 //            List<Base_addr> volList = bs_addrMapper.selectBaseAddr2(base_addr.getStreet());
-        List<Base_addr> volList = bs_addrMapper1.selectBaseAddr2(base_addr.getStreet());
+        List<Base_addr> volList = bs_addrMapper1.selectBaseAddr2(base_addr.getArea(), base_addr.getStreet());
 
         log.info("*********有 {} 条被比较值数据*********", volList.size());
         Base_addr baseAddr2 = CompareRunnable4(blockSizeByNum, blockSizeByStr, volList, base_addr);
@@ -504,14 +530,12 @@ public class MsgSearchServiceImpl implements MsgSearchService {
 
         //数字字母处理
         String shortAddr = AsciiUtil.RegProcess(baseAddrBasics.getShortAddr());
+
         //切将地址切割成字符串数组，装进map集合，strMapa是数字，strMapb是字符串
         Map stringMap = stringParsingService.stringParse(shortAddr);
         strMapa.put("strb", (String[]) stringMap.get("strb1"));
         strMapb.put("strb", (String[]) stringMap.get("strb2"));
 
-        if (TextUtils.isEmpty(baseAddrBasics)) {
-            return baseAddrBasics;
-        }
 
         for (int i = 0; i < addressMessage.size(); i++) {
             BigDecimal grace = new BigDecimal(applicationProperty.getGrace1());
@@ -598,26 +622,22 @@ public class MsgSearchServiceImpl implements MsgSearchService {
                 //如果相似度大于阈值或者基准短地址包含比较短地址
                 if (sum.compareTo(grace) > 0) {
                     if (flag) {
-                        int count = 0;
                         baseAddrBasics.setContrastId(addressMessage.get(i).getId());
                         baseAddrBasics.setP2type(222);
                         addressMessage.get(i).setMergeNum(addressMessage.get(i).getMergeNum() + 1);
                         if (baseAddrBasics.getCreateTime().compareTo(addressMessage.get(i).getLatestTime()) > 0) {
                             addressMessage.get(i).setLatestTime(baseAddrBasics.getLatestTime());
-                            count++;
                         }
 
                         if (baseAddrBasics.getCreateTime().compareTo(addressMessage.get(i).getEarliestTime()) < 0) {
                             addressMessage.get(i).setEarliestTime(baseAddrBasics.getEarliestTime());
-                            count++;
                         }
 
-                        if (count > 0) {
-                            bs_addrMapper.updateBasics(addressMessage.get(i));
-                        }
+                        //todo 修改合并数
+                        bs_addrMapper.updateBasicsES(addressMessage.get(i));
 
                         log.info("插入合并表");
-                        bs_addrMapper.insert3(baseAddrBasics);
+                        bs_addrMapper.insert3ES(baseAddrBasics);
                         addressMessage.get(i).setContrastScore(sum);
                         return addressMessage.get(i);
                     }
@@ -627,13 +647,13 @@ public class MsgSearchServiceImpl implements MsgSearchService {
 
                     //手机号姓名反写
                     if (!flag) {
-                        String[] phone1 = null;
                         String[] name1a = null;
-                        if (!StringUtils.isBlank(addressMessage.get(i).getPhone())) {
-                            phone1 = addressMessage.get(i).getPhone().split("");
-                        }
+                        String[] phone1 = null;
                         if (!StringUtils.isBlank(addressMessage.get(i).getName1())) {
                             name1a = addressMessage.get(i).getName1().split("");
+                        }
+                        if (!StringUtils.isBlank(addressMessage.get(i).getPhone())) {
+                            phone1 = addressMessage.get(i).getPhone().split("");
                         }
                         NameProcessServiceImpl nameProcessService = new NameProcessServiceImpl();
                         if (phone1 != null) {
@@ -750,6 +770,15 @@ public class MsgSearchServiceImpl implements MsgSearchService {
     }
 
 
+    /**
+     * 增量数据处理时，基准数据与房屋数据碰撞时使用
+     *
+     * @param num
+     * @param str
+     * @param baseAddrList
+     * @param addressMessage
+     * @return
+     */
     public Base_addr CompareRunnable4(int num, int str, List<Base_addr> baseAddrList, Base_addr addressMessage) {
         Map<String, String[]> strMapb = new HashMap<>();
         ProcessGradeServiceImpl processGradeService = new ProcessGradeServiceImpl();
@@ -758,10 +787,10 @@ public class MsgSearchServiceImpl implements MsgSearchService {
 
         //数字字母处理
         String shortAddr = AsciiUtil.RegProcess(addressMessage.getShortAddr());
-        if(shortAddr.endsWith("号") || shortAddr.endsWith("室")){
-            shortAddr = shortAddr.substring(0,shortAddr.length()-1);
+        if (shortAddr.endsWith("号") || shortAddr.endsWith("室")) {
+            shortAddr = shortAddr.substring(0, shortAddr.length() - 1);
         }
-        //切将地址切割成字符串数组，装进map集合，strMapa是数字，strMapb是字符串
+        //将地址切割成字符串数组，装进map集合，strMapa是数字，strMapb是字符串
         Map stringMap = stringParsingService.stringParse(shortAddr);
         strMapb.put("stra", (String[]) stringMap.get("strb2"));
         strMapa.put("stra", (String[]) stringMap.get("strb1"));
@@ -784,6 +813,7 @@ public class MsgSearchServiceImpl implements MsgSearchService {
 
                 //之后这里可以使用正则匹配，匹配到关键字就调高分值
                 //后续准备直接按照百分比上调分值。另外这个字典后期可能会前移到标准化那一步就做掉，提高后面效率。
+                //如果地址包含此关键字，那么连续匹配时分值会递增加1
                 if (shortAddr1.contains("罗东花园")) {
                     flag = true;
                 }
@@ -820,14 +850,106 @@ public class MsgSearchServiceImpl implements MsgSearchService {
         }
         baseAddrss.add(addressMessage);
         if (!StringUtils.isBlank(addressMessage.getContrastId())) {
+            bs_addrMapper1.insert3_2_1ES(baseAddrss);
             bs_addrMapper1.insert3_2_1(baseAddrss);
             baseAddrList = null;
             log.info("插入标准合并表");
         } else {
-            bs_addrMapper1.insert5_2_1(baseAddrss);
+//            bs_addrMapper1.insert5_2_1(baseAddrss);
+            bs_addrMapper1.insert5_2_1ES(baseAddrss);
             baseAddrList = null;
         }
+        return addressMessage;
+    }
 
+    /**
+     * 增量数据处理时，基准数据与房屋数据碰撞时使用
+     *
+     * @param num
+     * @param str
+     * @param baseAddrList
+     * @param addressMessage
+     * @return
+     */
+    public Base_addr CompareRunnable5(int num, int str, List<Base_addr> baseAddrList, Base_addr addressMessage, Discrepancy discrepancy) {
+        Map<String, String[]> strMapb = new HashMap<>();
+        Map<String, String[]> strMapa = new HashMap<>();
+        ProcessGradeServiceImpl processGradeService = new ProcessGradeServiceImpl();
+        StringPasringServiceImpl stringParsingService = new StringPasringServiceImpl();
+
+        //数字字母处理
+        String shortAddr = AsciiUtil.RegProcess(addressMessage.getShortAddr());
+        if (shortAddr.endsWith("号") || shortAddr.endsWith("室")) {
+            shortAddr = shortAddr.substring(0, shortAddr.length() - 1);
+        }
+        //将地址切割成字符串数组，装进map集合，strMapa是数字，strMapb是字符串
+        Map stringMap = stringParsingService.stringParse(shortAddr);
+        strMapa.put("stra", (String[]) stringMap.get("strb1"));
+        strMapb.put("stra", (String[]) stringMap.get("strb2"));
+
+        /*用于判断的阈值*/
+        BigDecimal grace = new BigDecimal(applicationProperty.getGrace());
+
+        for (int i = 0; i < baseAddrList.size(); i++) {
+
+//            //如果姓相同就继续，不相同就判定为不是同一个人
+//            if (!StringUtils.isBlank(addressMessage.getName1()) && !StringUtils.isBlank(baseAddrList.get(i).getName1())) {
+//                if (!addressMessage.getName1().split("")[0].equals(baseAddrList.get(i).getName1().split("")[0])
+//                        && !baseAddrList.get(i).getName1().startsWith("*") && !addressMessage.getName1().startsWith("*")) {
+//                    continue;
+//                }
+//            }
+
+            boolean flag = false;
+            if (!StringUtils.isEmpty(baseAddrList.get(i).getShortAddr())) {
+                //数字字母处理
+                String shortAddr1 = AsciiUtil.RegProcess(baseAddrList.get(i).getShortAddr());
+                if (shortAddr1.endsWith("号") || shortAddr1.endsWith("室")) {
+                    shortAddr1 = shortAddr1.substring(0, shortAddr1.length() - 1);
+                }
+                //切将地址切割成字符串数组，装进map集合，strMapa是数字，strMapb是字符串
+                Map stringMap1 = stringParsingService.stringParse(shortAddr1);
+                strMapb.put("strb", (String[]) stringMap1.get("strb2"));
+                strMapa.put("strb", (String[]) stringMap1.get("strb1"));
+
+                //数字和字符相似度匹配
+                Map<String, Object> processresult2 = processGradeService.processDemo(strMapb, str, flag);
+                Map<String, Object> processresult1 = processGradeService.processDemo(strMapa, num, false);
+                BigDecimal sumb = (BigDecimal) processresult2.get("sum");
+                BigDecimal suma = (BigDecimal) processresult1.get("sum");
+
+                if(sumb.compareTo(new BigDecimal(0))<=0 || suma.compareTo(new BigDecimal(0))<=0){
+                    continue;
+                }
+
+                //计算相似度
+                BigDecimal sum = processGradeService.getSum(suma, sumb, (String[]) stringMap1.get("strb1"), (String[]) stringMap.get("strb1"), (String[]) stringMap1.get("strb2"), (String[]) stringMap.get("strb2"));
+
+                //如果相似度大于阈值
+                if (sum.compareTo(grace) > 0) {
+                    //绑定数据关联关系
+                    addressMessage.setAddrCode(baseAddrList.get(i).getAddrCode());
+                    addressMessage.setContrastScore(sum);
+                    addressMessage.setContrastId(baseAddrList.get(i).getId());
+                    //如果被比较值的街道为空，标准数据的街道不为空，就反写街道
+                    if (StringUtils.isBlank(addressMessage.getStreet()) && !StringUtils.isBlank(baseAddrList.get(i).getStreet())) {
+                        addressMessage.setStreet(baseAddrList.get(i).getStreet());
+                    }
+                    continue;
+                }
+            }
+        }
+
+        List<Base_addr> baseAddress = new ArrayList<>();
+        baseAddress.add(addressMessage);
+        if (!StringUtils.isBlank(addressMessage.getContrastId())) {
+            bs_addrMapper.insertDepositData(baseAddress, discrepancy.getDepositMerge());
+            baseAddrList = null;
+            log.info("插入标准合并表");
+            return null;
+        }
+        bs_addrMapper.insertDepositData(baseAddress, discrepancy.getDepositBasics());
+        baseAddrList = null;
         return addressMessage;
     }
 
@@ -1499,5 +1621,84 @@ public class MsgSearchServiceImpl implements MsgSearchService {
         allMessage.put("dec7", dec7);
         allMessage.put("dec8", dec8);
         return allMessage;
+    }
+
+    @Async("asyncPromiseExecutor")
+    @Override
+    public void insertMsgProcess1(Base_addr baseAddr,String reg, Map<String, Object> allMessage) {
+        if(!"温州".equals(baseAddr.getCity()) && !"温州市".equals(baseAddr.getCity()) && !"577".equals(baseAddr.getCity())){
+            return;
+        }
+        baseAddr.setCity(null);
+
+        //合法性校验
+        if (StringUtils.isBlank(baseAddr.getPhone()) || baseAddr.getPhone().length() < 5) {
+            bs_addrMapper.insertDiscard(baseAddr);
+            return;
+        }
+
+        //step1地址切割
+        Base_addr base_addr = getBaseAddr(baseAddr, reg, allMessage);
+
+        if (base_addr == null || StringUtils.isBlank(base_addr.getShortAddr())|| !"温州市".equals(base_addr.getCity())) {
+            bs_addrMapper.insertDiscard(baseAddr);
+            return;
+        }
+
+        //todo 先不插总表base_addr
+//        bs_addrMapper.insertBaseAddr(base_addr);
+
+        int blockSizeByStr = Integer.valueOf(applicationProperty.getBlockSizeByStr());
+        int blockSizeByNum = Integer.valueOf(applicationProperty.getBlockSizeByNum());
+
+        String phone = base_addr.getPhone();
+        String name = base_addr.getName1();
+        //手机号包含*,手机号反写，反写失败就扔进垃圾表
+        if (!StringUtils.isBlank(phone) && phone.length() >= 7 && phone.contains("*")) {
+            String name1 = null;
+            if(!StringUtils.isBlank(name) && name.length() >= 1 && !"*".equals(name.split("")[0])){
+                name1 = name;
+            }
+
+            //获取比较数据
+            List<Base_addr> addressMessage = bs_addrMapper.getDate1(base_addr.getArea(), base_addr.getStreet(), base_addr.getShortPhone(),name1);
+
+            Base_addr baseAddr1 = getProcess(blockSizeByNum, blockSizeByStr, base_addr, addressMessage, false);
+            if (baseAddr1 == null || baseAddr1.getPhone().contains("*")) {
+                bs_addrMapper.insertDiscard(baseAddr);
+                return;
+            }
+        }
+
+        //第二步骤相似度碰撞
+        List<Base_addr> addressMessage = bs_addrMapper.getBaseAddrs(base_addr.getPhone());
+        Base_addr baseAddr1 = getProcess(blockSizeByNum, blockSizeByStr, base_addr, addressMessage, true);
+        //如果被合并
+        if (!TextUtils.isEmpty(baseAddr1)) {
+            return;
+        }
+
+        //该数据是基准值数据
+        base_addr.setP2type(223);
+        base_addr.setMergeNum(0);
+        base_addr.setP5type(1);
+        base_addr.setTableName("insert_addr");
+        base_addr.setEarliestTime(base_addr.getCreateTime());
+        base_addr.setLatestTime(base_addr.getCreateTime());
+        log.info("插入基准表");
+        bs_addrMapper.insert5ES(base_addr);
+        bs_addrMapper.insert5(base_addr);
+//        log.info("插入基准表");
+//        bs_addrMapper.insert5ESComm(base_addr);
+
+        //街道为空就不处理
+        if(TextUtils.isEmpty(base_addr.getStreet())){
+            return;
+        }
+        List<Base_addr> volList = bs_addrMapper1.selectBaseAddr2(base_addr.getArea(), base_addr.getStreet());
+
+        log.info("*********有 {} 条被比较值数据*********", volList.size());
+        CompareRunnable4(blockSizeByNum, blockSizeByStr, volList, base_addr);
+        return;
     }
 }

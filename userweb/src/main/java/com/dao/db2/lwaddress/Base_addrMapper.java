@@ -29,11 +29,17 @@ public interface Base_addrMapper {
     //int insert3(List<Base_addr> message);
     int insert3(Base_addr base_addr);
 
+    int insert3ES(Base_addr base_addr);
+
     int insert3_2(List<Base_addr> base_addr);
 
     int insert4(List<Base_addr> message);
 
     int insert5(Base_addr message);
+
+    void insert5ES(Base_addr message);
+
+    void insert5ESComm(Base_addr base_addr);
 
     int insert5_2(List<Base_addr> base_addr);
 
@@ -125,9 +131,11 @@ public interface Base_addrMapper {
 
     List<Base_addr> getDate(@Param("shortPhone")String shortPhone,@Param("province")String province,@Param("city")String city,@Param("area")String area,@Param("street")String street);
 
-    List<Base_addr> getDate1(@Param("area") String area, @Param("street") String street,@Param("shortPhone")String shortPhone);
+    List<Base_addr> getDate1(@Param("area") String area, @Param("street") String street,@Param("shortPhone")String shortPhone,@Param("name")String name);
 
     List<Base_addr> getInsertDate();
+
+    List<Base_addr> getInsertDate1(@Param("startCount")int startCount,@Param("count")int count);
 
     List<Bs_province> getAllProvince();
 
@@ -143,6 +151,7 @@ public interface Base_addrMapper {
     List<Base_addr> selectBaseAddrs(@Param("streetName")String streetName, @Param("start")int start, @Param("count")int count);
 
     void function(@Param("start")int start, @Param("end")int end);
+    int function2(@Param("start")int start, @Param("end")int end);
 
     void insertDiscard(Base_addr base_addr);
 
@@ -160,5 +169,33 @@ public interface Base_addrMapper {
 
     void updateBasics(Base_addr base_addr);
 
+    void updateBasicsES(Base_addr base_addr);
+
     List<BaseAddrByPhone> queryMsgByPhone(String phone);
+
+    List<Base_addr> getData(@Param("obtain") String obtain, @Param("phone") String phone);
+
+    void insertDepositData(@Param("baseAddress") List<Base_addr> baseAddress, @Param("depositData") String depositData);
+
+    void updateState(int start, int totle);
+
+    List<Base_addr> getAddress();
+
+    List<Bs_community> getSheQu();
+
+    void insertSheQu(List<Bs_community> bs_communities);
+
+    void updateBatchByIds(List<Base_addr> date);
+
+    List<String> function1(@Param("start") int start,@Param("end")  int end);
+
+    List<Base_addr> selectByIds(@Param("ids") List<String> ids);
+
+    List<SQ> getSQSJ(@Param("street") String street);
+
+    List<SQ> getZRQSJ(@Param("area")String area);
+
+    void updateBasicsAdd(Base_addr base_addr);
+
+    int getStart();
 }

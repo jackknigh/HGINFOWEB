@@ -6,15 +6,14 @@ import com.dao.db3.lwaddr.Base_addrMapper1;
 import com.dao.entity.lwaddress.Base_addr;
 import com.service.lwaddress.Base_addrService;
 import com.service.lwaddress.Bs_utilService;
+import com.utils.sys.DateUtil;
 import com.utils.sys.TextUtils;
 import com.utils.sys.lwaddress.AsciiUtil;
 import com.utils.sys.lwaddress.CompareRunnable3;
-import com.utils.sys.lwaddress.DateUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
@@ -24,7 +23,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ThreadPoolExecutor;
 
 @Service
 public class Bs_utilServiceImpl implements Bs_utilService {
@@ -52,12 +50,11 @@ public class Bs_utilServiceImpl implements Bs_utilService {
     @Override
     @Async("asyncPromiseExecutor")
     public void addressStart(int number1, int number2, String reg, Map<String, Object> allMessage) {
-        List<Base_addr> list;
         long startTime = System.currentTimeMillis();
         List<Base_addr> updateMessage = new ArrayList<>();
 
         //查询原始数据表
-        list = base_addrMapper.selectAddr_sj(number1, number1 + number2);
+        List<Base_addr> list = base_addrMapper.selectAddr_sj(number1, number1 + number2);
 
         //将查到的数据加入集合中
         for (int i = 0; i < list.size(); i++) {
@@ -151,7 +148,7 @@ public class Bs_utilServiceImpl implements Bs_utilService {
                 String endPhone = phone.substring(phone.length() - 4);
                 String shortPhone = startPhone + endPhone;
 
-                List<Base_addr> addressMessage = bs_addrMapper.getDate1(base_addr.getArea(), base_addr.getStreet(),shortPhone);
+                List<Base_addr> addressMessage = bs_addrMapper.getDate1(base_addr.getArea(), base_addr.getStreet(),shortPhone,null);
                 Base_addr baseAddr1 = getProcess(blockSizeByNum, blockSizeByStr, base_addr, addressMessage, false);
                 if (baseAddr1.getPhone().contains("*")) {
                     //扔进垃圾表
@@ -187,7 +184,7 @@ public class Bs_utilServiceImpl implements Bs_utilService {
             baseAddrs.add(base_addr);
 
             //标准数据
-            List<Base_addr> volList = base_addrMapper1.selectBaseAddr2(base_addr.getStreet());
+            List<Base_addr> volList = base_addrMapper1.selectBaseAddr2(null,base_addr.getStreet());
 
             log.info("*********有 {} 条被比较值数据*********",volList.size());
             executor.execute(new CompareRunnable3(blockSizeByNum,blockSizeByStr,volList,baseAddrs));

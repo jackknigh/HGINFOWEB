@@ -143,12 +143,12 @@ public class Base_addrServiceImpl implements Base_addrService {
         }
         streetMap = bs_streetService.streetJudge((String) areaMap.get("address"), listStreet);
 
-        if (StringUtils.isBlank((String) streetMap.get("streeCode"))) {
-            for (Bs_street streetMessage : ((List<Bs_street>) allMessage.get("streetMessage"))) {
-                listStreet.add(streetMessage);
-            }
-            streetMap = bs_streetService.streetJudge((String) areaMap.get("address"), listStreet);
-        }
+//        if (StringUtils.isBlank((String) streetMap.get("streeCode"))) {
+//            for (Bs_street streetMessage : ((List<Bs_street>) allMessage.get("streetMessage"))) {
+//                listStreet.add(streetMessage);
+//            }
+//            streetMap = bs_streetService.streetJudge((String) areaMap.get("address"), listStreet);
+//        }
 
         //如果城市区域街道都为空就标记为-100
         if (streetMap.get("streetCode") == null && areaMap.get("areaCode") == null && cityMap.get("cityCode") == null) {
@@ -207,7 +207,6 @@ public class Base_addrServiceImpl implements Base_addrService {
         //街道不为空,区为空
         if (streetMap.get("streetCode") != null && areaMap.get("areaCode") == null) {
             String areacode = (String) streetMap.get("areaCodeSec");
-
             for (int i = 0; i < ((List<Bs_area>) areaMap.get("areaAllName")).size(); i++) {
                 if (((List<Bs_area>) areaMap.get("areaAllName")).get(i).getAreaCode().equals(areacode)) {
                     areaMap.put("areaName", ((List<Bs_area>) areaMap.get("areaAllName")).get(i).getAreaName());
@@ -217,10 +216,10 @@ public class Base_addrServiceImpl implements Base_addrService {
                 }
             }
         }
+
         //区不为空，城市为空
         if (cityMap.get("cityCode") == null && areaMap.get("areaCode") != null) {
             String citycode = (String) areaMap.get("cityCodeSec");
-
             for (int i = 0; i < ((List<Bs_city>) cityMap.get("cityAllName")).size(); i++) {
                 if (((List<Bs_city>) cityMap.get("cityAllName")).get(i).getCityCode().equals(citycode)) {
                     cityMap.put("cityName", ((List<Bs_city>) cityMap.get("cityAllName")).get(i).getCityName());
@@ -237,7 +236,6 @@ public class Base_addrServiceImpl implements Base_addrService {
 
             for (int i = 0; i < ((List<Bs_province>) provinceMap.get("provinceAllName")).size(); i++) {
                 if ((((List<Bs_province>) provinceMap.get("provinceAllName")).get(i).getProvinceCode()).equals(provincecode)) {
-                    // bs_addr.setProvince(((List<Bs_province>)provinceMap.get("provinceAllName")).get(i).getProvinceName());
                     provinceMap.put("provinceName", ((List<Bs_province>) provinceMap.get("provinceAllName")).get(i).getProvinceName());
                     provinceMap.put("provinceCode", ((List<Bs_province>) provinceMap.get("provinceAllName")).get(i).getProvinceCode());
                     break;
@@ -338,11 +336,6 @@ public class Base_addrServiceImpl implements Base_addrService {
 
         if (bs_addr.getShortAddr().contains("楼")) {
             dec6 = dec6.add(new BigDecimal(5));
-        }
-
-        //短地址过长的扣分项
-        if (bs_addr.getShortAddr().length() > 25) {
-            dec6 = dec6.subtract(new BigDecimal(10));
         }
 
         bs_addr.setMulWeight(dec6);

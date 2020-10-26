@@ -29,8 +29,6 @@ public class Bs_provinceServiceImpl implements Bs_provinceService {
         String firstAddress = address;
         String provinceName = null;//省名称
         String provinceCode = null;//省编号
-        Pattern pattern = null;
-        Matcher matcher = null;
         Map<String,Object> provinceMap = new HashMap<String, Object>();
         //如果开头是中国，就把中国去了
         if (address.startsWith("中国")) {
@@ -41,14 +39,14 @@ public class Bs_provinceServiceImpl implements Bs_provinceService {
         if (address.length() <= 13) {
             addressUse = address;
         } else {
-            addressUse = address.substring(0,9);
+            addressUse = address.substring(0,13);
         }
 
         //遍历存了省名称的集合
         for (int i = 0; i < provinceAllName.size(); i++) {
             //将地址和标准地址进行比较，如果比较成功就将地址中去掉这个省
-            pattern = Pattern.compile(provinceAllName.get(i).getProvinceName());
-            matcher = pattern.matcher(addressUse);
+            Pattern pattern = Pattern.compile(provinceAllName.get(i).getProvinceName());
+            Matcher matcher = pattern.matcher(addressUse);
             if (matcher.find()) {
                 provinceName = matcher.group();
                 provinceCode = provinceAllName.get(i).getProvinceCode();
@@ -56,15 +54,13 @@ public class Bs_provinceServiceImpl implements Bs_provinceService {
                 break;
             } else {
                 //如果比较不成功就比较短地址，如果比较成功就将短地址改为标准地址并地址中去掉这个短地址
-                pattern = Pattern.compile(provinceAllName.get(i).getShortName());
-                matcher = pattern.matcher(addressUse);
-                if (matcher.find()) {
+                Pattern pattern1 = Pattern.compile(provinceAllName.get(i).getShortName());
+                Matcher matcher1 = pattern1.matcher(addressUse);
+                if (matcher1.find()) {
                     provinceName = provinceAllName.get(i).getProvinceName();
                     provinceCode = provinceAllName.get(i).getProvinceCode();
-                    address = address.replace(matcher.group(),"");
+                    address = address.replace(matcher1.group(),"");
                     break;
-                } else {
-                    continue;
                 }
             }
         }

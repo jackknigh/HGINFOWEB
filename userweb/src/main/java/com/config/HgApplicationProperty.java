@@ -20,6 +20,10 @@ public class HgApplicationProperty {
     @Value("${sysPropertys.grace2}")
     private String grace2;
 
+    //增量数据去除常暂口存取源配置json字符串
+    @Value("${sysPropertys.discrepancy}")
+    private String discrepancy;
+
 
     @Value("${sysPropertys.loginWithAutoCode}")
     private String loginWithAutoCode;
@@ -110,6 +114,14 @@ public class HgApplicationProperty {
 
     public String getGrace() {
         return grace;
+    }
+
+    public String getDiscrepancy() {
+        return discrepancy;
+    }
+
+    public void setDiscrepancy(String discrepancy) {
+        this.discrepancy = discrepancy;
     }
 
     public int getNumPass() {

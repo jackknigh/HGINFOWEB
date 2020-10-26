@@ -84,11 +84,31 @@ public class QuartzInit implements ApplicationRunner {
             processStartService.compareSelf();
         }
 
-        //经纬度处理
+        //高德根据地址获取经纬度
         if(applicationProperty.getdelectTableIndex().compareTo("4")==0){
         log.debug("========================经纬度处理开始==========================");
         encodeStartWayService.startway(Integer.valueOf(applicationProperty.getStartCount()), Integer.valueOf(applicationProperty.getTotalCount()), Integer.valueOf(applicationProperty.getCount()));
         log.debug("========================经纬度处理结束==========================");
+        }
+
+        //高德根据经纬度获取地址
+        if(applicationProperty.getdelectTableIndex().compareTo("6")==0){
+            log.debug("========================经纬度处理开始==========================");
+            encodeStartWayService.getAddr(Integer.valueOf(applicationProperty.getStartCount()), Integer.valueOf(applicationProperty.getTotalCount()), Integer.valueOf(applicationProperty.getCount()));
+            log.debug("========================经纬度处理结束==========================");
+        }
+
+        //百度根据地址获取经纬度
+        if(applicationProperty.getdelectTableIndex().compareTo("7")==0){
+            log.debug("========================经纬度处理开始==========================");
+            encodeStartWayService.getAddrByBD(Integer.valueOf(applicationProperty.getStartCount()), Integer.valueOf(applicationProperty.getTotalCount()), Integer.valueOf(applicationProperty.getCount()));
+            log.debug("========================经纬度处理结束==========================");
+        }
+        //百度根据经纬度获取地址
+        if(applicationProperty.getdelectTableIndex().compareTo("8")==0){
+            log.debug("========================经纬度处理开始==========================");
+            encodeStartWayService.getAddrBDD(Integer.valueOf(applicationProperty.getStartCount()), Integer.valueOf(applicationProperty.getTotalCount()), Integer.valueOf(applicationProperty.getCount()));
+            log.debug("========================经纬度处理结束==========================");
         }
 
         //更新经纬度

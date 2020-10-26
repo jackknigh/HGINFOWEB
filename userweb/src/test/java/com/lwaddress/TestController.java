@@ -48,6 +48,27 @@ public class TestController {
         log.debug("========================测试结束==========================");
     }
 
+    @Test
+    public void test1() {
+        log.debug("========================测试开始==========================");
+        List<Bs_community> bs_communities = bs_addrMapper.getSheQu();
+        String code = "";
+        String streetCode = "";
+        for (Bs_community bs_community : bs_communities) {
+            if(!streetCode.equals(bs_community.getStreetCode())){
+                streetCode = bs_community.getStreetCode();
+                code = bs_community.getStreetCode()+"001";
+                bs_community.setCommunityCode(code);
+                continue;
+            }
+            Long num = Long.valueOf(code) + 1;
+            code = String.valueOf(num);
+            bs_community.setCommunityCode(code);
+        }
+        bs_addrMapper.insertSheQu(bs_communities);
+        log.debug("========================测试结束==========================");
+    }
+
 //    @Test
 //    public void test1() {
 //        log.debug("========================测试开始==========================");

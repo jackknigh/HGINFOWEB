@@ -6,5 +6,5 @@ import java.util.List;
 import java.util.Map;
 
 public interface Bs_areaService {
-    public Map areaJudge(String address, List<Bs_area> areaAllName);
+    Map areaJudge(String address, List<Bs_area> areaAllName);
 }

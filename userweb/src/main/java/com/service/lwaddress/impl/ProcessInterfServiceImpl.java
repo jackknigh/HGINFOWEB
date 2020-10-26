@@ -142,6 +142,63 @@ public class ProcessInterfServiceImpl implements ProcessInterfService {
         }
     }
 
+//    /**
+//     * 左右相似度碰撞方法
+//     * @param executor
+//     */
+//    @Override
+//    public void compare(ThreadPoolTaskExecutor executor) {
+//        //获取温州的所有街道
+//        Map<String, Object> map = bs_startWayService.getMap();
+//        List<Bs_street> streetNames = (List<Bs_street>) map.get("streetMessage");
+//        //将街道为null的对象存进街道集合中
+//        //todo 街道为null的最后单独处理
+////        Bs_street bs_street = new Bs_street();
+////        streetNames.add(bs_street);
+//
+//        for (Bs_street streetName : streetNames) {
+//            //滑块的大小
+//            int blockSizeByStr = Integer.valueOf(applicationProperty.getBlockSizeByStr());
+//            int blockSizeByNum = Integer.valueOf(applicationProperty.getBlockSizeByNum());
+//
+//            int count = Integer.valueOf(applicationProperty.getCount());
+//            int start = Integer.valueOf(applicationProperty.getStartCount());
+//            int total = Integer.valueOf(applicationProperty.getTotalCount());
+//
+//            while (true){
+//                //需碰撞的数据
+//                List<Base_addr> baseAddrs1 = base_addrMapper.selectBaseAddrs(streetName.getStreetName(),start,count);
+//                log.error("街道  {} 的进度 {} ---> {} , 有 【{}】 条数据",streetName.getStreetName(),start,total,baseAddrs1.size());
+//                if(TextUtils.isEmpty(baseAddrs1)){
+//                    start = start + count;
+//                    if(start>total){
+//                        break;
+//                    }
+//                    continue;
+//                }
+//
+//                log.info("*********街道 ：{}  有 {} 条比较值数据*********",streetName.getStreetName(),baseAddrs1.size());
+//
+//                //标准数据,如果需碰撞数据街道为null,就与所有标准数据进行碰撞
+//                List<Base_addr> volList = base_addrMapper1.selectBaseAddr2(null,streetName.getStreetName());
+//                log.error("街道  {} 的进度 {} ---> {} , 有 【{}】 条被比较数据",streetName.getStreetName(),start,total,volList.size());
+//                if(TextUtils.isEmpty(volList)){
+//                    start = start + count;
+//                    if(start>total){
+//                        break;
+//                    }
+//                    continue;
+//                }
+//                log.info("*********有 {} 条被比较值数据*********",volList.size());
+//                executor.execute(new CompareRunnable4(blockSizeByNum,blockSizeByStr,volList,baseAddrs1));
+//                start = start + count;
+//                if(start>total){
+//                    break;
+//                }
+//            }
+//        }
+//    }
+
     /**
      * 左右相似度碰撞方法
      * @param executor
@@ -152,32 +209,31 @@ public class ProcessInterfServiceImpl implements ProcessInterfService {
         Map<String, Object> map = bs_startWayService.getMap();
         List<Bs_street> streetNames = (List<Bs_street>) map.get("streetMessage");
         //将街道为null的对象存进街道集合中
-        Bs_street bs_street = new Bs_street();
-        streetNames.add(bs_street);
+        //todo 街道为null的最后单独处理
+//        Bs_street bs_street = new Bs_street();
+//        streetNames.add(bs_street);
 
         for (Bs_street streetName : streetNames) {
             //滑块的大小
             int blockSizeByStr = Integer.valueOf(applicationProperty.getBlockSizeByStr());
             int blockSizeByNum = Integer.valueOf(applicationProperty.getBlockSizeByNum());
-
-            int count = Integer.valueOf(applicationProperty.getCount());
-            int start = Integer.valueOf(applicationProperty.getStartCount());
-
+//            --         count_id &gt;= #{start} and count_id &lt; #{count}
             while (true){
                 //需碰撞的数据
-                List<Base_addr> baseAddrs1 = base_addrMapper.selectBaseAddrs(streetName.getStreetName(),start,count);
+                List<Base_addr> baseAddrs1 = base_addrMapper.selectBaseAddrs(streetName.getStreetName(),0,0);
+                log.error("街道 {} ，共 {} 条比较数据",streetName.getStreetName(),baseAddrs1.size());
                 if(TextUtils.isEmpty(baseAddrs1)){
-                    break;
+                break;
                 }
 
-                log.info("*********街道 ：{}  有 {} 条比较值数据*********",streetName.getStreetName(),baseAddrs1.size());
-
                 //标准数据,如果需碰撞数据街道为null,就与所有标准数据进行碰撞
-                List<Base_addr> volList = base_addrMapper1.selectBaseAddr2(streetName.getStreetName());
-
-                log.info("*********有 {} 条被比较值数据*********",volList.size());
+                List<Base_addr> volList = base_addrMapper1.selectBaseAddr2(null,streetName.getStreetName());
+                log.error("街道 {} ，共 {} 条被比较数据",streetName.getStreetName(),volList.size());
+                if(TextUtils.isEmpty(volList)){
+                break;
+                }
                 executor.execute(new CompareRunnable4(blockSizeByNum,blockSizeByStr,volList,baseAddrs1));
-                start = start + count;
+                break;
             }
         }
     }
@@ -264,6 +320,53 @@ public class ProcessInterfServiceImpl implements ProcessInterfService {
     @Override
     public void function(int start, int end) {
         base_addrMapper.function(start,end);
+        log.info("***************** 进度：  {} ----》 {} *****************",start,end);
+    }
+
+    @Async("asyncPromiseExecutor")
+    @Override
+    public void function1(int start, int end) {
+        //获取third_addr表指定步进值的数据
+        List<String> ids = base_addrMapper.function1(start,end);
+        //更新基准表数据对应的经纬度
+        int i = base_addrMapper.function2(start, end);
+        //获取基准表对应数据
+        List<Base_addr> base_addrs = base_addrMapper.selectByIds(ids);
+
+        for (Base_addr base_addr : base_addrs) {
+            boolean flag = false;
+            //根据街道获取对应社区
+            if(!TextUtils.isEmpty(base_addr.getStreet()) || !TextUtils.isEmpty(base_addr.getLongitude())){
+                List<SQ> sqList = base_addrMapper.getSQSJ(base_addr.getStreet());
+                //判断经纬度是否在社区经纬度多边形范围内
+                for (SQ sq : sqList) {
+                    boolean pointInPolygon = GraphUtils.isPointInPolygon(base_addr.getLongitude(),base_addr.getLatitude(),sq.getBound());
+                    if(pointInPolygon){
+                        base_addr.setCommunity(sq.getName());
+                        flag = true;
+                        break;
+                    }
+                }
+            }
+
+            //根据区域判断经纬度是否在责任区经纬度多边形范围内
+            //根据街道获取对应社区
+            if(!TextUtils.isEmpty(base_addr.getArea()) || !TextUtils.isEmpty(base_addr.getLongitude())){
+                List<SQ> sqList = base_addrMapper.getZRQSJ(base_addr.getArea());
+                //判断经纬度是否在社区经纬度多边形范围内
+                for (SQ sq : sqList) {
+                    boolean pointInPolygon = GraphUtils.isPointInPolygon(base_addr.getLongitude(),base_addr.getLatitude(),sq.getBound());
+                    if(pointInPolygon){
+                        base_addr.setResponsibilityArea(sq.getName());
+                        flag = true;
+                        break;
+                    }
+                }
+            }
+            if(flag){
+                base_addrMapper.updateBasicsAdd(base_addr);
+            }
+        }
         log.info("***************** 进度：  {} ----》 {} *****************",start,end);
     }
 

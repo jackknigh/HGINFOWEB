@@ -1,17 +1,19 @@
 package com.utils.sys;
 
 import com.Application;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONException;
+import com.alibaba.fastjson.JSONObject;
 import com.dao.entity.lwaddress.Base_addr;
+import com.dao.entity.lwaddress.BmapPoint;
+import com.dao.entity.lwaddress.Discrepancy;
 import com.dao.entity.lwaddress.Sec_addr;
 import com.service.lwaddress.MsgSearchService;
 import com.service.lwaddress.impl.Bs_startWayServiceImpl;
 import com.service.lwaddress.impl.MsgSearchServiceImpl;
 import com.service.lwaddress.impl.NameProcessServiceImpl;
 import com.service.lwaddress.impl.ProcessGradeServiceImpl;
-import com.utils.sys.lwaddress.AsciiUtil;
-import com.utils.sys.lwaddress.BatchListUtil;
-import com.utils.sys.lwaddress.ListUtil;
-import com.utils.sys.lwaddress.SwitchNumber;
+import com.utils.sys.lwaddress.*;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -997,7 +999,6 @@ public class AESPythonTest {
         int n = 3;
         int a1 = a3.length;
 
-
         Integer[] max=new Integer[a1];
         for(int i=0;i<a1;i++){
             int maxsum=0;
@@ -1056,7 +1057,6 @@ public class AESPythonTest {
         }
     }
 
-
     @Test
     public void test36() {
         String f = "振,中,街,罗,东,花,园,3,-,3,0,4,室";
@@ -1064,8 +1064,6 @@ public class AESPythonTest {
         String[] a1 = f.split(",");
         String[] a2 = e.split(",");
         int n = 3;
-
-
 
         int a3 = a1.length;
 
@@ -1128,10 +1126,6 @@ public class AESPythonTest {
             value1 = value1 + integer;
         }
         System.out.println("理论最大值："+value1);
-
-
-
-
 
         Integer[] max1=new Integer[a1.length];
         for(int a=0;a<a1.length;a++){
@@ -1200,5 +1194,40 @@ public class AESPythonTest {
             value2 = value2 + integer;
         }
         System.out.println("理论最大值："+value2);
+    }
+
+    @Test
+    public void test38() {
+    }
+
+
+    @Test
+    public void test39() {
+        String message = "{\"township\" :[ ]}";
+        JSONObject jsonObject = JSON.parseObject(message);
+        if("[]".equals(jsonObject.get("township").toString())){
+            System.out.println("异常");
+        }else
+            System.out.println("正常");
+        Object township = jsonObject.get("township");
+        System.out.println(township.toString());
+    }
+
+    @Test
+    public void test40() {
+        double[] doubles = LngLonUtil.gcj02_To_Gps84(28.2743, 121.1026);
+        System.out.println(doubles[0]+","+doubles[1]);
+    }
+
+    @Test
+    public void test41() {
+        //地址的经纬度
+        BigDecimal lng = new BigDecimal(120.61611771583557);
+        BigDecimal lat = new BigDecimal(27.9681658744812);
+        //经纬度边界范围
+        String jwd = "120.61611771583557,27.9681658744812,120.61776995658875,27.972135543823242,120.61191201210022,27.972114086151123,120.61159014701843,27.97441005706787,120.61369299888611,27.97447443008423,120.61267375946045,27.981061935424805,120.6084680557251,27.9816627502";
+
+        boolean pointInPolygon = GraphUtils.isPointInPolygon(lng,lat,jwd);
+        System.out.println(pointInPolygon);
     }
 }

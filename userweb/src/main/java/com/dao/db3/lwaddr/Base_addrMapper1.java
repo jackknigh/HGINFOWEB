@@ -22,11 +22,15 @@ public interface Base_addrMapper1 {
 
     int insert3_2_1(List<Base_addr> base_addr);
 
+    int insert3_2_1ES(List<Base_addr> base_addr);
+
     int insert5(Base_addr message);
 
     int insert5_2(List<Base_addr> base_addr);
 
     int insert5_2_1(List<Base_addr> base_addr);
+
+    int insert5_2_1ES(List<Base_addr> base_addr);
 
     int insert5_2_11(List<Base_addr> base_addr);
 
@@ -58,5 +62,7 @@ public interface Base_addrMapper1 {
 
     void updateP5type(Base_addr base_addr);
 
-    List<Base_addr> selectBaseAddr2(@Param("streetName") String streetName);
+    List<Base_addr> selectBaseAddr2(@Param("areaName") String areaName,@Param("streetName") String streetName);
+
+    void updateBatchByIds(List<Base_addr> date);
 }

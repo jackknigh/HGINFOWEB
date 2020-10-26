@@ -46,7 +46,7 @@
 <!--  </select>-->
 
     <select id="selectAddrsec" resultMap="BaseResultMap">
-        SELECT ba.id,ba.addr_sj,ta.longitude,ta.type FROM basics_addr AS ba LEFT JOIN third_addr AS ta ON ba.id = ta.id
+        SELECT ba.id,ba.addr_sj AS addr_sj,ta.longitude,ta.type FROM basics_addr AS ba LEFT JOIN third_addr AS ta ON ba.id = ta.id
         WHERE ba.count_id &gt;= #{number1} AND ba.count_id &lt; #{number2}
   </select>
 
@@ -62,8 +62,17 @@
       WHERE
           ta.type = '126' OR ta.type = '127'
   </select>
+    <select id="getAddressBD" resultType="com.dao.entity.lwaddress.Sec_addr">
+        SELECT a.id,CONCAT(a.latitude,',',a.longitude) AS addrJj FROM third_addr AS a
+        WHERE a.count_id &gt;= #{number1} AND a.count_id &lt; #{number2}
+    </select>
+    <select id="getAddress" resultType="com.dao.entity.lwaddress.Sec_addr">
+        SELECT a.id,CONCAT(a.longitude,',',a.latitude) AS addrJj,b.id FROM third_addr AS a LEFT JOIN third_addr1 AS b
+        ON a.id = b.id
+        WHERE a.count_id &gt;= #{number1} AND a.count_id &lt; #{number2}
+    </select>
 
-  <insert id="insert2" parameterType="com.dao.entity.lwaddress.Sec_addr" >
+    <insert id="insert2" parameterType="com.dao.entity.lwaddress.Sec_addr" >
 
     insert into  third_addr (id,latitude ,longitude,`type`)
     values
@@ -75,5 +84,19 @@
     </foreach>
 
   </insert>
+
+    <insert id="insert3" parameterType="com.dao.entity.lwaddress.Sec_addr" >
+
+        insert into  third_addr1 (id,province,city,area,street)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.id,jdbcType=VARCHAR},
+            #{item.province,jdbcType=VARCHAR},
+            #{item.city,jdbcType=VARCHAR},
+            #{item.area,jdbcType=VARCHAR},
+            #{item.street,jdbcType=VARCHAR})
+        </foreach>
+
+    </insert>
 
 </mapper>

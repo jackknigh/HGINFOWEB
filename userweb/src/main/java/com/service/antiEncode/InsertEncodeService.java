@@ -28,4 +28,7 @@ public interface InsertEncodeService {
      */
     void errorProcess();
 
+    void getAddr(int start, int batchcCount, CountDownLatch countDownLatch);
+    void getAddrByBD(int start, int batchcCount, CountDownLatch countDownLatch);
+    void getAddrBD(int start, int batchcCount, CountDownLatch countDownLatch);
 }

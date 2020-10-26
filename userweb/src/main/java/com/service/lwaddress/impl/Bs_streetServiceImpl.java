@@ -15,8 +15,6 @@ import java.util.regex.Pattern;
 
 @Service
 public class Bs_streetServiceImpl implements Bs_streetService {
-    /*private static final Logger log = LoggerFactory.getLogger(Bs_utilServiceImpl.class);*/
-
     @Autowired
     Bs_streetMapper bs_streetMapper;
 
@@ -26,13 +24,11 @@ public class Bs_streetServiceImpl implements Bs_streetService {
     @Override
     public Map streetJudge(String address, List<Bs_street> streetAllName) {
 
-        String addressUse = null;
+        String addressUse;
         Map<String,Object> streetMap = new HashMap<String, Object>();
         String streetName = null;//区名称
         String streetCode = null;//区编号
         String areaCodeSec = null;
-        Pattern pattern = null;
-        Matcher matcher = null;
 
        if (address.length() <= 25) {
             addressUse = address;
@@ -42,8 +38,8 @@ public class Bs_streetServiceImpl implements Bs_streetService {
 
         if(streetAllName.size() > 0) {
             for (int i = 0; i < streetAllName.size();i++) {
-                pattern = Pattern.compile(streetAllName.get(i).getStreetName());
-                matcher = pattern.matcher(addressUse);
+                Pattern pattern = Pattern.compile(streetAllName.get(i).getStreetName());
+                Matcher matcher = pattern.matcher(addressUse);
                 if (matcher.find()) {
                     streetName = matcher.group();
                     streetCode = streetAllName.get(i).getStreetCode();
@@ -51,17 +47,14 @@ public class Bs_streetServiceImpl implements Bs_streetService {
                     areaCodeSec = streetAllName.get(i).getAreaCode();
                     break;
                 } else {
-                    pattern = Pattern.compile(streetAllName.get(i).getShortName());
-                    matcher = pattern.matcher(addressUse);
-                    if (matcher.find()) {
-                        address = address.replace(matcher.group(),"");
+                    Pattern pattern1 = Pattern.compile(streetAllName.get(i).getShortName());
+                    Matcher matcher1 = pattern1.matcher(addressUse);
+                    if (matcher1.find()) {
+                        address = address.replace(matcher1.group(),"");
                         streetName = streetAllName.get(i).getStreetName();
                         streetCode = streetAllName.get(i).getStreetCode();
                         areaCodeSec = streetAllName.get(i).getAreaCode();
-
                         break;
-                    } else {
-                        continue;
                     }
                 }
             }
@@ -71,7 +64,6 @@ public class Bs_streetServiceImpl implements Bs_streetService {
         streetMap.put("streetCode",streetCode);
         streetMap.put("areaCodeSec",areaCodeSec);
         streetMap.put("streetAllName",streetAllName);
-
         return streetMap;
     }
 

@@ -17,4 +17,5 @@ public interface ProcessInterfService {
     void compareSelf(ThreadPoolTaskExecutor executor);
 
     void function(int start, int end);
+    void function1(int start, int end);
 }

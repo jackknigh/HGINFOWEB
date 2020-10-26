@@ -161,6 +161,93 @@ public class HttpUtils {
     }
 
     /**
+     * GET方式提交数据
+     * @param url
+     *          待请求的URL
+     * @param msg
+     *          要提交的数据
+     * @param enc
+     *          编码
+     * @return
+     *          响应结果
+     * @throws IOException
+     *          IO异常
+     */
+    public static String URLGet1(String url, String msg,String key, String enc){
+
+        String response = EMPTY;
+        GetMethod getMethod = null;
+        StringBuffer strtTotalURL = new StringBuffer(EMPTY);
+
+        if(strtTotalURL.indexOf("?") == -1) {
+            strtTotalURL.append(url).append("?").append("location=").append(msg).append("&key=").append(key);
+        }
+        log.debug("GET请求URL = \n" + strtTotalURL.toString());
+
+        try {
+            getMethod = new GetMethod(strtTotalURL.toString());
+            getMethod.setRequestHeader("Content-Type", "application/x-www-form-urlencoded;charset=" + enc);
+            //执行getMethod
+            int statusCode = client.executeMethod(getMethod);
+            if(statusCode == HttpStatus.SC_OK) {
+                response = getMethod.getResponseBodyAsString();
+            }else{
+                log.debug("响应状态码 = " + getMethod.getStatusCode());
+            }
+        }catch(HttpException e){
+            log.error("发生致命的异常，可能是协议不对或者返回的内容有问题", e);
+            e.printStackTrace();
+        }catch(IOException e){
+            log.error("发生网络异常", e);
+            e.printStackTrace();
+        }finally{
+            if(getMethod != null){
+                getMethod.releaseConnection();
+                getMethod = null;
+            }
+        }
+
+        return response;
+    }
+
+//    public static String URLGet2(String url, Map<String, String> params, String enc){
+//
+//        String response = EMPTY;
+//        GetMethod getMethod = null;
+//        StringBuffer strtTotalURL = new StringBuffer(EMPTY);
+//
+//        if(strtTotalURL.indexOf("?") == -1) {
+//            strtTotalURL.append(url).append("?").append("location=").append(msg).append("&key=").append(key);
+//        }
+//        log.debug("GET请求URL = \n" + strtTotalURL.toString());
+//
+//        try {
+//            getMethod = new GetMethod(strtTotalURL.toString());
+//            getMethod.setRequestHeader("Content-Type", "application/x-www-form-urlencoded;charset=" + enc);
+//            //执行getMethod
+//            int statusCode = client.executeMethod(getMethod);
+//            if(statusCode == HttpStatus.SC_OK) {
+//                response = getMethod.getResponseBodyAsString();
+//            }else{
+//                log.debug("响应状态码 = " + getMethod.getStatusCode());
+//            }
+//        }catch(HttpException e){
+//            log.error("发生致命的异常，可能是协议不对或者返回的内容有问题", e);
+//            e.printStackTrace();
+//        }catch(IOException e){
+//            log.error("发生网络异常", e);
+//            e.printStackTrace();
+//        }finally{
+//            if(getMethod != null){
+//                getMethod.releaseConnection();
+//                getMethod = null;
+//            }
+//        }
+//
+//        return response;
+//    }
+
+    /**
      * 据Map生成URL字符串 
      * @param map
      *          Map 

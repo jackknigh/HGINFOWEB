@@ -32,9 +32,18 @@ public class InsertEncodeServiceImpl implements InsertEncodeService {
 
     @Value("${sysEncode.key}")
     private String keyValue;
-
     @Value("${sysEncode.url}")
     private String urlValue;
+    @Value("${sysEncode.url2}")
+    private String urlValue2;
+    @Value("${sysEncode.ak}")
+    private String keyValueAK;
+    @Value("${sysEncode.sk}")
+    private String keyValueSK;
+    @Value("${sysEncode.url3}")
+    private String urlValueBD;
+    @Value("${sysEncode.url4}")
+    private String urlValueBD1;
 
     private volatile Map<String, Integer> keyMap = new Hashtable();
 
@@ -50,7 +59,7 @@ public class InsertEncodeServiceImpl implements InsertEncodeService {
         List<Sec_addr> date1 = new ArrayList<>();
 
         for (Sec_addr b1 : date) {
-            if(b1.getLongitude() != null || b1.getType() != null){
+            if(b1.getLongitude() != null || b1.getType() != null || TextUtils.isEmpty(b1.getAddrSj())){
                 continue;
             }
             //调用高德地图查询经纬度
@@ -172,6 +181,141 @@ public class InsertEncodeServiceImpl implements InsertEncodeService {
         cal.set(Calendar.MILLISECOND, 0);
         long time = cal.getTimeInMillis() - System.currentTimeMillis() + 1800000;
         return time;
+    }
+
+    @Async("asyncPromiseExecutor")
+    public void getAddr(int start, int number, CountDownLatch countDownLatch) {
+        log.info("==========================线程:{} 开始执行  start:{} ===========================", Thread.currentThread().getName(), start);
+        //查询指定步进值的地址信息
+        List<Sec_addr> date = secAddrMapper.getAddress(start, start+number);
+
+        List<Sec_addr> date1 = new ArrayList<>();
+
+        for (Sec_addr b1 : date) {
+            if(b1.getAddrJj() == null){
+                continue;
+            }
+            //调用高德地图查询省市区街道
+            Sec_addr secAddr = getAddr(b1);
+            if(TextUtils.isEmpty(secAddr)){
+                continue;
+            }
+
+            b1.setProvince(secAddr.getProvince());
+            b1.setCity(secAddr.getCity());
+            b1.setArea(secAddr.getArea());
+            b1.setStreet(secAddr.getStreet());
+            b1.setType(secAddr.getType());
+            date1.add(b1);
+        }
+
+        try {
+            if(TextUtils.isEmpty(date1)){
+                return;
+            }
+            secAddrMapper.insert3(date1);
+            countDownLatch.countDown();
+            log.info("插入  start:{} number:{} 成功", start, number);
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("插入  start:{} number:{} 失败", start, number);
+        }
+    }
+
+
+    private Sec_addr getAddr(Sec_addr secAddr) {
+        Sec_addr secAddr1;
+        secAddr1 = findEncodeService.getAddr(secAddr, keyValue, urlValue2);
+        return secAddr1;
+    }
+
+    @Async("asyncPromiseExecutor")
+    public void getAddrByBD(int start, int number, CountDownLatch countDownLatch) {
+        log.info("==========================线程:{} 开始执行  start:{} ===========================", Thread.currentThread().getName(), start);
+        //查询指定步进值的地址信息
+        List<Sec_addr> date = secAddrMapper.selectAddrsec(start, start+number);
+
+        List<Sec_addr> date1 = new ArrayList<>();
+
+        for (Sec_addr b1 : date) {
+            if(b1.getLongitude() != null){
+                continue;
+            }
+            //调用百度地图查询省市区街道
+            Sec_addr secAddr = getAddrByBD(b1);
+            if(TextUtils.isEmpty(secAddr)){
+                continue;
+            }
+
+            b1.setProvince(secAddr.getProvince());
+            b1.setCity(secAddr.getCity());
+            b1.setArea(secAddr.getArea());
+            b1.setStreet(secAddr.getStreet());
+            b1.setType(secAddr.getType());
+            date1.add(b1);
+        }
+
+        try {
+            if(TextUtils.isEmpty(date1)){
+                return;
+            }
+            secAddrMapper.insert2(date1);
+            countDownLatch.countDown();
+            log.info("插入  start:{} number:{} 成功", start, number);
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("插入  start:{} number:{} 失败", start, number);
+        }
+    }
+
+    private Sec_addr getAddrByBD(Sec_addr secAddr) {
+        return findEncodeService.getAddrByBD(secAddr, keyValueAK,keyValueSK, urlValueBD);
+    }
+
+
+    @Async("asyncPromiseExecutor")
+    public void getAddrBD(int start, int number, CountDownLatch countDownLatch) {
+        log.info("==========================线程:{} 开始执行  start:{} ===========================", Thread.currentThread().getName(), start);
+        //查询指定步进值的地址信息
+        List<Sec_addr> date = secAddrMapper.getAddressBD(start, start+number);
+
+        List<Sec_addr> date1 = new ArrayList<>();
+
+        for (Sec_addr b1 : date) {
+            if(b1.getAddrJj() == null){
+                continue;
+            }
+            //调用百度地图查询省市区街道
+            Sec_addr secAddr = getAddrBDD(b1);
+            if(TextUtils.isEmpty(secAddr)){
+                continue;
+            }
+
+            b1.setProvince(secAddr.getProvince());
+            b1.setCity(secAddr.getCity());
+            b1.setArea(secAddr.getArea());
+            b1.setStreet(secAddr.getStreet());
+            b1.setType(secAddr.getType());
+            date1.add(b1);
+        }
+
+        try {
+            if(TextUtils.isEmpty(date1)){
+                return;
+            }
+            secAddrMapper.insert3(date1);
+            countDownLatch.countDown();
+            log.info("插入  start:{} number:{} 成功", start, number);
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("插入  start:{} number:{} 失败", start, number);
+        }
+    }
+
+    private Sec_addr getAddrBDD(Sec_addr secAddr) {
+        Sec_addr secAddr1;
+        secAddr1 = findEncodeService.getAddrBDD(secAddr, keyValueAK,keyValueSK, urlValueBD1);
+        return secAddr1;
     }
 }
 

@@ -71,6 +71,7 @@ public class CompareRunnable4 implements Runnable {
             BigDecimal grace = new BigDecimal(applicationProperty.getGrace());
 
             for (int i = 0; i < addressMessage.size(); i++) {
+                log.info("街道 {}  的进度  {} ----> {}   和   {} ---- {}",baseAddrList.get(j).getStreet(),j,baseAddrList.size(),i,addressMessage.size());
                 boolean flag = false;
                 //如果数据已经跟其他数据合并过了，就不需要再判断了
                 if (!StringUtils.isBlank(addressMessage.get(i).getContrastId())) {
@@ -118,15 +119,17 @@ public class CompareRunnable4 implements Runnable {
                     }
                 }
             }
-            //每隔200条数据就打印一次输出日志
+            //每隔2000条数据就打印一次输出日志
             if(j%2000==0) {
                 long endTime1 = System.currentTimeMillis();
                 log.info("**********碰撞进度 ： {} ---》 {}   用时 {} 毫秒**********", addressMessage.size(), j,endTime1 - startTime1);
             }
         }
 
-        //数据切割,如果需要插入的数据的结果大于20w就切割成20W一份
-        List<List<Base_addr>> lists = ListUtil.splitList(baseAddrList, 200000);
+        addressMessage = null;
+
+        //数据切割,如果需要插入的数据的结果大于10w就切割成10W一份
+        List<List<Base_addr>> lists = ListUtil.splitList(baseAddrList, 100000);
         baseAddrList = null;
         if(TextUtils.isEmpty(lists)){
             return;
