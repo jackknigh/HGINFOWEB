@@ -6,11 +6,14 @@ import com.dao.entity.lwaddress.*;
 import com.service.lwaddress.*;
 import com.utils.sys.lwaddress.AsciiUtil;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -18,6 +21,7 @@ import static com.dto.constants.Constants.REGEX_XMSJ;
 
 @Service
 public class Base_addrServiceImpl implements Base_addrService {
+    private static final Logger log = LoggerFactory.getLogger(Base_addrServiceImpl.class);
 
     @Autowired
     Base_addrMapper base_addrMapper;
@@ -106,6 +110,20 @@ public class Base_addrServiceImpl implements Base_addrService {
             //如果省市的编码都为空就将标准的区域集合存进区域集合
             listArea = (List<Bs_area>) allMessage.get("areaMessage");
         }
+
+        //如果区域不为空，就按照这个区域来判断
+        if(!StringUtils.isBlank(bs_addr.getArea())){
+            for (int i = 0; i < ((List<Bs_area>) allMessage.get("areaMessage")).size(); i++) {
+                //获取对应区域的信息
+                if (((List<Bs_area>) allMessage.get("areaMessage")).get(i).getAreaName().equals(bs_addr.getArea())) {
+                    listArea = new ArrayList<>();
+                    listArea.add(((List<Bs_area>) allMessage.get("areaMessage")).get(i));
+                    String address1 = (String) cityMap.get("address");
+                    cityMap.put("address",bs_addr.getArea()+address1);
+                    break;
+                }
+            }
+        }
         //对区域的操作(这里的listArea可能是前面赋值的区域)
         areaMap = bs_areaService.areaJudge((String) cityMap.get("address"), listArea);
         //如果没匹配到区域
@@ -141,14 +159,13 @@ public class Base_addrServiceImpl implements Base_addrService {
                 }
             }
         }
+        //对街道的操作
         streetMap = bs_streetService.streetJudge((String) areaMap.get("address"), listStreet);
 
-//        if (StringUtils.isBlank((String) streetMap.get("streeCode"))) {
-//            for (Bs_street streetMessage : ((List<Bs_street>) allMessage.get("streetMessage"))) {
-//                listStreet.add(streetMessage);
-//            }
-//            streetMap = bs_streetService.streetJudge((String) areaMap.get("address"), listStreet);
-//        }
+        //如果街道为空
+        if (StringUtils.isBlank((String) streetMap.get("streetCode")) && areaMap.get("areaCode") != null) {
+            streetMap = bs_streetService.streetDecide((List<BsCommunity>)allMessage.get("communityMessage"),(String)areaMap.get("areaName"),(String) areaMap.get("address"));
+        }
 
         //如果城市区域街道都为空就标记为-100
         if (streetMap.get("streetCode") == null && areaMap.get("areaCode") == null && cityMap.get("cityCode") == null) {
@@ -284,12 +301,7 @@ public class Base_addrServiceImpl implements Base_addrService {
             }
         }
 
-        if (cityMap.get("cityCode") == null) {
-            bs_addr.setCity((String) cityMap.get("cityCode"));
-        } else {
-            bs_addr.setCity((String) cityMap.get("cityName"));
-        }
-
+        bs_addr.setCity((String) cityMap.get("cityName"));
         bs_addr.setArea((String) areaMap.get("areaName"));
         bs_addr.setStreet((String) streetMap.get("streetName"));
         bs_addr.setShortAddr((String) streetMap.get("address"));

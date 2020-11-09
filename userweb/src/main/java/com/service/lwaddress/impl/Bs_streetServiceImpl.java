@@ -1,12 +1,10 @@
 package com.service.lwaddress.impl;
 
-import com.dao.db2.lwaddress.Bs_areaMapper;
-import com.dao.db2.lwaddress.Bs_streetMapper;
+import com.dao.entity.lwaddress.BsCommunity;
 import com.dao.entity.lwaddress.Bs_street;
 import com.service.lwaddress.Bs_streetService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,11 +13,6 @@ import java.util.regex.Pattern;
 
 @Service
 public class Bs_streetServiceImpl implements Bs_streetService {
-    @Autowired
-    Bs_streetMapper bs_streetMapper;
-
-    @Autowired
-    Bs_areaMapper bs_areaMapper;
 
     @Override
     public Map streetJudge(String address, List<Bs_street> streetAllName) {
@@ -46,16 +39,6 @@ public class Bs_streetServiceImpl implements Bs_streetService {
                     address = address.replace(streetName,"");
                     areaCodeSec = streetAllName.get(i).getAreaCode();
                     break;
-                } else {
-                    Pattern pattern1 = Pattern.compile(streetAllName.get(i).getShortName());
-                    Matcher matcher1 = pattern1.matcher(addressUse);
-                    if (matcher1.find()) {
-                        address = address.replace(matcher1.group(),"");
-                        streetName = streetAllName.get(i).getStreetName();
-                        streetCode = streetAllName.get(i).getStreetCode();
-                        areaCodeSec = streetAllName.get(i).getAreaCode();
-                        break;
-                    }
                 }
             }
         }
@@ -64,6 +47,44 @@ public class Bs_streetServiceImpl implements Bs_streetService {
         streetMap.put("streetCode",streetCode);
         streetMap.put("areaCodeSec",areaCodeSec);
         streetMap.put("streetAllName",streetAllName);
+        return streetMap;
+    }
+
+    @Override
+    public Map streetDecide(List<BsCommunity> communityMessage, String areaName,String address) {
+        //社区名称
+        Map<String,Object> streetMap = new HashMap<String, Object>();
+        if(communityMessage.size() > 0) {
+            //匹配社区
+            for (int i = 0; i < communityMessage.size();i++) {
+                Pattern pattern = Pattern.compile(communityMessage.get(i).getCommunity());
+                Matcher matcher = pattern.matcher(address);
+                //如果匹配到社区，再判断街道简称是否匹配
+                if (matcher.find()) {
+                    Pattern pattern1 = Pattern.compile(communityMessage.get(i).getStreetShort());
+                    Matcher matcher1 = pattern1.matcher(address);
+                    //如果都匹配
+                    if (matcher1.find()) {
+                        String streetShortName = matcher1.group();
+                        address = address.replace(streetShortName,"");
+                        String streetName = communityMessage.get(i).getStreet();
+                        streetMap.put("streetName",streetName);
+                        streetMap.put("address",address);
+                        return streetMap;
+                    }
+                    //判断社区和区县是否匹配
+                    if(communityMessage.get(i).getArea().equals(areaName)){
+                        String streetName = communityMessage.get(i).getStreet();
+                        streetMap.put("streetName",streetName);
+                        streetMap.put("address",address);
+                        return streetMap;
+                    }
+                }
+            }
+        }
+
+        streetMap.put("address",address);
+        streetMap.put("areaName",areaName);
         return streetMap;
     }
 

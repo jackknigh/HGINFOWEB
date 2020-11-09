@@ -35,7 +35,7 @@ public class Bs_provinceServiceImpl implements Bs_provinceService {
             address = address.replace("中国","");
         }
 
-        //如果全地址大于9，就取前9位
+        //如果全地址大于13，就取前13位
         if (address.length() <= 13) {
             addressUse = address;
         } else {

@@ -1292,6 +1292,9 @@ WHERE ta.id = ba.id AND ta.count_id &gt;= #{start} AND ta.count_id &lt; #{end}
     <select id="getStart" resultType="java.lang.Integer">
         SELECT MAX(count_id) FROM insert_addr WHERE create_time BETWEEN CONCAT(DATE_FORMAT(DATE_SUB(NOW(), INTERVAL 3 DAY),'%Y-%m-%d'),' 00:00:00') AND CONCAT(DATE_FORMAT(DATE_SUB(NOW(), INTERVAL 3 DAY),'%Y-%m-%d'),' 23:59:59')
     </select>
+    <select id="getCommunities" resultType="com.dao.entity.lwaddress.BsCommunity">
+        SELECT DMMC as area,XZJDMC as street,XZJDSX as streetShort,QC as community FROM wzshequ
+    </select>
 
 
 </mapper>

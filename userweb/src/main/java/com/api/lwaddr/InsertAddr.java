@@ -68,8 +68,8 @@ public class InsertAddr implements Job {
 
         int count = Integer.valueOf(applicationProperty.getCount());
         //获取两天前最大的步进值
-        int start = bs_addrMapper.getStart();
-//        int start = 0;
+//        int start = bs_addrMapper.getStart();
+        int start = Integer.valueOf(applicationProperty.getStartCount());
         String reg = getReg();
         Map<String, Object> map = getMap();
         //获取增量表的数据
@@ -116,7 +116,6 @@ public class InsertAddr implements Job {
                 regex.append("|").append(streetName.getStreetName()).append("|").append(streetName.getShortName());
             }
         }
-        log.info(regex.toString());
         return regex.toString();
     }
 
@@ -152,10 +151,14 @@ public class InsertAddr implements Job {
         cityMessage.add(cityName);
         areaMessage.addAll(areaNames);
 
+        //查询社区表
+        List<BsCommunity> communityMessage = bs_addrMapper.getCommunities();
+
         allMessage.put("provinceMessage", provinceMessage);
         allMessage.put("cityMessage", cityMessage);
         allMessage.put("areaMessage", areaMessage);
         allMessage.put("streetMessage", streetMessage);
+        allMessage.put("communityMessage", communityMessage);
 
         //分值计算
         BigDecimal dec2 = new BigDecimal(-2);

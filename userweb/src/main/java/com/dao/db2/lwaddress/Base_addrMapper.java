@@ -198,4 +198,6 @@ public interface Base_addrMapper {
     void updateBasicsAdd(Base_addr base_addr);
 
     int getStart();
+
+    List<BsCommunity> getCommunities();
 }

@@ -603,10 +603,18 @@ public class MsgSearchServiceImpl implements MsgSearchService {
                             strPass = new BigDecimal(15);
                         }
 
-                        //如果字符没到及格线
-                        if (bsum.divide(asummax1, 4, BigDecimal.ROUND_HALF_UP).multiply(asum1).divide(strPass, 4, BigDecimal.ROUND_HALF_UP).compareTo(new BigDecimal(1)) <= 0) {
-                            continue;
+                        try {
+                            //如果字符没到及格线
+                            if (bsum.divide(asummax1, 4, BigDecimal.ROUND_HALF_UP).multiply(asum1).divide(strPass, 4, BigDecimal.ROUND_HALF_UP).compareTo(new BigDecimal(1)) <= 0) {
+                                continue;
+                            }
+                        }catch (Exception e){
+                            log.error("========= bsum : {}  =========",bsum);
+                            log.error("========= asummax1 : {}  =========",asummax1);
+                            log.error("========= asum1 : {}  =========",asum1);
+                            log.error("========= strPass : {}  =========",strPass);
                         }
+
                     }
 
                     //计算相似度
@@ -1003,6 +1011,7 @@ public class MsgSearchServiceImpl implements MsgSearchService {
         base_addr = base_addrService.addrSet(base_addr, allMessage);
 
         String shortAddr = base_addr.getShortAddr();
+        //如果去掉省市区街道后短地址为空
         if (StringUtils.isBlank(shortAddr)) {
             return null;
         }
@@ -1629,7 +1638,7 @@ public class MsgSearchServiceImpl implements MsgSearchService {
         if(!"温州".equals(baseAddr.getCity()) && !"温州市".equals(baseAddr.getCity()) && !"577".equals(baseAddr.getCity())){
             return;
         }
-        baseAddr.setCity(null);
+        baseAddr.setCity("温州市");
 
         //合法性校验
         if (StringUtils.isBlank(baseAddr.getPhone()) || baseAddr.getPhone().length() < 5) {
