@@ -57,7 +57,7 @@ public class Bs_startWayServiceImpl implements Bs_startWayService {
                 //如果是最后一次操作
                 if (j == startCount-1) {
                     //判断是否有余数，没有余数就直接跳出循环
-                    if (total % batchcCount == 0 && total - start / batchcCount == 1) {
+                    if (total % batchcCount == 0 && (total - start) / batchcCount == 0) {
                         bs_utilService.addressStart(start, batchcCount,reg,allMessage);
                         break;
                     }
@@ -202,11 +202,15 @@ public class Bs_startWayServiceImpl implements Bs_startWayService {
         cityMessage.add(cityName);
         areaMessage.addAll(areaNames);
 
+        //查询社区表
+        List<BsCommunity> communityMessage = bs_addrMapper.getCommunities();
+
         allMessage.put("streetMessage", streetMessage);
         allMessage.put("provinceMessage", provinceMessage);
         allMessage.put("cityMessage", cityMessage);
         allMessage.put("areaMessage", areaMessage);
         allMessage.put("allProvince", allProvince);
+        allMessage.put("communityMessage", communityMessage);
 
         //分值计算
         BigDecimal dec2 = new BigDecimal(-2);

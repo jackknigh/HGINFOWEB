@@ -4,6 +4,7 @@ import com.config.HgApplicationProperty;
 import com.dao.db2.lwaddress.*;
 import com.dao.entity.lwaddress.*;
 import com.service.lwaddress.*;
+import com.utils.sys.TextUtils;
 import com.utils.sys.lwaddress.AsciiUtil;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -113,6 +114,13 @@ public class Base_addrServiceImpl implements Base_addrService {
 
         //如果区域不为空，就按照这个区域来判断
         if(!StringUtils.isBlank(bs_addr.getArea())){
+            //判断是否是 苍南县，如果是苍南县需要特殊处理，判断是否包含 龙港，包含的话改为龙港市
+            String address2 = (String) cityMap.get("address");
+            if(bs_addr.getArea().contains("苍南") && !TextUtils.isEmpty(address2) && address2.contains("龙港")){
+                String address1 = (String) ((String) cityMap.get("address")).replaceAll(bs_addr.getArea(),"");
+                bs_addr.setArea("龙港市");
+                cityMap.put("address",address1);
+            }
             for (int i = 0; i < ((List<Bs_area>) allMessage.get("areaMessage")).size(); i++) {
                 //获取对应区域的信息
                 if (((List<Bs_area>) allMessage.get("areaMessage")).get(i).getAreaName().equals(bs_addr.getArea())) {
@@ -126,6 +134,23 @@ public class Base_addrServiceImpl implements Base_addrService {
         }
         //对区域的操作(这里的listArea可能是前面赋值的区域)
         areaMap = bs_areaService.areaJudge((String) cityMap.get("address"), listArea);
+
+        //判断是否是 苍南县，如果是苍南县需要特殊处理，判断是否包含 龙港，包含的话改为龙港市
+        if (areaMap.get("areaCode") != null && ((String) areaMap.get("areaName")).contains("苍南") && !TextUtils.isEmpty((String) areaMap.get("address")) && ((String) areaMap.get("address")).contains("龙港")) {
+                bs_addr.setArea("龙港市");
+                for (int i = 0; i < ((List<Bs_area>) allMessage.get("areaMessage")).size(); i++) {
+                    //获取对应区域的信息
+                    if (((List<Bs_area>) allMessage.get("areaMessage")).get(i).getAreaName().equals(bs_addr.getArea())) {
+                        listArea = new ArrayList<>();
+                        listArea.add(((List<Bs_area>) allMessage.get("areaMessage")).get(i));
+                        String address1 = (String) cityMap.get("address");
+                        cityMap.put("address",bs_addr.getArea()+address1);
+                        break;
+                    }
+                }
+            areaMap = bs_areaService.areaJudge((String) cityMap.get("address"), listArea);
+        }
+
         //如果没匹配到区域
         if (areaMap.get("areaCode") == null) {
             //如果城市和省都不为空
@@ -165,6 +190,19 @@ public class Base_addrServiceImpl implements Base_addrService {
         //如果街道为空
         if (StringUtils.isBlank((String) streetMap.get("streetCode")) && areaMap.get("areaCode") != null) {
             streetMap = bs_streetService.streetDecide((List<BsCommunity>)allMessage.get("communityMessage"),(String)areaMap.get("areaName"),(String) areaMap.get("address"));
+        }
+
+        //如果街道不为空，就需要用社区表的街道去反写区域
+        if(!StringUtils.isBlank((String) streetMap.get("streetName"))){
+            List<BsCommunity> communityMessage = (List<BsCommunity>) allMessage.get("communityMessage");
+            for (int i = 0; i < communityMessage.size();i++) {
+                //如果社区表的街道等于数据街道，就将社区表的区域赋值给数据的区域
+                if (communityMessage.get(i).getStreet().equals((String) streetMap.get("streetName"))) {
+                    areaMap.put("areaName",communityMessage.get(i).getArea());
+                    areaMap.put("areaCode",communityMessage.get(i).getAreaCode());
+                    break;
+                }
+            }
         }
 
         //如果城市区域街道都为空就标记为-100

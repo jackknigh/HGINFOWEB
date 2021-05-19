@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -21,7 +20,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ThreadPoolExecutor;
 
 
 @Component
@@ -39,49 +37,34 @@ public class InsertAddr implements Job {
     @Autowired
     private HgApplicationProperty applicationProperty;
 
-    private static ThreadPoolTaskExecutor executor;
-
-    public void initExecutor(){
-        executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(similarityCorePoolSize);//核心线程大小
-        executor.setMaxPoolSize(similarityMaxPoolSize);//最大线程大小
-        executor.setQueueCapacity(9999999);//队列最大容量
-        executor.setKeepAliveSeconds(60);//存活时间
-        executor.setThreadNamePrefix("async-match1-");//线程名称
-        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
-        executor.initialize();
-    }
-
     private static final Logger log = LoggerFactory.getLogger(InsertAddr.class);
 
 
     /**
-     * 增量
+     * 增量定时处理
      * @param jobExecutionContext
      * @throws JobExecutionException
      */
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-//        log.info("================================开始增量操作======================= 开始时间:{}", DateUtil.getCurrDateTimeStr());
-//        initExecutor();
-//        bs_startWayService.increment(executor);
-
         int count = Integer.valueOf(applicationProperty.getCount());
-        //获取两天前最大的步进值
+        //从两天前最大的count_id开始
 //        int start = bs_addrMapper.getStart();
+        //从指定的count_id开始
         int start = Integer.valueOf(applicationProperty.getStartCount());
+
+        //省市区街道拼接的正则字符串方法
         String reg = getReg();
+        //获取温州所有省市区街道集合方法
         Map<String, Object> map = getMap();
-        //获取增量表的数据
+
         while (true) {
+            //获取增量表的数据，每次都会取完，start都会加上指定步进值，直到获取不到数据
             List<Base_addr> baseAddrList = bs_addrMapper.getInsertDate1(start, start+count);
             if (TextUtils.isEmpty(baseAddrList)) {
                 return;
             }
-
-//            //修改处理过的数据的状态为7
-//            bs_addrMapper.updateState(start, start+count);
-
+            //对增量数据进行处理方法
             for (Base_addr base_addr : baseAddrList) {
                 msgSearchService.insertMsgProcess1(base_addr,reg,map);
             }
@@ -89,10 +72,13 @@ public class InsertAddr implements Job {
         }
     }
 
-
-    //配置的区的省市区街道关键字正则生成，并去除对应参数中包含的关键字
+    /**
+     * 配置的区的省市区街道关键字正则生成，并去除对应参数中包含的关键字
+     *
+     * @return
+     */
     public String getReg() {
-        //配置的市的编号
+        //配置的市的编号，目前默认温州市
         String cityCode = applicationProperty.getCityCode();
         StringBuilder regex = new StringBuilder();
 
@@ -106,8 +92,6 @@ public class InsertAddr implements Job {
 
         //查询区
         List<Bs_area> areaNames = bs_addrMapper.getArea(cityCode);
-
-        //todo 街道不需要去除
         for (Bs_area areaName : areaNames) {
             regex.append("|").append(areaName.getAreaName());
 //            //查询街道
@@ -180,17 +164,4 @@ public class InsertAddr implements Job {
         allMessage.put("dec8", dec8);
         return allMessage;
     }
-
-
-//    /**
-//     * 增量
-//     * @param jobExecutionContext
-//     * @throws JobExecutionException
-//     */
-//    @Override
-//    public void execute1(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-//        log.info("================================开始增量操作。。。。。。。。。。 开始时间:{}", DateUtil.getCurrDateTimeStr());
-//        initExecutor();
-//        bs_startWayService.increment(executor);
-//    }
 }

@@ -8,6 +8,7 @@ import com.service.antiEncode.FindEncodeService;
 import com.utils.sys.DateUtil;
 import com.utils.sys.HttpUtils;
 import com.utils.sys.SnCal;
+import com.utils.sys.TextUtils;
 import com.utils.sys.lwaddress.LngLonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,8 +57,20 @@ public class FindEncodeServiceImpl implements FindEncodeService {
         // 调用高德API，拿到json格式的字符串结果
         JSONObject jsonObject = JSON.parseObject(result);
 
+        //没返回结果 -130
+        if(TextUtils.isEmpty(jsonObject)){
+            sec_addr.setType(Integer.valueOf(130));
+            return sec_addr;
+        }
+
+        String s = jsonObject.getString("status");
+        //没返回结果 -130
+        if(TextUtils.isEmpty(s)){
+            sec_addr.setType(Integer.valueOf(131));
+            return sec_addr;
+        }
         // 拿到返回报文的status值，高德的该接口返回值有两个：0-请求失败，1-请求成功；
-        int status = Integer.valueOf(jsonObject.getString("status"));
+        int status = Integer.valueOf(s);
 
         if (status == 1) {
             int counts = Integer.valueOf(jsonObject.getString("count"));

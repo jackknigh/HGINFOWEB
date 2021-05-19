@@ -11,6 +11,15 @@ public class BsCommunity implements Serializable {
     private String streetShort;
 
     private String community;
+    private String areaCode;
+
+    public String getAreaCode() {
+        return areaCode;
+    }
+
+    public void setAreaCode(String areaCode) {
+        this.areaCode = areaCode;
+    }
 
     public String getArea() {
         return area;

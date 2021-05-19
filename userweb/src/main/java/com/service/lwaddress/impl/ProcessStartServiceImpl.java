@@ -87,7 +87,7 @@ public class ProcessStartServiceImpl implements ProcessStartService {
             log.info("current j:" + j);
             if (batchcCount != 1) {
                 if (j == total / batchcCount ) {
-                    if(total%batchcCount==0 && total-start/batchcCount==1){
+                    if(total%batchcCount==0 && (total - start) / batchcCount == 0){
                         processInterfService.processInterf(start, batchcCount,n,executor,executor1,phoneList);
                         break;
                     }

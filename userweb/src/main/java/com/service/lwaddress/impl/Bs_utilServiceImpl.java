@@ -61,6 +61,12 @@ public class Bs_utilServiceImpl implements Bs_utilService {
             //调用短地址切割和地址打分处理方法
             Base_addr baseAddr = getBaseAddr(list.get(i), reg, allMessage);
             if (baseAddr != null) {
+                if(!TextUtils.isEmpty(baseAddr.getPhone())){
+                    baseAddr.setOldPhone(baseAddr.getPhone());
+                }
+                if(!TextUtils.isEmpty(baseAddr.getName1())){
+                    baseAddr.setOldName1(baseAddr.getName1());
+                }
                 updateMessage.add(baseAddr);
             }
         }

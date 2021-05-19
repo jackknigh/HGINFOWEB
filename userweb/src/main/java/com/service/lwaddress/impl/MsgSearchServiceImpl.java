@@ -863,7 +863,6 @@ public class MsgSearchServiceImpl implements MsgSearchService {
             baseAddrList = null;
             log.info("插入标准合并表");
         } else {
-//            bs_addrMapper1.insert5_2_1(baseAddrss);
             bs_addrMapper1.insert5_2_1ES(baseAddrss);
             baseAddrList = null;
         }
@@ -1007,7 +1006,7 @@ public class MsgSearchServiceImpl implements MsgSearchService {
             return null;
         }
 
-        //省市区切割操作
+        //省市区切割、反写、打分操作
         base_addr = base_addrService.addrSet(base_addr, allMessage);
 
         String shortAddr = base_addr.getShortAddr();
@@ -1632,30 +1631,34 @@ public class MsgSearchServiceImpl implements MsgSearchService {
         return allMessage;
     }
 
+    /**
+     * 增量数据处理方法
+     * @param baseAddr 源数据
+     * @param reg 省市区街道正则字符串
+     * @param allMessage 温州所有省市区街道的集合
+     */
     @Async("asyncPromiseExecutor")
     @Override
     public void insertMsgProcess1(Base_addr baseAddr,String reg, Map<String, Object> allMessage) {
+        //过滤不是温州的数据，格式化市为温州市
         if(!"温州".equals(baseAddr.getCity()) && !"温州市".equals(baseAddr.getCity()) && !"577".equals(baseAddr.getCity())){
             return;
         }
         baseAddr.setCity("温州市");
 
-        //合法性校验
+        //对手机号进行合法性校验
         if (StringUtils.isBlank(baseAddr.getPhone()) || baseAddr.getPhone().length() < 5) {
             bs_addrMapper.insertDiscard(baseAddr);
             return;
         }
 
-        //step1地址切割
+        //第一步：短地址切割方法
         Base_addr base_addr = getBaseAddr(baseAddr, reg, allMessage);
 
         if (base_addr == null || StringUtils.isBlank(base_addr.getShortAddr())|| !"温州市".equals(base_addr.getCity())) {
             bs_addrMapper.insertDiscard(baseAddr);
             return;
         }
-
-        //todo 先不插总表base_addr
-//        bs_addrMapper.insertBaseAddr(base_addr);
 
         int blockSizeByStr = Integer.valueOf(applicationProperty.getBlockSizeByStr());
         int blockSizeByNum = Integer.valueOf(applicationProperty.getBlockSizeByNum());
@@ -1671,7 +1674,7 @@ public class MsgSearchServiceImpl implements MsgSearchService {
 
             //获取比较数据
             List<Base_addr> addressMessage = bs_addrMapper.getDate1(base_addr.getArea(), base_addr.getStreet(), base_addr.getShortPhone(),name1);
-
+            //手机号反写方法，反写失败就是无效数据
             Base_addr baseAddr1 = getProcess(blockSizeByNum, blockSizeByStr, base_addr, addressMessage, false);
             if (baseAddr1 == null || baseAddr1.getPhone().contains("*")) {
                 bs_addrMapper.insertDiscard(baseAddr);
@@ -1679,34 +1682,30 @@ public class MsgSearchServiceImpl implements MsgSearchService {
             }
         }
 
-        //第二步骤相似度碰撞
+        //第二步：相似度碰撞
         List<Base_addr> addressMessage = bs_addrMapper.getBaseAddrs(base_addr.getPhone());
         Base_addr baseAddr1 = getProcess(blockSizeByNum, blockSizeByStr, base_addr, addressMessage, true);
-        //如果被合并
+        //如果撞到了 说明是合并数据
         if (!TextUtils.isEmpty(baseAddr1)) {
             return;
         }
 
-        //该数据是基准值数据
+        //没撞到的数据是基准值数据
         base_addr.setP2type(223);
         base_addr.setMergeNum(0);
         base_addr.setP5type(1);
         base_addr.setTableName("insert_addr");
         base_addr.setEarliestTime(base_addr.getCreateTime());
         base_addr.setLatestTime(base_addr.getCreateTime());
-        log.info("插入基准表");
         bs_addrMapper.insert5ES(base_addr);
         bs_addrMapper.insert5(base_addr);
-//        log.info("插入基准表");
-//        bs_addrMapper.insert5ESComm(base_addr);
 
         //街道为空就不处理
         if(TextUtils.isEmpty(base_addr.getStreet())){
             return;
         }
+        //碰撞房屋表，对撞到的数据赋值房屋编号
         List<Base_addr> volList = bs_addrMapper1.selectBaseAddr2(base_addr.getArea(), base_addr.getStreet());
-
-        log.info("*********有 {} 条被比较值数据*********", volList.size());
         CompareRunnable4(blockSizeByNum, blockSizeByStr, volList, base_addr);
         return;
     }

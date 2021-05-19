@@ -1102,7 +1102,7 @@ WHERE ta.id = ba.id AND ta.count_id &gt;= #{start} AND ta.count_id &lt; #{end}
                 and short_phone = #{shortPhone}
             </if>
             <if test="name != null and name != ''" >
-                and LEFT(name1,1) = #{name}
+                and LEFT(name1,1) = LEFT(#{name},1)
             </if>
         </where>
     </select>
@@ -1293,7 +1293,8 @@ WHERE ta.id = ba.id AND ta.count_id &gt;= #{start} AND ta.count_id &lt; #{end}
         SELECT MAX(count_id) FROM insert_addr WHERE create_time BETWEEN CONCAT(DATE_FORMAT(DATE_SUB(NOW(), INTERVAL 3 DAY),'%Y-%m-%d'),' 00:00:00') AND CONCAT(DATE_FORMAT(DATE_SUB(NOW(), INTERVAL 3 DAY),'%Y-%m-%d'),' 23:59:59')
     </select>
     <select id="getCommunities" resultType="com.dao.entity.lwaddress.BsCommunity">
-        SELECT DMMC as area,XZJDMC as street,XZJDSX as streetShort,QC as community FROM wzshequ
+        SELECT a.DMMC AS AREA,b.`AREA_CODE` AS areaCode,a.XZJDMC AS street,a.XZJDSX AS streetShort,a.QC AS community
+        FROM wzshequ AS a LEFT JOIN bs_area AS b ON a.`DMMC` = b.`AREA_NAME`
     </select>
 
 
