@@ -25,7 +25,7 @@
     </select>
 
     <select id="selectAll" resultMap="BaseResultMap">
-        select row,phone,amount from  phone where row &gt;= #{number1} and row &lt; #{number2}
+        select `row`,phone,amount from  phone where `row` &gt;= #{number1} and `row` &lt; #{number2}
   </select>
   <select id="selectAllAddress" resultType="com.dao.entity.lwaddress.Address">
         select `row`,street,amount from  address order by `row` desc limit #{number1},#{number2}

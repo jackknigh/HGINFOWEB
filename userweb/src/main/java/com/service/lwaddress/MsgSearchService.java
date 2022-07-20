@@ -40,6 +40,7 @@ public interface MsgSearchService {
     BaseAddrVo  insertMsgProcess(BaseAddrVo baseAddrVo);
 
     void insertMsgProcess1(Base_addr baseAddr, String reg, Map<String, Object> map);
+//    void processBaseAddr(String reg, Map<String, Object> map, List<Base_addr> baseAddrList);
 
     BaseAddrVo queryInfoById(String id);
 

@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,11 +48,13 @@ public class InsertAddr implements Job {
      */
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-        int count = Integer.valueOf(applicationProperty.getCount());
+//        int count = Integer.valueOf(applicationProperty.getCount());
+        BigInteger count = new BigInteger(applicationProperty.getCount());
         //从两天前最大的count_id开始
 //        int start = bs_addrMapper.getStart();
         //从指定的count_id开始
-        int start = Integer.valueOf(applicationProperty.getStartCount());
+//        int start = Integer.valueOf(applicationProperty.getStartCount());
+        BigInteger start = new BigInteger(applicationProperty.getStartCount());
 
         //省市区街道拼接的正则字符串方法
         String reg = getReg();
@@ -60,7 +63,7 @@ public class InsertAddr implements Job {
 
         while (true) {
             //获取增量表的数据，每次都会取完，start都会加上指定步进值，直到获取不到数据
-            List<Base_addr> baseAddrList = bs_addrMapper.getInsertDate1(start, start+count);
+            List<Base_addr> baseAddrList = bs_addrMapper.getInsertDate1(start, start.add(count));
             if (TextUtils.isEmpty(baseAddrList)) {
                 return;
             }
@@ -68,7 +71,8 @@ public class InsertAddr implements Job {
             for (Base_addr base_addr : baseAddrList) {
                 msgSearchService.insertMsgProcess1(base_addr,reg,map);
             }
-            start = start+count;
+//            msgSearchService.processBaseAddr(reg,map,baseAddrList);
+            start = start.add(count);
         }
     }
 

@@ -731,10 +731,10 @@ WHERE ta.id = ba.id AND ta.count_id &gt;= #{start} AND ta.count_id &lt; #{end}
          update insert_addr set p5type = 7 where id = #{id}
     </update>
     <update id="updateBasics" parameterType="com.dao.entity.lwaddress.Base_addr">
-        update basics_addr set merge_num=#{mergeNum},latest_time=#{latestTime},earliest_time=#{earliestTime}  where id = #{id}
+        update basics_addr set merge_num=merge_num+#{mergeNum},latest_time=#{latestTime},earliest_time=#{earliestTime}  where id = #{id}
     </update>
     <update id="updateBasicsES" parameterType="com.dao.entity.lwaddress.Base_addr">
-        update basics_addr_es set merge_num=#{mergeNum},latest_time=#{latestTime},earliest_time=#{earliestTime}  where id = #{id}
+            update basics_addr_es set merge_num=merge_num+#{mergeNum},latest_time=#{latestTime},earliest_time=#{earliestTime}  where id = #{id}
     </update>
     <update id="updateState">
         update insert_addr set p5type = 7 where count_id &gt;= #{startCount} and count_id &lt; #{count}
@@ -1231,7 +1231,7 @@ WHERE ta.id = ba.id AND ta.count_id &gt;= #{start} AND ta.count_id &lt; #{end}
                latest_time AS latestTime,longitude,latitude,contrast_id AS contrastId,old_phone AS oldPhone,
                old_name1 AS oldName1,create_time as createTime,
                CONCAT(IFNULL(`province`,''),IFNULL(`city`,''),IFNULL(`area`,''),IFNULL(`street`,''),IFNULL(`short_addr`,'')) AS address
-               from merge_addr where  contrast_id = #{id} order by create_time DESC
+               from merge_addr where  contrast_id = #{id} GROUP BY earliest_time order by create_time DESC
     </select>
     <select id="queryBasicsMsgByPhone" resultType="com.dao.entity.lwaddress.BaseAddrByPhone">
         SELECT id,addr_sj AS addrSj,short_addr AS shortAddr,name1,id_card AS idCard,

@@ -9,6 +9,7 @@ import com.dto.vo.*;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigInteger;
 import java.util.List;
 
 @Repository
@@ -135,7 +136,7 @@ public interface Base_addrMapper {
 
     List<Base_addr> getInsertDate();
 
-    List<Base_addr> getInsertDate1(@Param("startCount")int startCount,@Param("count")int count);
+    List<Base_addr> getInsertDate1(@Param("startCount") BigInteger startCount, @Param("count")BigInteger count);
 
     List<Bs_province> getAllProvince();
 
